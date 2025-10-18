@@ -2,236 +2,67 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>I'm Not a Bot 🤖</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Babylon Mobile Walk</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  min-height: 100vh;
-  margin: 0;
-  background: #f0f0f0;
-}
-h1 {
-  margin: 30px 0 20px;
-  font-size: 2em;
-}
-#main-menu, #game-container {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-}
-#main-menu.active, #game-container.active {
-  display: flex;
-}
-button {
-  padding: 12px 25px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: white;
-}
-#captcha-container {
-  display: grid;
-  grid-template-columns: repeat(3, 80px);
-  grid-gap: 10px;
-  margin: 20px 0;
-}
-.captcha-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  width: 80px;
-  height: 80px;
-  background: white;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-.captcha-cell.selected {
-  border-color: #1a73e8;
-  background: #e0f0ff;
-}
-#message {
-  font-weight: bold;
-  margin-bottom: 10px;
-  min-height: 24px;
-}
-#level-display, #instruction {
-  font-size: 18px;
-  margin: 10px 0;
-}
-#clicker-btn {
-  padding: 25px 40px;
-  font-size: 30px;
-  margin: 20px 0;
-}
+html, body {width: 100%; height: 100%; margin: 0; overflow: hidden;}
+canvas {width: 100%; height: 100%; touch-action: none;}
+.joystick {position: absolute; width: 100px; height: 100px; border-radius: 50%; background: rgba(0,0,0,0.3);}
+.joystick-inner {position: absolute; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,0,0,0.5); left: 25px; top: 25px;}
+#leftJoystick {left: 20px; bottom: 20px;}
+#rightJoystick {right: 20px; bottom: 20px;}
+#jumpButton {position: absolute; width: 70px; height: 70px; border-radius: 50%; background: rgba(255,0,0,0.5); right: 120px; bottom: 30px;}
 </style>
 </head>
 <body>
-
-<h1>I'm Not a Bot 🤖</h1>
-
-<div id="main-menu" class="active">
-  <button id="start-btn">Verify</button>
-</div>
-
-<div id="game-container">
-  <div id="level-display"></div>
-  <div id="instruction"></div>
-  <div id="captcha-container"></div>
-  <div id="message"></div>
-  <button id="verify-btn">Verify</button>
-</div>
-
+<canvas id="renderCanvas"></canvas>
+<div id="leftJoystick" class="joystick"><div class="joystick-inner"></div></div>
+<div id="rightJoystick" class="joystick"><div class="joystick-inner"></div></div>
+<div id="jumpButton"></div>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
 <script>
-const captchaTypes = ['🐶','🐱','🍎','🍌','🚗','✈️','🌲','🌸'];
-let currentLevel = 1;
-let currentCaptcha = '';
-let clickCount = 0;
-
-const mainMenu = document.getElementById('main-menu');
-const gameContainer = document.getElementById('game-container');
-const startBtn = document.getElementById('start-btn');
-const verifyBtn = document.getElementById('verify-btn');
-const instruction = document.getElementById('instruction');
-const captchaContainer = document.getElementById('captcha-container');
-const message = document.getElementById('message');
-const levelDisplay = document.getElementById('level-display');
-
-function showMenu() {
-  mainMenu.classList.add('active');
-  gameContainer.classList.remove('active');
+const canvas = document.getElementById("renderCanvas");
+const engine = new BABYLON.Engine(canvas,true);
+const scene = new BABYLON.Scene(engine);
+scene.gravity = new BABYLON.Vector3(0,-0.98,0);
+scene.collisionsEnabled = true;
+const camera = new BABYLON.UniversalCamera("cam", new BABYLON.Vector3(0,2,0), scene);
+camera.attachControl(canvas,true);
+camera.applyGravity = true;
+camera.checkCollisions = true;
+camera.ellipsoid = new BABYLON.Vector3(0.5,1,0.5);
+const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0,1,0), scene);
+const ground = BABYLON.MeshBuilder.CreateGround("ground",{width:100,height:100},scene);
+ground.checkCollisions = true;
+let moveForward=0,moveRight=0,lookX=0,lookY=0,jump=false;
+const left = document.getElementById("leftJoystick");
+const right = document.getElementById("rightJoystick");
+const jumpBtn = document.getElementById("jumpButton");
+function setupJoystick(joystick,callback){
+let active=false, startX=0, startY=0;
+const inner = joystick.querySelector(".joystick-inner");
+joystick.addEventListener("touchstart",e=>{active=true; const t=e.touches[0]; startX=t.clientX; startY=t.clientY;});
+joystick.addEventListener("touchmove",e=>{if(!active) return; const t=e.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY; inner.style.transform=`translate(${dx/2}px,${dy/2}px)`; callback(dx/50,dy/50);});
+joystick.addEventListener("touchend",e=>{active=false; inner.style.transform=`translate(0px,0px)`; callback(0,0);});
 }
-
-function startGame() {
-  mainMenu.classList.remove('active');
-  gameContainer.classList.add('active');
-  currentLevel = 1;
-  nextLevel();
-}
-
-function nextLevel() {
-  captchaContainer.innerHTML = '';
-  message.textContent = '';
-  levelDisplay.textContent = 'Level ' + currentLevel;
-  if(currentLevel === 1) generateLevel1();
-  else if(currentLevel === 2) generateLevel2();
-  else if(currentLevel === 3) generateClickerLevel();
-  else {
-    instruction.textContent = '🎉 You completed all levels!';
-    captchaContainer.innerHTML = '';
-    verifyBtn.style.display = 'none';
-  }
-}
-
-// LEVEL 1: Select emoji captcha
-function generateLevel1() {
-  const type = captchaTypes[Math.floor(Math.random() * captchaTypes.length)];
-  currentCaptcha = type;
-  const options = [];
-  const correctCount = 2 + Math.floor(Math.random()*2);
-  while(options.length < correctCount) options.push(type);
-  while(options.length < 9){
-    let emoji;
-    do { emoji = captchaTypes[Math.floor(Math.random()*captchaTypes.length)]; } while(emoji === type);
-    options.push(emoji);
-  }
-  options.sort(()=>Math.random()-0.5);
-  options.forEach(emoji=>{
-    const cell = document.createElement('div');
-    cell.className = 'captcha-cell';
-    cell.textContent = emoji;
-    cell.onclick = () => cell.classList.toggle('selected');
-    captchaContainer.appendChild(cell);
-  });
-  instruction.textContent = `Select all ${type}`;
-  verifyBtn.style.display = 'inline-block';
-}
-
-// LEVEL 2: Sequence memory captcha
-let sequence = [];
-function generateLevel2() {
-  captchaContainer.innerHTML = '';
-  sequence = [];
-  for(let i=0;i<4;i++){
-    sequence.push(captchaTypes[Math.floor(Math.random()*captchaTypes.length)]);
-  }
-  instruction.textContent = 'Repeat this sequence in order';
-  let idx = 0;
-  sequence.forEach(emoji=>{
-    const cell = document.createElement('div');
-    cell.className = 'captcha-cell';
-    cell.textContent = emoji;
-    captchaContainer.appendChild(cell);
-  });
-  setTimeout(()=>{
-    captchaContainer.innerHTML = '';
-    sequence.forEach(_=>{
-      const cell = document.createElement('div');
-      cell.className = 'captcha-cell';
-      cell.textContent = '?';
-      cell.onclick = () => {
-        const chosen = prompt('Which emoji for this position? Choose one of '+captchaTypes.join(' '));
-        if(chosen === sequence[idx]) {
-          idx++;
-          cell.textContent = chosen;
-        }
-        if(idx === sequence.length){
-          message.textContent = '✅ Correct!';
-          setTimeout(()=>{currentLevel++; nextLevel();},1000);
-        }
-      }
-      captchaContainer.appendChild(cell);
-    });
-  },2000);
-  verifyBtn.style.display = 'none';
-}
-
-// LEVEL 3: Clicker captcha
-function generateClickerLevel() {
-  instruction.textContent = 'Click the button 400 times to verify';
-  clickCount = 0;
-  captchaContainer.innerHTML = '';
-  const clickerBtn = document.createElement('button');
-  clickerBtn.id = 'clicker-btn';
-  clickerBtn.textContent = 'Click Me!';
-  clickerBtn.onclick = () => {
-    clickCount++;
-    instruction.textContent = `Click the button 400 times to verify (${clickCount}/400)`;
-    if(clickCount>=400){
-      message.textContent = '✅ Verified!';
-      setTimeout(()=>{currentLevel++; nextLevel();},500);
-    }
-  }
-  captchaContainer.appendChild(clickerBtn);
-  verifyBtn.style.display = 'none';
-}
-
-// LEVEL 1 verification
-verifyBtn.onclick = () => {
-  const cells = document.querySelectorAll('.captcha-cell');
-  let correct = true;
-  cells.forEach(cell=>{
-    if(cell.textContent === currentCaptcha && !cell.classList.contains('selected')) correct = false;
-    if(cell.textContent !== currentCaptcha && cell.classList.contains('selected')) correct = false;
-  });
-  if(correct){
-    message.textContent = '✅ Verified!';
-    setTimeout(()=>{currentLevel++; nextLevel();},800);
-  } else {
-    message.textContent = '❌ Try again.';
-  }
-}
-
-startBtn.onclick = startGame;
+setupJoystick(left,(x,y)=>{moveRight=x; moveForward=-y;});
+setupJoystick(right,(x,y)=>{lookX=x*2; lookY=y*2;});
+jumpBtn.addEventListener("touchstart",()=>{jump=true;});
+jumpBtn.addEventListener("touchend",()=>{jump=false;});
+scene.onBeforeRenderObservable.add(()=>{
+camera.rotation.y += lookX*0.02;
+camera.rotation.x += lookY*0.02;
+if(camera.rotation.x>Math.PI/2) camera.rotation.x=Math.PI/2;
+if(camera.rotation.x<-Math.PI/2) camera.rotation.x=-Math.PI/2;
+const forward = new BABYLON.Vector3(Math.sin(camera.rotation.y),0,Math.cos(camera.rotation.y));
+const rightVec = new BABYLON.Vector3(Math.sin(camera.rotation.y+Math.PI/2),0,Math.cos(camera.rotation.y+Math.PI/2));
+camera.position.addInPlace(forward.scale(moveForward*0.2));
+camera.position.addInPlace(rightVec.scale(moveRight*0.2));
+if(jump && camera.isGrounded) camera.cameraDirection.y +=0.4;
+});
+engine.runRenderLoop(()=>{scene.render();});
+window.addEventListener("resize",()=>{engine.resize();});
 </script>
-
 </body>
 </html>
