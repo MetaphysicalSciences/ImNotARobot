@@ -3,28 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0, user-scalable=no">
-<title>Sandbox Destruct V2</title>
+<title>Babylon Sandbox Destruct - Updated</title>
 <style>
 html,body{width:100%;height:100%;margin:0;overflow:hidden;touch-action:none;-webkit-user-select:none;-ms-touch-action:none}
 canvas{width:100%;height:100%;display:block}
-#fps{position:fixed;left:50%;transform:translateX(-50%);top:2vmin;background:rgba(0,0,0,0.5);padding:6px 10px;border-radius:8px;color:#fff;font-family:monospace;z-index:60;font-size:12px}
+#ui{position:fixed;left:8px;top:8px;z-index:50;display:flex;flex-direction:column;gap:8px}
 .button{background:rgba(30,30,30,0.7);color:#fff;padding:8px 12px;border-radius:8px;font-family:system-ui;font-weight:600;user-select:none;-webkit-user-select:none;touch-action:none}
 #spawnMenu{position:fixed;right:8px;top:8px;z-index:50;display:flex;flex-direction:column;gap:8px}
 #spawnGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 #leftJoystick{position:fixed;left:3vmin;bottom:3vmin;width:12vmin;height:12vmin;border-radius:50%;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center;z-index:40;touch-action:none}
 .left-inner{width:6vmin;height:6vmin;border-radius:50%;background:rgba(0,0,0,0.5);transform:translate(0,0)}
-#cameraJoystick{position:fixed;right:3vmin;bottom:3vmin;width:12vmin;height:12vmin;border-radius:50%;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center;z-index:40;touch-action:none}
-.camera-inner{width:6vmin;height:6vmin;border-radius:50%;background:rgba(0,0,0,0.5);transform:translate(0,0)}
+#rightJoystick{position:fixed;right:3vmin;bottom:3vmin;width:12vmin;height:12vmin;border-radius:50%;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center;z-index:40;touch-action:none}
+.right-inner{width:6vmin;height:6vmin;border-radius:50%;background:rgba(0,0,0,0.5);transform:translate(0,0)}
 #jumpBtn{position:fixed;right:3vmin;bottom:16vmin;width:9vmin;height:9vmin;border-radius:50%;background:rgba(220,20,60,0.9);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;z-index:40;touch-action:none}
 #throwBtn{position:fixed;left:50%;transform:translateX(-50%);bottom:3vmin;width:28vmin;height:9vmin;border-radius:10px;background:rgba(25,125,255,0.9);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;z-index:40;touch-action:none}
 #autoBtn{position:fixed;left:calc(50% + 32vmin);bottom:3vmin;width:14vmin;height:9vmin;border-radius:10px;background:rgba(255,90,20,0.9);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;z-index:40;touch-action:none}
-#menuBtn{position:fixed;left:8px;top:50%;transform:translateY(-50%);width:50px;height:50px;border-radius:50%;background:rgba(50,50,50,0.8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;z-index:55;touch-action:none}
+#fps{position:fixed;left:50%;transform:translateX(-50%);top:2vmin;background:rgba(0,0,0,0.5);padding:6px 10px;border-radius:8px;color:#fff;font-family:monospace;z-index:60;font-size:12px}
+#menuToggle{position:fixed;left:8px;bottom:8px;z-index:60}
+.pulse{animation:pulseA 900ms linear infinite}
+@keyframes pulseA{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
 <canvas id="renderCanvas"></canvas>
 <div id="fps">FPS: 0</div>
-<div id="menuBtn">M</div>
+<div id="ui">
+<div class="button" id="btnInfo">Sandbox Mode</div>
+</div>
 <div id="spawnMenu">
 <div id="spawnGrid">
 <button class="button" data-item="box">Box</button>
@@ -34,27 +39,31 @@ canvas{width:100%;height:100%;display:block}
 <button class="button" data-item="wall">Wall</button>
 <button class="button" data-item="barrel">Explosive Barrel</button>
 <button class="button" data-item="grenade">Grenade</button>
-<button class="button" data-item="fan">Fan</button>
-<button class="button" data-item="spike">Spike</button>
-<button class="button" data-item="crate">Crate</button>
+<button class="button" data-item="tower">Tower</button>
+<button class="button" data-item="metalBall">Metal Ball</button>
+<button class="button" data-item="glassPane">Glass Pane</button>
+<button class="button" id="spawnRandom">Spawn Random</button>
 </div>
 </div>
 <div id="leftJoystick"><div class="left-inner"></div></div>
-<div id="cameraJoystick"><div class="camera-inner"></div></div>
+<div id="rightJoystick"><div class="right-inner"></div></div>
 <div id="jumpBtn">JUMP</div>
 <div id="throwBtn">THROW</div>
 <div id="autoBtn">FULL AUTO</div>
-<audio id="bgMusic" src="loud russian music shorts.mp3" loop autoplay></audio>
+<div id="menuToggle"><button class="button" id="toggleMenuBtn">TOGGLE MENU</button></div>
 <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
+const audio=new Audio('loud russian music shorts.mp3');
+audio.loop=true;
+let audioStarted=false;
 const canvas=document.getElementById("renderCanvas");
 const engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:true,stencil:true});
 const scene=new BABYLON.Scene(engine);
 scene.clearColor=new BABYLON.Color3(0.75,0.9,1);
 const gravity=new BABYLON.Vector3(0,-9.81,0);
-const plugin=new BABYLON.CannonJSPlugin(true,undefined,CANNON);
-scene.enablePhysics(gravity,plugin);
+const plugin=new BABYLON.CannonJSPlugin(true, undefined, CANNON);
+scene.enablePhysics(gravity, plugin);
 scene.collisionsEnabled=true;
 const hemi=new BABYLON.HemisphericLight("h", new BABYLON.Vector3(0.2,1,0.1), scene);
 hemi.intensity=0.9;
@@ -73,12 +82,14 @@ ground.physicsImpostor=new BABYLON.PhysicsImpostor(ground,BABYLON.PhysicsImposto
 const arenaWalls=[];
 function makeWall(w,h,d,x,y,z,rotY){
   const m=BABYLON.MeshBuilder.CreateBox("wall"+arenaWalls.length,{width:w,height:h,depth:d},scene);
-  m.position.set(x,y,z); m.rotation.y=rotY||0;
+  m.position.set(x,y,z);
+  m.rotation.y=rotY||0;
   m.checkCollisions=true;
   m.material=new BABYLON.StandardMaterial("wm"+arenaWalls.length,scene);
   m.material.diffuseColor=new BABYLON.Color3(0.6,0.55,0.5);
   m.physicsImpostor=new BABYLON.PhysicsImpostor(m,BABYLON.PhysicsImpostor.BoxImpostor,{mass:0,friction:1,restitution:0},scene);
-  arenaWalls.push(m); return m;
+  arenaWalls.push(m);
+  return m;
 }
 makeWall(120,8,1,0,4,60,0);
 makeWall(120,8,1,0,4,-60,0);
@@ -99,58 +110,119 @@ function makeDestructibleBox(x,y,z,size){
   b.physicsImpostor=new BABYLON.PhysicsImpostor(b,BABYLON.PhysicsImpostor.BoxImpostor,{mass:3,friction:0.6,restitution:0.1},scene);
   destructibles.push(b);
   shadowGen.addShadowCaster(b);
+  setupImpact(b);
   return b;
 }
-for(let i=0;i<18;i++){ makeDestructibleBox(-10+Math.random()*20,2,-10+Math.random()*20,2);}
-const playerVis=BABYLON.MeshBuilder.CreateBox("playerVis",{width:1.2,height:2,depth:1},scene);
+for(let i=0;i<18;i++){
+  const x=-10+Math.random()*20;
+  const z=-10+Math.random()*20;
+  makeDestructibleBox(x,2,z,2);
+}
+const playerVis=BABYLON.MeshBuilder.CreateBox("playerVis",{width:1.2,height:2,depth:1.0},scene);
 playerVis.position=new BABYLON.Vector3(0,2,8);
 playerVis.material=new BABYLON.StandardMaterial("pvMat",scene);
 playerVis.material.diffuseColor=new BABYLON.Color3(0.2,0.6,1);
 playerVis.isVisible=true;
 playerVis.checkCollisions=true;
-playerVis.ellipsoid=new BABYLON.Vector3(0.6,1,0.6);
-playerVis.ellipsoidOffset=new BABYLON.Vector3(0,1,0);
 const playerPhysics=new BABYLON.PhysicsImpostor(playerVis,BABYLON.PhysicsImpostor.BoxImpostor,{mass:1,friction:0.2,restitution:0},scene);
 playerPhysics.sleep(false);
+if(playerPhysics.physicsBody){
+  try{ playerPhysics.physicsBody.angularDamping=1; playerPhysics.physicsBody.angularFactor.set(0,0,0); }catch(e){}
+}
 const camPivot=new BABYLON.TransformNode("camPivot",scene);
 camPivot.parent=playerVis;
 const camera=new BABYLON.UniversalCamera("cam",new BABYLON.Vector3(0,1.2,0),scene);
 camera.parent=camPivot;
+camera.rotation=new BABYLON.Vector3(0,0,0);
 camera.minZ=0.1;
-camera.position=new BABYLON.Vector3(0,1.2,0);
 camera.attachControl(canvas,true);
-let moveForward=0,moveRight=0,jump=false,camYaw=0,camPitch=0;
+camera.position=new BABYLON.Vector3(0,1.2,0);
+let moveForward=0,moveRight=0,jump=false,lookX=0,lookY=0;
 const leftJoy=document.getElementById("leftJoystick");
 const leftInner=leftJoy.querySelector(".left-inner");
-const camJoy=document.getElementById("cameraJoystick");
-const camInner=camJoy.querySelector(".camera-inner");
+const rightJoy=document.getElementById("rightJoystick");
+const rightInner=rightJoy.querySelector(".right-inner");
 const jumpBtn=document.getElementById("jumpBtn");
 const throwBtn=document.getElementById("throwBtn");
 const autoBtn=document.getElementById("autoBtn");
-const menuBtn=document.getElementById("menuBtn");
 let autoInterval=null;
-let leftId=null,camId=null;
-
-function setupJoystick(joy,inner,updateX,updateY){
+let leftId=null,rightId=null;
+function setupLeft(){
+  leftJoy.addEventListener("touchstart",e=>{
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    leftId=t.identifier;
+    startX=t.clientX; startY=t.clientY;
+    active=true;
+  },{passive:false});
   let active=false,startX=0,startY=0;
-  let valX=0,valY=0;
-  joy.addEventListener("touchstart",e=>{ e.preventDefault(); const t=e.changedTouches[0]; active=true; startX=t.clientX; startY=t.clientY; if(joy===leftJoy) leftId=t.identifier; else camId=t.identifier; });
-  joy.addEventListener("touchmove",e=>{ e.preventDefault(); for(const t of e.changedTouches){ if((joy===leftJoy&&t.identifier!==leftId)||(joy===camJoy&&t.identifier!==camId)) continue; valX=(t.clientX-startX)/50; valY=(t.clientY-startY)/50; valX=Math.max(-1,Math.min(1,valX)); valY=Math.max(-1,Math.min(1,valY)); inner.style.transform=`translate(${(t.clientX-startX)/3}px,${(t.clientY-startY)/3}px)`; updateX(valX); updateY(valY); } });
-  joy.addEventListener("touchend",e=>{ e.preventDefault(); for(const t of e.changedTouches){ if((joy===leftJoy&&t.identifier!==leftId)||(joy===camJoy&&t.identifier!==camId)) continue; inner.style.transform='translate(0,0)'; updateX(0); updateY(0); active=false; leftId=null; camId=null;} });
-  joy.addEventListener("touchcancel",e=>{ e.preventDefault(); inner.style.transform='translate(0,0)'; updateX(0); updateY(0); active=false; leftId=null; camId=null; });
+  leftJoy.addEventListener("touchmove",e=>{
+    e.preventDefault();
+    if(!active){
+      for(const t of e.changedTouches) if(t.identifier===leftId){ active=true; startX=t.clientX; startY=t.clientY; break;}
+    }
+    for(const t of e.changedTouches) if(t.identifier===leftId){
+      const dx=t.clientX-startX;
+      const dy=t.clientY-startY;
+      leftInner.style.transform=`translate(${dx/3}px,${dy/3}px)`;
+      moveRight = dx/50;
+      moveForward = -dy/50;
+      break;
+    }
+  },{passive:false});
+  leftJoy.addEventListener("touchend",e=>{
+    e.preventDefault();
+    for(const t of e.changedTouches) if(t.identifier===leftId){ active=false; leftId=null; leftInner.style.transform='translate(0,0)'; moveRight=0; moveForward=0; break;}
+  },{passive:false});
+  leftJoy.addEventListener("touchcancel",e=>{ e.preventDefault(); active=false; leftId=null; leftInner.style.transform='translate(0,0)'; moveRight=0; moveForward=0; },{passive:false});
 }
-setupJoystick(leftJoy,leftInner,(x)=>{moveRight=x;},(y)=>{moveForward=-y;});
-setupJoystick(camJoy,camInner,(x)=>{camYaw=x;},(y)=>{camPitch=-y;});
-
+function setupRight(){
+  rightJoy.addEventListener("touchstart",e=>{
+    e.preventDefault();
+    const t=e.changedTouches[0];
+    rightId=t.identifier;
+    rStartX=t.clientX; rStartY=t.clientY;
+    rActive=true;
+    if(!audioStarted){ try{ audio.play(); audioStarted=true; }catch(e){} }
+  },{passive:false});
+  let rActive=false,rStartX=0,rStartY=0;
+  rightJoy.addEventListener("touchmove",e=>{
+    e.preventDefault();
+    if(!rActive){
+      for(const t of e.changedTouches) if(t.identifier===rightId){ rActive=true; rStartX=t.clientX; rStartY=t.clientY; break;}
+    }
+    for(const t of e.changedTouches) if(t.identifier===rightId){
+      const dx=t.clientX-rStartX;
+      const dy=t.clientY-rStartY;
+      rightInner.style.transform=`translate(${dx/3}px,${dy/3}px)`;
+      lookX = dx/80;
+      lookY = dy/160;
+      break;
+    }
+  },{passive:false});
+  rightJoy.addEventListener("touchend",e=>{
+    e.preventDefault();
+    for(const t of e.changedTouches) if(t.identifier===rightId){ rActive=false; rightId=null; rightInner.style.transform='translate(0,0)'; lookX=0; lookY=0; break;}
+  },{passive:false});
+  rightJoy.addEventListener("touchcancel",e=>{ e.preventDefault(); rActive=false; rightId=null; rightInner.style.transform='translate(0,0)'; lookX=0; lookY=0; },{passive:false});
+}
+setupLeft();
+setupRight();
 jumpBtn.addEventListener("touchstart",e=>{ e.preventDefault(); if(isGrounded()){ playerPhysics.applyImpulse(new BABYLON.Vector3(0,6,0), playerVis.getAbsolutePosition()); } },{passive:false});
-throwBtn.addEventListener("touchstart",e=>{ e.preventDefault(); throwRock(); },{passive:false});
+throwBtn.addEventListener("touchstart",e=>{ e.preventDefault(); throwRock(); if(!audioStarted){ try{ audio.play(); audioStarted=true; }catch(e){} } },{passive:false});
 autoBtn.addEventListener("touchstart",e=>{ e.preventDefault(); if(autoInterval) return; autoInterval=setInterval(()=>{ fireBullet(); },90); },{passive:false});
 autoBtn.addEventListener("touchend",e=>{ e.preventDefault(); if(autoInterval){ clearInterval(autoInterval); autoInterval=null; } },{passive:false});
-menuBtn.addEventListener("click",()=>{ spawnMenu.style.display=spawnMenu.style.display==="none"?"flex":"none"; });
-
-function isGrounded(){ const origin=playerVis.position.clone(); const ray=new BABYLON.Ray(origin,new BABYLON.Vector3(0,-1,0),1.05); const pick=scene.pickWithRay(ray,m=> m!==playerVis); return pick&&pick.hit;}
-function forwardVector(){ const y=playerVis.rotation.y+camYaw; return new BABYLON.Vector3(Math.sin(y),0,Math.cos(y));}
-
+autoBtn.addEventListener("touchcancel",e=>{ e.preventDefault(); if(autoInterval){ clearInterval(autoInterval); autoInterval=null; } },{passive:false});
+function isGrounded(){
+  const origin=playerVis.position.clone();
+  const ray=new BABYLON.Ray(origin, new BABYLON.Vector3(0,-1,0),1.05);
+  const pick=scene.pickWithRay(ray, m=> m!==playerVis);
+  return pick && pick.hit;
+}
+function forwardVector(){
+  const y=playerVis.rotation.y;
+  return new BABYLON.Vector3(Math.sin(y),0,Math.cos(y));
+}
 function throwRock(){
   const f=forwardVector();
   const rock=BABYLON.MeshBuilder.CreateSphere("rock"+Math.random(),{diameter:0.6},scene);
@@ -158,7 +230,7 @@ function throwRock(){
   rock.material=new BABYLON.StandardMaterial("rMat",scene);
   rock.material.diffuseColor=new BABYLON.Color3(0.45,0.45,0.45);
   rock.physicsImpostor=new BABYLON.PhysicsImpostor(rock,BABYLON.PhysicsImpostor.SphereImpostor,{mass:1,friction:0.2,restitution:0.2},scene);
-  rock.physicsImpostor.applyImpulse(f.scale(16).add(new BABYLON.Vector3(0,4,0)), rock.getAbsolutePosition());
+  rock.physicsImpostor.applyImpulse(f.scale(14).add(new BABYLON.Vector3(0,3,0)), rock.getAbsolutePosition());
   setTimeout(()=>{ try{ rock.dispose(); }catch(e){} },9000);
   setupImpact(rock);
 }
@@ -169,95 +241,245 @@ function fireBullet(){
   b.material=new BABYLON.StandardMaterial("bm",scene);
   b.material.diffuseColor=new BABYLON.Color3(0.9,0.85,0.6);
   b.physicsImpostor=new BABYLON.PhysicsImpostor(b,BABYLON.PhysicsImpostor.SphereImpostor,{mass:0.1,friction:0.1,restitution:0.05},scene);
-  b.physicsImpostor.applyImpulse(f.scale(80), b.getAbsolutePosition());
+  b.physicsImpostor.applyImpulse(f.scale(90), b.getAbsolutePosition());
   setTimeout(()=>{ try{ b.dispose(); }catch(e){} },3000);
   setupImpact(b);
 }
-
 function setupImpact(mesh){
   mesh.physicsImpostor.registerOnPhysicsCollide(destructibles.map(d=>d.physicsImpostor),(main,other)=>{
     const impact=main.getLinearVelocity().length();
     const targetMesh=other.object;
-    if(targetMesh&&!targetMesh._destroyed){
-      if(targetMesh.metadata&&targetMesh.metadata.type==="barrel"&&impact>6) explodeAt(targetMesh.position,targetMesh);
-      else if(impact>10||Math.random()>0.985) destroyMesh(targetMesh);
+    if(targetMesh && !targetMesh._destroyed){
+      if(targetMesh.metadata && targetMesh.metadata.type==="barrel"){
+        if(impact>6){
+          explodeAt(targetMesh.position, targetMesh);
+        }
+      } else {
+        if(impact>10 || Math.random()>0.985){
+          destroyMesh(targetMesh);
+        }
+      }
     }
   });
 }
-
 function destroyMesh(m){
-  if(!m||m._destroyed) return; m._destroyed=true;
+  if(!m) return;
+  if(m._destroyed) return;
+  m._destroyed=true;
   const p=m.position.clone();
   const efx=BABYLON.MeshBuilder.CreateSphere("ef"+Math.random(),{diameter:0.4},scene);
   efx.position.copyFrom(p);
   efx.material=new BABYLON.StandardMaterial("efm",scene);
-  efx.material.emissiveColor=new BABYLON.Color3(1,0.5,0.15);
+  efx.material.diffuseColor=new BABYLON.Color3(1,0.5,0.15);
+  const ps=new BABYLON.ParticleSystem("p"+Math.random(),200,scene);
+  ps.particleTexture=new BABYLON.Texture("https://playground.babylonjs.com/textures/flare.png",scene);
+  ps.emitter=efx;
+  ps.minEmitBox=new BABYLON.Vector3(-0.3,0, -0.3);
+  ps.maxEmitBox=new BABYLON.Vector3(0.3,0.3,0.3);
+  ps.color1=new BABYLON.Color4(1,0.6,0.2,1);
+  ps.color2=new BABYLON.Color4(1,0.2,0.1,1);
+  ps.minSize=0.05; ps.maxSize=0.25;
+  ps.minLifeTime=0.2; ps.maxLifeTime=0.6;
+  ps.emitRate=150;
+  ps.blendMode=BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+  ps.direction1=new BABYLON.Vector3(-1,-1,-1);
+  ps.direction2=new BABYLON.Vector3(1,1,1);
+  ps.gravity=new BABYLON.Vector3(0,-6,0);
+  ps.start();
+  setTimeout(()=>{ try{ ps.stop(); ps.dispose(); }catch(e){} },500);
   setTimeout(()=>{ try{ efx.dispose(); }catch(e){} },600);
   try{ if(m.physicsImpostor) m.physicsImpostor.dispose(); }catch(e){}
   setTimeout(()=>{ try{ m.dispose(); }catch(e){} },40);
 }
-function explodeAt(pos,source){
-  const radius=10;
-  const strength=180;
-  for(const m of scene.meshes){
+function explodeAt(pos, source){
+  const radius=12;
+  const strength=220;
+  const parts=scene.meshes;
+  for(const m of parts){
     if(!m.physicsImpostor) continue;
-    const dist=BABYLON.Vector3.Distance(m.position,pos);
+    const dist=BABYLON.Vector3.Distance(m.position, pos);
     if(dist>radius) continue;
     const dir=m.position.subtract(pos).normalize();
-    const force=dir.scale((1-(dist/radius))*strength);
-    m.physicsImpostor.applyImpulse(force,m.getAbsolutePosition());
-    if(m!==source&&Math.random()<0.5) destroyMesh(m);
+    const force=dir.scale((1 - (dist/radius)) * strength);
+    m.physicsImpostor.applyImpulse(force, m.getAbsolutePosition());
+    if(m.metadata && m.metadata.type==="barrel" && m!==source){
+      if(Math.random()>0.6){
+        explodeAt(m.position, m);
+      }
+    }
+    if(m!==source && (m.name.startsWith("dBox") || m.metadata && m.metadata.destructible)){
+      if(Math.random()>0.35) destroyMesh(m);
+    }
   }
-  const explosion=BABYLON.MeshBuilder.CreateSphere("exp"+Math.random(),{diameter:2},scene);
-  explosion.position.copyFrom(pos);
-  const mat=new BABYLON.StandardMaterial("em",scene);
-  mat.emissiveColor=new BABYLON.Color3(1,0.3,0);
-  explosion.material=mat;
-  setTimeout(()=>{ try{ explosion.dispose(); }catch(e){} },400);
+  const flash=BABYLON.MeshBuilder.CreateSphere("fl"+Math.random(),{diameter:3.2},scene);
+  flash.position.copyFrom(pos);
+  flash.material=new BABYLON.StandardMaterial("flm",scene);
+  flash.material.emissiveColor=new BABYLON.Color3(1,0.6,0.2);
+  const ps=new BABYLON.ParticleSystem("expl"+Math.random(),600,scene);
+  ps.particleTexture=new BABYLON.Texture("https://playground.babylonjs.com/textures/flare.png",scene);
+  ps.emitter=flash;
+  ps.minEmitBox=new BABYLON.Vector3(-1,0,-1);
+  ps.maxEmitBox=new BABYLON.Vector3(1,1,1);
+  ps.color1=new BABYLON.Color4(1,0.7,0.3,1);
+  ps.color2=new BABYLON.Color4(1,0.2,0.05,1);
+  ps.minSize=0.08; ps.maxSize=0.6;
+  ps.minLifeTime=0.3; ps.maxLifeTime=1.2;
+  ps.emitRate=900;
+  ps.blendMode=BABYLON.ParticleSystem.BLENDMODE_STANDARD;
+  ps.direction1=new BABYLON.Vector3(-3,-3,-3);
+  ps.direction2=new BABYLON.Vector3(3,3,3);
+  ps.gravity=new BABYLON.Vector3(0,-9,0);
+  ps.start();
+  setTimeout(()=>{ try{ ps.stop(); ps.dispose(); }catch(e){} },900);
+  setTimeout(()=>{ try{ flash.dispose(); }catch(e){} },900);
+  try{ if(source){ source.physicsImpostor && source.physicsImpostor.dispose(); source.dispose(); } }catch(e){}
 }
-const randomItems=["cone","tube","pyramid"];
-document.querySelectorAll("#spawnGrid button").forEach(b=>{
-  b.addEventListener("click",()=>{
-    let type=b.dataset.item;
-    if(type==="random"){ type=randomItems[Math.floor(Math.random()*randomItems.length)]; }
-    spawnItem(type);
-  });
-});
-
 function spawnItem(type){
-  let m;
-  switch(type){
-    case"box": m=BABYLON.MeshBuilder.CreateBox("box",{size:2},scene); break;
-    case"sphere": m=BABYLON.MeshBuilder.CreateSphere("sphere",{diameter:2},scene); break;
-    case"rock": m=BABYLON.MeshBuilder.CreateSphere("rock",{diameter:1.5},scene); break;
-    case"ramp": m=BABYLON.MeshBuilder.CreateBox("ramp",{width:2,height:0.5,depth:3},scene); break;
-    case"wall": m=BABYLON.MeshBuilder.CreateBox("wall",{width:3,height:4,depth:0.5},scene); break;
-    case"barrel": m=BABYLON.MeshBuilder.CreateCylinder("barrel",{diameter:1.5,height:2},scene); m.metadata={type:"barrel"}; break;
-    case"grenade": m=BABYLON.MeshBuilder.CreateSphere("gren",{diameter:1},scene); m.material=new BABYLON.StandardMaterial("gmat",scene); m.material.diffuseColor=new BABYLON.Color3(0.1,0.9,0.1); m.metadata={type:"grenade"}; break;
-    case"fan": m=BABYLON.MeshBuilder.CreateCylinder("fan",{diameter:0.5,height:0.2},scene); break;
-    case"spike": m=BABYLON.MeshBuilder.CreateCylinder("spike",{diameter:0.5,height:1},scene); break;
-    case"crate": m=BABYLON.MeshBuilder.CreateBox("crate",{size:2},scene); break;
-    case"cone": m=BABYLON.MeshBuilder.CreateCylinder("cone",{diameterTop:0,diameterBottom:1.5,height:2},scene); break;
-    case"tube": m=BABYLON.MeshBuilder.CreateCylinder("tube",{diameter:1,height:3},scene); break;
-    case"pyramid": m=BABYLON.MeshBuilder.CreateCylinder("pyr",{diameterTop:0,diameterBottom:2,height:2},scene); break;
+  const f=forwardVector();
+  const spawnPos=playerVis.position.add(new BABYLON.Vector3(0,1.2,0)).add(f.scale(2));
+  if(type==="box"){
+    const b=BABYLON.MeshBuilder.CreateBox("sBox"+Math.random(),{size:2},scene);
+    b.position.copyFrom(spawnPos);
+    b.material=new BABYLON.StandardMaterial("sbb",scene);
+    b.material.diffuseColor=new BABYLON.Color3(Math.random()*0.6+0.2,Math.random()*0.6+0.2,Math.random()*0.6+0.2);
+    b.physicsImpostor=new BABYLON.PhysicsImpostor(b,BABYLON.PhysicsImpostor.BoxImpostor,{mass:3,friction:0.6,restitution:0.1},scene);
+    destructibles.push(b);
+    setupImpact(b);
+    shadowGen.addShadowCaster(b);
+  } else if(type==="sphere"){
+    const s=BABYLON.MeshBuilder.CreateSphere("sph"+Math.random(),{diameter:1.8},scene);
+    s.position.copyFrom(spawnPos);
+    s.material=new BABYLON.StandardMaterial("sphm",scene);
+    s.material.diffuseColor=new BABYLON.Color3(Math.random()*0.6+0.2,Math.random()*0.6+0.2,Math.random()*0.6+0.2);
+    s.physicsImpostor=new BABYLON.PhysicsImpostor(s,BABYLON.PhysicsImpostor.SphereImpostor,{mass:2,friction:0.6,restitution:0.1},scene);
+    destructibles.push(s);
+    setupImpact(s);
+    shadowGen.addShadowCaster(s);
+  } else if(type==="rock"){
+    const r=BABYLON.MeshBuilder.CreateSphere("rock"+Math.random(),{diameter:1},scene);
+    r.position.copyFrom(spawnPos);
+    r.material=new BABYLON.StandardMaterial("rockm",scene);
+    r.material.diffuseColor=new BABYLON.Color3(0.45,0.45,0.45);
+    r.physicsImpostor=new BABYLON.PhysicsImpostor(r,BABYLON.PhysicsImpostor.SphereImpostor,{mass:2,friction:0.6,restitution:0.05},scene);
+    destructibles.push(r);
+    setupImpact(r);
+    shadowGen.addShadowCaster(r);
+  } else if(type==="ramp"){
+    const ramp=BABYLON.MeshBuilder.CreateBox("ramp"+Math.random(),{width:6,height:0.5,depth:6},scene);
+    ramp.position.copyFrom(spawnPos.add(new BABYLON.Vector3(0,0.25,0)));
+    ramp.rotation.x=Math.PI*0.12;
+    ramp.material=new BABYLON.StandardMaterial("rmpm",scene);
+    ramp.material.diffuseColor=new BABYLON.Color3(0.52,0.4,0.35);
+    ramp.physicsImpostor=new BABYLON.PhysicsImpostor(ramp,BABYLON.PhysicsImpostor.BoxImpostor,{mass:0,friction:1},scene);
+    shadowGen.addShadowCaster(ramp);
+  } else if(type==="wall"){
+    const w=BABYLON.MeshBuilder.CreateBox("wallS"+Math.random(),{width:6,height:4,depth:0.5},scene);
+    w.position.copyFrom(spawnPos.add(new BABYLON.Vector3(0,2,0)));
+    w.material=new BABYLON.StandardMaterial("wsm",scene);
+    w.material.diffuseColor=new BABYLON.Color3(0.6,0.55,0.5);
+    w.physicsImpostor=new BABYLON.PhysicsImpostor(w,BABYLON.PhysicsImpostor.BoxImpostor,{mass:0,friction:1},scene);
+    shadowGen.addShadowCaster(w);
+  } else if(type==="barrel"){
+    const bar=BABYLON.MeshBuilder.CreateCylinder("barrel"+Math.random(),{height:2.2,diameterTop:1.2,diameterBottom:1.2,tessellation:24},scene);
+    bar.position.copyFrom(spawnPos.add(new BABYLON.Vector3(0,1.1,0)));
+    bar.material=new BABYLON.StandardMaterial("barm",scene);
+    bar.material.diffuseColor=new BABYLON.Color3(0.55,0.1,0.1);
+    bar.physicsImpostor=new BABYLON.PhysicsImpostor(bar,BABYLON.PhysicsImpostor.CylinderImpostor,{mass:6,friction:0.6,restitution:0.1},scene);
+    bar.metadata={type:"barrel"};
+    destructibles.push(bar);
+    setupImpact(bar);
+    shadowGen.addShadowCaster(bar);
+  } else if(type==="grenade"){
+    const g=BABYLON.MeshBuilder.CreateSphere("gren"+Math.random(),{diameter:0.6},scene);
+    g.position.copyFrom(spawnPos);
+    g.material=new BABYLON.StandardMaterial("gnm",scene);
+    g.material.diffuseColor=new BABYLON.Color3(0.1,0.7,0.1);
+    g.physicsImpostor=new BABYLON.PhysicsImpostor(g,BABYLON.PhysicsImpostor.SphereImpostor,{mass:0.9,friction:0.2,restitution:0.1},scene);
+    g.physicsImpostor.applyImpulse(forwardVector().scale(14).add(new BABYLON.Vector3(0,4,0)), g.getAbsolutePosition());
+    setTimeout(()=>{ explodeAt(g.position, g); },900);
+    shadowGen.addShadowCaster(g);
+  } else if(type==="tower"){
+    const cx=spawnPos.x, cz=spawnPos.z;
+    for(let i=0;i<6;i++){
+      makeDestructibleBox(cx,1+i*1.05,cz,1.5);
+    }
+  } else if(type==="metalBall"){
+    const mball=BABYLON.MeshBuilder.CreateSphere("mb"+Math.random(),{diameter:2},scene);
+    mball.position.copyFrom(spawnPos.add(new BABYLON.Vector3(0,1.2,0)));
+    mball.material=new BABYLON.StandardMaterial("mbm",scene);
+    mball.material.diffuseColor=new BABYLON.Color3(0.25,0.25,0.28);
+    mball.physicsImpostor=new BABYLON.PhysicsImpostor(mball,BABYLON.PhysicsImpostor.SphereImpostor,{mass:12,friction:0.7,restitution:0.05},scene);
+    destructibles.push(mball);
+    setupImpact(mball);
+    shadowGen.addShadowCaster(mball);
+  } else if(type==="glassPane"){
+    const glass=BABYLON.MeshBuilder.CreateBox("glass"+Math.random(),{width:2.5,height:2.5,depth:0.06},scene);
+    glass.position.copyFrom(spawnPos.add(new BABYLON.Vector3(0,1.25,0)));
+    glass.material=new BABYLON.StandardMaterial("gsm",scene);
+    glass.material.diffuseColor=new BABYLON.Color3(0.9,0.95,1);
+    glass.material.alpha=0.25;
+    glass.physicsImpostor=new BABYLON.PhysicsImpostor(glass,BABYLON.PhysicsImpostor.BoxImpostor,{mass:0.8,friction:0.2,restitution:0.02},scene);
+    destructibles.push(glass);
+    setupImpact(glass);
+    shadowGen.addShadowCaster(glass);
   }
-  if(!m) return;
-  m.position=playerVis.position.add(new BABYLON.Vector3(0,2,0)).add(forwardVector().scale(2));
-  m.physicsImpostor=new BABYLON.PhysicsImpostor(m,BABYLON.PhysicsImpostor.BoxImpostor,{mass:2,friction:0.5,restitution:0.2},scene);
-  shadowGen.addShadowCaster(m);
 }
+document.querySelectorAll('#spawnGrid button[data-item]').forEach(b=>{
+  b.addEventListener('touchstart',e=>{ e.preventDefault(); spawnItem(b.dataset.item); if(!audioStarted){ try{ audio.play(); audioStarted=true; }catch(e){} } },{passive:false});
+  b.addEventListener('click',e=>{ spawnItem(b.dataset.item); });
+});
+document.getElementById('spawnRandom').addEventListener('touchstart',e=>{ e.preventDefault(); const r=['tower','metalBall','glassPane']; spawnItem(r[Math.floor(Math.random()*r.length)]); },{passive:false});
+document.getElementById('toggleMenuBtn').addEventListener('touchstart',e=>{ e.preventDefault(); const m=document.getElementById('spawnMenu'); m.style.display=(m.style.display==='none'?'flex':'flex'); if(m.style.opacity==='0' || !m.style.opacity){ m.style.opacity='1'; m.style.transform='translateY(0)'; } else { m.style.opacity='0'; m.style.transform='translateY(-6px)'; } },{passive:false});
+function setupCollisionsForNew(mesh){
+  if(mesh.physicsImpostor){
+    mesh.physicsImpostor.registerOnPhysicsCollide(destructibles.map(d=>d.physicsImpostor),(main,other)=>{ const impact=main.getLinearVelocity().length(); const target=other.object; if(target && target.metadata && target.metadata.type==="barrel" && impact>6) explodeAt(target.position,target); if(impact>12) destroyMesh(target); });
+  }
+}
+scene.registerBeforeRender(()=>{
+  const speed=6;
+  const moveDir=new BABYLON.Vector3(Math.sin(playerVis.rotation.y),0,Math.cos(playerVis.rotation.y));
+  const rightVec=new BABYLON.Vector3(Math.sin(playerVis.rotation.y+Math.PI/2),0,Math.cos(playerVis.rotation.y+Math.PI/2));
+  const mv=moveDir.scale(moveForward).add(rightVec.scale(moveRight));
+  if(mv.length()>0.12){
+    const desired=mv.normalize().scale(speed);
+    const lv=playerPhysics.getLinearVelocity();
+    playerPhysics.setLinearVelocity(new BABYLON.Vector3(desired.x,lv.y,desired.z));
+  } else {
+    const lv=playerPhysics.getLinearVelocity();
+    playerPhysics.setLinearVelocity(new BABYLON.Vector3(0,lv.y,0));
+  }
+  camPivot.rotation.x = Math.max(-Math.PI/3, Math.min(Math.PI/3, camPivot.rotation.x - lookY));
+  playerVis.rotation.y += lookX;
+  if(playerVis.position.y<-40){
+    playerPhysics.setLinearVelocity(new BABYLON.Vector3(0,0,0));
+    playerVis.position.set(0,4,8);
+    playerVis.rotation.set(0,0,0);
+    camPivot.rotation.set(0,0,0);
+    playerPhysics.setLinearVelocity(new BABYLON.Vector3(0,0,0));
+  }
+  for(let i=destructibles.length-1;i>=0;i--){
+    const d=destructibles[i];
+    if(!d || d.isDisposed()){ destructibles.splice(i,1); continue; }
+    if(d.position.y<-30){ try{ d.dispose(); }catch(e){}; destructibles.splice(i,1); }
+  }
+});
 engine.runRenderLoop(()=>{
-  const dt=engine.getDeltaTime()/1000;
-  const fwd=forwardVector().scale(moveForward*8);
-  const right=new BABYLON.Vector3(Math.cos(playerVis.rotation.y),0,-Math.sin(playerVis.rotation.y)).scale(moveRight*8);
-  const vel=fwd.add(right); vel.y=playerPhysics.getLinearVelocity().y;
-  playerPhysics.setLinearVelocity(vel);
-  camPivot.rotation.x=Math.max(-Math.PI/3,Math.min(Math.PI/3,camPivot.rotation.x+camPitch*dt*2));
-  playerVis.rotation.y+=camYaw*dt*2;
-  camPitch=0; camYaw=0;
+  scene.render();
   document.getElementById("fps").innerText="FPS: "+Math.round(engine.getFps());
 });
-window.addEventListener("resize",()=>{engine.resize();});
+window.addEventListener("resize",()=>{ engine.resize(); });
+window.addEventListener("touchmove",e=>{ e.preventDefault(); },{passive:false});
+document.addEventListener("keydown",e=>{
+  if(e.key==="w") moveForward=1;
+  if(e.key==="s") moveForward=-1;
+  if(e.key==="a") moveRight=-1;
+  if(e.key==="d") moveRight=1;
+});
+document.addEventListener("keyup",e=>{
+  if(e.key==="w"||e.key==="s") moveForward=0;
+  if(e.key==="a"||e.key==="d") moveRight=0;
+});
+canvas.addEventListener('touchstart',()=>{ if(!audioStarted){ try{ audio.play(); audioStarted=true; }catch(e){} } },{passive:false});
 </script>
 </body>
 </html>
