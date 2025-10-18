@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Babylon Mobile Map</title>
+<title>Babylon Room Pressure Plate</title>
 <style>
 html, body {width:100%; height:100%; margin:0; overflow:hidden; touch-action:none;}
 canvas {width:100%; height:100%; display:block;}
@@ -11,21 +11,21 @@ canvas {width:100%; height:100%; display:block;}
 .joystick-inner{position:absolute;width:50px;height:50px;border-radius:50%;background:rgba(0,0,0,0.5);left:25px;top:25px;}
 #leftJoystick{left:20px;bottom:20px;}
 #rightJoystick{right:20px;bottom:20px;}
-#jumpButton{position:absolute;width:70px;height:70px;border-radius:50%;background:rgba(255,0,0,0.5);right:20px;bottom:120px;}
+#fpsCounter{position:absolute;top:10px;left:10px;color:white;font-family:monospace;font-size:20px;}
 </style>
 </head>
 <body>
 <canvas id="renderCanvas"></canvas>
 <div id="leftJoystick" class="joystick"><div class="joystick-inner"></div></div>
 <div id="rightJoystick" class="joystick"><div class="joystick-inner"></div></div>
-<div id="jumpButton"></div>
+<div id="fpsCounter">0 FPS</div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script>
 const canvas=document.getElementById("renderCanvas");
 const engine=new BABYLON.Engine(canvas,true);
 const scene=new BABYLON.Scene(engine);
-scene.gravity=new BABYLON.Vector3(0,-0.98,0);
 scene.collisionsEnabled=true;
+scene.gravity=new BABYLON.Vector3(0,-0.98,0);
 
 const camera=new BABYLON.UniversalCamera("cam",new BABYLON.Vector3(0,2,0),scene);
 camera.attachControl(canvas,true);
@@ -33,46 +33,80 @@ camera.applyGravity=true;
 camera.checkCollisions=true;
 camera.ellipsoid=new BABYLON.Vector3(0.5,1,0.5);
 
-const light=new BABYLON.HemisphericLight("light",new BABYLON.Vector3(0,1,0),scene);
+const light=new BABYLON.DirectionalLight("dirLight",new BABYLON.Vector3(-0.5,-1,-0.5),scene);
+light.position=new BABYLON.Vector3(10,15,10);
+light.intensity=1.2;
+const shadowGenerator=new BABYLON.ShadowGenerator(1024,light);
+shadowGenerator.useBlurExponentialShadowMap=true;
+shadowGenerator.blurKernel=16;
 
-const ground=BABYLON.MeshBuilder.CreateGround("ground",{width:50,height:50},scene);
+const ground=BABYLON.MeshBuilder.CreateGround("ground",{width:20,height:20},scene);
 ground.checkCollisions=true;
-ground.position.y=0;
+ground.receiveShadows=true;
 
-const box1=BABYLON.MeshBuilder.CreateBox("b1",{size:2},scene);
-box1.position.set(5,1,5);
-box1.checkCollisions=true;
+const wallFront=BABYLON.MeshBuilder.CreateBox("wallFront",{width:20,height:5,depth:0.5},scene);
+wallFront.position.set(0,2.5,10);
+wallFront.checkCollisions=true;
+wallFront.receiveShadows=true;
 
-const box2=BABYLON.MeshBuilder.CreateBox("b2",{size:3},scene);
-box2.position.set(-5,1.5,-5);
-box2.checkCollisions=true;
+const wallBack=BABYLON.MeshBuilder.CreateBox("wallBack",{width:20,height:5,depth:0.5},scene);
+wallBack.position.set(0,2.5,-10);
+wallBack.checkCollisions=true;
+wallBack.receiveShadows=true;
 
-const wall1=BABYLON.MeshBuilder.CreateBox("w1",{width:20,height:5,depth:1},scene);
-wall1.position.set(0,2.5,10);
-wall1.checkCollisions=true;
+const wallLeft=BABYLON.MeshBuilder.CreateBox("wallLeft",{width:0.5,height:5,depth:20},scene);
+wallLeft.position.set(-10,2.5,0);
+wallLeft.checkCollisions=true;
+wallLeft.receiveShadows=true;
 
-const wall2=BABYLON.MeshBuilder.CreateBox("w2",{width:1,height:5,depth:20},scene);
-wall2.position.set(10,2.5,0);
-wall2.checkCollisions=true;
+const wallRight=BABYLON.MeshBuilder.CreateBox("wallRight",{width:0.5,height:5,depth:20},scene);
+wallRight.position.set(10,2.5,0);
+wallRight.checkCollisions=true;
+wallRight.receiveShadows=true;
 
-let moveForward=0,moveRight=0,lookX=0,lookY=0,jump=false;
+const roof=BABYLON.MeshBuilder.CreateBox("roof",{width:20,height:0.5,depth:20},scene);
+roof.position.set(0,5,0);
+roof.checkCollisions=true;
+roof.receiveShadows=true;
 
+const door=BABYLON.MeshBuilder.CreateBox("door",{width:3,height:4,depth:0.3},scene);
+door.position.set(0,2,9.75);
+door.checkCollisions=true;
+shadowGenerator.addShadowCaster(door);
+
+const plate=BABYLON.MeshBuilder.CreateBox("plate",{width:2,height:0.2,depth:2},scene);
+plate.position.set(0,0.1,5);
+plate.receiveShadows=true;
+
+const cube=BABYLON.MeshBuilder.CreateBox("cube",{size:1},scene);
+cube.position.set(3,1,3);
+cube.checkCollisions=true;
+shadowGenerator.addShadowCaster(cube);
+
+const material=new BABYLON.StandardMaterial("mat",scene);
+material.diffuseColor=new BABYLON.Color3(0.6,0.6,0.6);
+ground.material=material;
+wallFront.material=material;
+wallBack.material=material;
+wallLeft.material=material;
+wallRight.material=material;
+roof.material=material;
+door.material=material;
+plate.material=material;
+cube.material=material;
+
+let moveForward=0,moveRight=0,lookX=0,lookY=0;
 const left=document.getElementById("leftJoystick");
 const right=document.getElementById("rightJoystick");
-const jumpBtn=document.getElementById("jumpButton");
-
 function setupJoystick(joystick,callback){
 let active=false,startX=0,startY=0;
 const inner=joystick.querySelector(".joystick-inner");
 joystick.addEventListener("touchstart",e=>{e.preventDefault(); active=true; const t=e.touches[0]; startX=t.clientX; startY=t.clientY;});
-joystick.addEventListener("touchmove",e=>{e.preventDefault(); if(!active) return; const t=e.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY; inner.style.transform=`translate(${dx/2}px,${dy/2}px)`; callback(dx/50,dy/50);});
+joystick.addEventListener("touchmove",e=>{e.preventDefault(); if(!active)return; const t=e.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY; inner.style.transform=`translate(${dx/2}px,${dy/2}px)`; callback(dx/50,dy/50);});
 joystick.addEventListener("touchend",e=>{e.preventDefault(); active=false; inner.style.transform=`translate(0px,0px)`; callback(0,0);});
 }
 setupJoystick(left,(x,y)=>{moveRight=x; moveForward=-y;});
 setupJoystick(right,(x,y)=>{lookX=x*2; lookY=y*2;});
-
-jumpBtn.addEventListener("touchstart",e=>{e.preventDefault(); jump=true;});
-jumpBtn.addEventListener("touchend",e=>{e.preventDefault(); jump=false;});
 
 scene.onBeforeRenderObservable.add(()=>{
 camera.rotation.y+=lookX*0.02;
@@ -81,12 +115,27 @@ if(camera.rotation.x>Math.PI/2) camera.rotation.x=Math.PI/2;
 if(camera.rotation.x<-Math.PI/2) camera.rotation.x=-Math.PI/2;
 const forward=new BABYLON.Vector3(Math.sin(camera.rotation.y),0,Math.cos(camera.rotation.y));
 const rightVec=new BABYLON.Vector3(Math.sin(camera.rotation.y+Math.PI/2),0,Math.cos(camera.rotation.y+Math.PI/2));
-camera.position.addInPlace(forward.scale(moveForward*0.2));
-camera.position.addInPlace(rightVec.scale(moveRight*0.2));
-if(jump && camera.isGrounded) camera.cameraDirection.y+=0.4;
+camera.position.addInPlace(forward.scale(moveForward*0.15));
+camera.position.addInPlace(rightVec.scale(moveRight*0.15));
+const cubeBelow=cube.position.y<=0.51;
+if(cubeBelow) cube.position.y=0.5;
+const playerXZ=new BABYLON.Vector2(camera.position.x,camera.position.z);
+const cubeXZ=new BABYLON.Vector2(cube.position.x,cube.position.z);
+const plateXZ=new BABYLON.Vector2(plate.position.x,plate.position.z);
+const playerOnPlate=playerXZ.subtract(plateXZ).length()<1.5 && camera.position.y<1.5;
+const cubeOnPlate=cubeXZ.subtract(plateXZ).length()<1.5 && cube.position.y<=0.6;
+if(playerOnPlate||cubeOnPlate){
+if(door.position.y>1.5) door.position.y-=0.1;
+}else{
+if(door.position.y<2) door.position.y+=0.1;
+}
 });
 
-engine.runRenderLoop(()=>{scene.render();});
+const fpsDisplay=document.getElementById("fpsCounter");
+engine.runRenderLoop(()=>{
+scene.render();
+fpsDisplay.textContent=Math.round(engine.getFps())+" FPS";
+});
 window.addEventListener("resize",()=>{engine.resize();});
 </script>
 </body>
