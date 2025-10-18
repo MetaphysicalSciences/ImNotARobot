@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Babylon Mobile Walk</title>
+<title>Babylon Mobile Map</title>
 <style>
-html, body {width: 100%; height: 100%; margin: 0; overflow: hidden;}
-canvas {width: 100%; height: 100%; touch-action: none;}
-.joystick {position: absolute; width: 100px; height: 100px; border-radius: 50%; background: rgba(0,0,0,0.3);}
-.joystick-inner {position: absolute; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,0,0,0.5); left: 25px; top: 25px;}
-#leftJoystick {left: 20px; bottom: 20px;}
-#rightJoystick {right: 20px; bottom: 20px;}
-#jumpButton {position: absolute; width: 70px; height: 70px; border-radius: 50%; background: rgba(255,0,0,0.5); right: 120px; bottom: 30px;}
+html, body {width:100%; height:100%; margin:0; overflow:hidden; touch-action:none;}
+canvas {width:100%; height:100%; display:block;}
+.joystick{position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(0,0,0,0.3);}
+.joystick-inner{position:absolute;width:50px;height:50px;border-radius:50%;background:rgba(0,0,0,0.5);left:25px;top:25px;}
+#leftJoystick{left:20px;bottom:20px;}
+#rightJoystick{right:20px;bottom:20px;}
+#jumpButton{position:absolute;width:70px;height:70px;border-radius:50%;background:rgba(255,0,0,0.5);right:20px;bottom:120px;}
 </style>
 </head>
 <body>
@@ -20,47 +20,72 @@ canvas {width: 100%; height: 100%; touch-action: none;}
 <div id="rightJoystick" class="joystick"><div class="joystick-inner"></div></div>
 <div id="jumpButton"></div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
-<script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
 <script>
-const canvas = document.getElementById("renderCanvas");
-const engine = new BABYLON.Engine(canvas,true);
-const scene = new BABYLON.Scene(engine);
-scene.gravity = new BABYLON.Vector3(0,-0.98,0);
-scene.collisionsEnabled = true;
-const camera = new BABYLON.UniversalCamera("cam", new BABYLON.Vector3(0,2,0), scene);
+const canvas=document.getElementById("renderCanvas");
+const engine=new BABYLON.Engine(canvas,true);
+const scene=new BABYLON.Scene(engine);
+scene.gravity=new BABYLON.Vector3(0,-0.98,0);
+scene.collisionsEnabled=true;
+
+const camera=new BABYLON.UniversalCamera("cam",new BABYLON.Vector3(0,2,0),scene);
 camera.attachControl(canvas,true);
-camera.applyGravity = true;
-camera.checkCollisions = true;
-camera.ellipsoid = new BABYLON.Vector3(0.5,1,0.5);
-const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0,1,0), scene);
-const ground = BABYLON.MeshBuilder.CreateGround("ground",{width:100,height:100},scene);
-ground.checkCollisions = true;
+camera.applyGravity=true;
+camera.checkCollisions=true;
+camera.ellipsoid=new BABYLON.Vector3(0.5,1,0.5);
+
+const light=new BABYLON.HemisphericLight("light",new BABYLON.Vector3(0,1,0),scene);
+
+const ground=BABYLON.MeshBuilder.CreateGround("ground",{width:50,height:50},scene);
+ground.checkCollisions=true;
+ground.position.y=0;
+
+const box1=BABYLON.MeshBuilder.CreateBox("b1",{size:2},scene);
+box1.position.set(5,1,5);
+box1.checkCollisions=true;
+
+const box2=BABYLON.MeshBuilder.CreateBox("b2",{size:3},scene);
+box2.position.set(-5,1.5,-5);
+box2.checkCollisions=true;
+
+const wall1=BABYLON.MeshBuilder.CreateBox("w1",{width:20,height:5,depth:1},scene);
+wall1.position.set(0,2.5,10);
+wall1.checkCollisions=true;
+
+const wall2=BABYLON.MeshBuilder.CreateBox("w2",{width:1,height:5,depth:20},scene);
+wall2.position.set(10,2.5,0);
+wall2.checkCollisions=true;
+
 let moveForward=0,moveRight=0,lookX=0,lookY=0,jump=false;
-const left = document.getElementById("leftJoystick");
-const right = document.getElementById("rightJoystick");
-const jumpBtn = document.getElementById("jumpButton");
+
+const left=document.getElementById("leftJoystick");
+const right=document.getElementById("rightJoystick");
+const jumpBtn=document.getElementById("jumpButton");
+
 function setupJoystick(joystick,callback){
-let active=false, startX=0, startY=0;
-const inner = joystick.querySelector(".joystick-inner");
-joystick.addEventListener("touchstart",e=>{active=true; const t=e.touches[0]; startX=t.clientX; startY=t.clientY;});
-joystick.addEventListener("touchmove",e=>{if(!active) return; const t=e.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY; inner.style.transform=`translate(${dx/2}px,${dy/2}px)`; callback(dx/50,dy/50);});
-joystick.addEventListener("touchend",e=>{active=false; inner.style.transform=`translate(0px,0px)`; callback(0,0);});
+let active=false,startX=0,startY=0;
+const inner=joystick.querySelector(".joystick-inner");
+joystick.addEventListener("touchstart",e=>{e.preventDefault(); active=true; const t=e.touches[0]; startX=t.clientX; startY=t.clientY;});
+joystick.addEventListener("touchmove",e=>{e.preventDefault(); if(!active) return; const t=e.touches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY; inner.style.transform=`translate(${dx/2}px,${dy/2}px)`; callback(dx/50,dy/50);});
+joystick.addEventListener("touchend",e=>{e.preventDefault(); active=false; inner.style.transform=`translate(0px,0px)`; callback(0,0);});
 }
 setupJoystick(left,(x,y)=>{moveRight=x; moveForward=-y;});
 setupJoystick(right,(x,y)=>{lookX=x*2; lookY=y*2;});
-jumpBtn.addEventListener("touchstart",()=>{jump=true;});
-jumpBtn.addEventListener("touchend",()=>{jump=false;});
+
+jumpBtn.addEventListener("touchstart",e=>{e.preventDefault(); jump=true;});
+jumpBtn.addEventListener("touchend",e=>{e.preventDefault(); jump=false;});
+
 scene.onBeforeRenderObservable.add(()=>{
-camera.rotation.y += lookX*0.02;
-camera.rotation.x += lookY*0.02;
+camera.rotation.y+=lookX*0.02;
+camera.rotation.x+=lookY*0.02;
 if(camera.rotation.x>Math.PI/2) camera.rotation.x=Math.PI/2;
 if(camera.rotation.x<-Math.PI/2) camera.rotation.x=-Math.PI/2;
-const forward = new BABYLON.Vector3(Math.sin(camera.rotation.y),0,Math.cos(camera.rotation.y));
-const rightVec = new BABYLON.Vector3(Math.sin(camera.rotation.y+Math.PI/2),0,Math.cos(camera.rotation.y+Math.PI/2));
+const forward=new BABYLON.Vector3(Math.sin(camera.rotation.y),0,Math.cos(camera.rotation.y));
+const rightVec=new BABYLON.Vector3(Math.sin(camera.rotation.y+Math.PI/2),0,Math.cos(camera.rotation.y+Math.PI/2));
 camera.position.addInPlace(forward.scale(moveForward*0.2));
 camera.position.addInPlace(rightVec.scale(moveRight*0.2));
-if(jump && camera.isGrounded) camera.cameraDirection.y +=0.4;
+if(jump && camera.isGrounded) camera.cameraDirection.y+=0.4;
 });
+
 engine.runRenderLoop(()=>{scene.render();});
 window.addEventListener("resize",()=>{engine.resize();});
 </script>
