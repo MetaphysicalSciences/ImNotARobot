@@ -3,198 +3,234 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Im Not a Bot 🤖</title>
+<title>I'm Not a Bot 🤖</title>
 <style>
 body {
-  font-family: sans-serif;
+  font-family: Arial, sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100vh;
-  background: #f0f0f0;
   margin: 0;
+  background: #f0f0f0;
 }
-h1 { margin-bottom: 20px; }
-#main-menu, #game-container { display: flex; flex-direction: column; align-items: center; }
-#captcha-container, #level2-container, #clicker-container { display: grid; grid-template-columns: repeat(3, 80px); grid-gap: 10px; margin-bottom: 20px; }
-.captcha-cell, .level2-cell, .clicker-btn { display: flex; align-items: center; justify-content: center; font-size: 40px; width: 80px; height: 80px; background: white; border: 2px solid #ccc; border-radius: 8px; cursor: pointer; user-select: none; }
-.captcha-cell.selected, .level2-cell.selected { border-color: green; background: #d4ffd4; }
-#verify-btn, #level2-verify, #clicker-verify, #start-btn { padding: 10px 20px; font-size: 16px; cursor: pointer; margin-top: 10px; }
-#message { font-weight: bold; margin-bottom: 10px; }
-#level-display { margin-bottom: 10px; font-weight: bold; }
+h1 {
+  margin: 30px 0 20px;
+  font-size: 2em;
+}
+#main-menu, #game-container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+#main-menu.active, #game-container.active {
+  display: flex;
+}
+button {
+  padding: 12px 25px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: white;
+}
+#captcha-container {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-gap: 10px;
+  margin: 20px 0;
+}
+.captcha-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  width: 80px;
+  height: 80px;
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.captcha-cell.selected {
+  border-color: #1a73e8;
+  background: #e0f0ff;
+}
+#message {
+  font-weight: bold;
+  margin-bottom: 10px;
+  min-height: 24px;
+}
+#level-display, #instruction {
+  font-size: 18px;
+  margin: 10px 0;
+}
+#clicker-btn {
+  padding: 25px 40px;
+  font-size: 30px;
+  margin: 20px 0;
+}
 </style>
 </head>
 <body>
 
-<div id="main-menu">
-  <h1>Im Not a Bot 🤖</h1>
+<h1>I'm Not a Bot 🤖</h1>
+
+<div id="main-menu" class="active">
   <button id="start-btn">Verify</button>
 </div>
 
-<div id="game-container" style="display:none;">
+<div id="game-container">
   <div id="level-display"></div>
   <div id="instruction"></div>
   <div id="captcha-container"></div>
-  <div id="level2-container"></div>
-  <div id="clicker-container"></div>
   <div id="message"></div>
-  <button id="verify-btn" style="display:none;">Verify</button>
-  <button id="level2-verify" style="display:none;">Verify</button>
-  <button id="clicker-verify" style="display:none;">Verify</button>
+  <button id="verify-btn">Verify</button>
 </div>
 
 <script>
 const captchaTypes = ['🐶','🐱','🍎','🍌','🚗','✈️','🌲','🌸'];
 let currentLevel = 1;
-let currentCaptcha = null;
+let currentCaptcha = '';
 let clickCount = 0;
-let level2Target = null;
 
 const mainMenu = document.getElementById('main-menu');
 const gameContainer = document.getElementById('game-container');
-const levelDisplay = document.getElementById('level-display');
+const startBtn = document.getElementById('start-btn');
+const verifyBtn = document.getElementById('verify-btn');
 const instruction = document.getElementById('instruction');
 const captchaContainer = document.getElementById('captcha-container');
-const level2Container = document.getElementById('level2-container');
-const clickerContainer = document.getElementById('clicker-container');
 const message = document.getElementById('message');
-const verifyBtn = document.getElementById('verify-btn');
-const level2Verify = document.getElementById('level2-verify');
-const clickerVerify = document.getElementById('clicker-verify');
+const levelDisplay = document.getElementById('level-display');
 
-document.getElementById('start-btn').onclick = () => {
-  mainMenu.style.display = 'none';
-  gameContainer.style.display = 'flex';
-  startLevel1();
-};
-
-function startLevel1() {
-  currentLevel = 1;
-  levelDisplay.textContent = `Level ${currentLevel}`;
-  verifyBtn.style.display = 'inline-block';
-  level2Container.style.display = 'none';
-  clickerContainer.style.display = 'none';
-  captchaContainer.style.display = 'grid';
-  generateCaptcha();
+function showMenu() {
+  mainMenu.classList.add('active');
+  gameContainer.classList.remove('active');
 }
 
-function generateCaptcha() {
+function startGame() {
+  mainMenu.classList.remove('active');
+  gameContainer.classList.add('active');
+  currentLevel = 1;
+  nextLevel();
+}
+
+function nextLevel() {
   captchaContainer.innerHTML = '';
+  message.textContent = '';
+  levelDisplay.textContent = 'Level ' + currentLevel;
+  if(currentLevel === 1) generateLevel1();
+  else if(currentLevel === 2) generateLevel2();
+  else if(currentLevel === 3) generateClickerLevel();
+  else {
+    instruction.textContent = '🎉 You completed all levels!';
+    captchaContainer.innerHTML = '';
+    verifyBtn.style.display = 'none';
+  }
+}
+
+// LEVEL 1: Select emoji captcha
+function generateLevel1() {
   const type = captchaTypes[Math.floor(Math.random() * captchaTypes.length)];
   currentCaptcha = type;
   const options = [];
   const correctCount = 2 + Math.floor(Math.random()*2);
-  const incorrectCount = 9 - correctCount;
-  for (let i=0;i<correctCount;i++) options.push(type);
-  while (options.length<9){
+  while(options.length < correctCount) options.push(type);
+  while(options.length < 9){
     let emoji;
-    do { emoji = captchaTypes[Math.floor(Math.random()*captchaTypes.length)]; } while (emoji===type);
+    do { emoji = captchaTypes[Math.floor(Math.random()*captchaTypes.length)]; } while(emoji === type);
     options.push(emoji);
   }
   options.sort(()=>Math.random()-0.5);
   options.forEach(emoji=>{
     const cell = document.createElement('div');
-    cell.className='captcha-cell';
-    cell.textContent=emoji;
-    cell.onclick=()=>cell.classList.toggle('selected');
+    cell.className = 'captcha-cell';
+    cell.textContent = emoji;
+    cell.onclick = () => cell.classList.toggle('selected');
     captchaContainer.appendChild(cell);
   });
   instruction.textContent = `Select all ${type}`;
-  message.textContent = '';
+  verifyBtn.style.display = 'inline-block';
 }
 
-verifyBtn.onclick = ()=>{
-  const cells=document.querySelectorAll('.captcha-cell');
-  let correct=true;
-  cells.forEach(cell=>{
-    if(cell.textContent===currentCaptcha&&!cell.classList.contains('selected')) correct=false;
-    if(cell.textContent!==currentCaptcha&&cell.classList.contains('selected')) correct=false;
-  });
-  if(correct){
-    message.textContent='✅ Verified!';
-    message.style.color='green';
-    setTimeout(startLevel2,1000);
-  }else{
-    message.textContent='❌ Try again';
-    message.style.color='red';
+// LEVEL 2: Sequence memory captcha
+let sequence = [];
+function generateLevel2() {
+  captchaContainer.innerHTML = '';
+  sequence = [];
+  for(let i=0;i<4;i++){
+    sequence.push(captchaTypes[Math.floor(Math.random()*captchaTypes.length)]);
   }
-};
+  instruction.textContent = 'Repeat this sequence in order';
+  let idx = 0;
+  sequence.forEach(emoji=>{
+    const cell = document.createElement('div');
+    cell.className = 'captcha-cell';
+    cell.textContent = emoji;
+    captchaContainer.appendChild(cell);
+  });
+  setTimeout(()=>{
+    captchaContainer.innerHTML = '';
+    sequence.forEach(_=>{
+      const cell = document.createElement('div');
+      cell.className = 'captcha-cell';
+      cell.textContent = '?';
+      cell.onclick = () => {
+        const chosen = prompt('Which emoji for this position? Choose one of '+captchaTypes.join(' '));
+        if(chosen === sequence[idx]) {
+          idx++;
+          cell.textContent = chosen;
+        }
+        if(idx === sequence.length){
+          message.textContent = '✅ Correct!';
+          setTimeout(()=>{currentLevel++; nextLevel();},1000);
+        }
+      }
+      captchaContainer.appendChild(cell);
+    });
+  },2000);
+  verifyBtn.style.display = 'none';
+}
 
-function startLevel2(){
-  currentLevel=2;
-  levelDisplay.textContent=`Level ${currentLevel}`;
-  captchaContainer.style.display='none';
-  verifyBtn.style.display='none';
-  level2Container.style.display='grid';
-  clickerContainer.style.display='none';
-  level2Container.innerHTML='';
-  level2Target=Math.floor(Math.random()*3)+1; // pick a row to select
-  const rows=3;
-  const cols=3;
-  for(let i=0;i<rows;i++){
-    for(let j=0;j<cols;j++){
-      const cell=document.createElement('div');
-      cell.className='level2-cell';
-      const rand=Math.random()<0.5?'🟩':'🟥';
-      cell.textContent=rand;
-      cell.dataset.row=i;
-      cell.onclick=()=>cell.classList.toggle('selected');
-      level2Container.appendChild(cell);
+// LEVEL 3: Clicker captcha
+function generateClickerLevel() {
+  instruction.textContent = 'Click the button 400 times to verify';
+  clickCount = 0;
+  captchaContainer.innerHTML = '';
+  const clickerBtn = document.createElement('button');
+  clickerBtn.id = 'clicker-btn';
+  clickerBtn.textContent = 'Click Me!';
+  clickerBtn.onclick = () => {
+    clickCount++;
+    instruction.textContent = `Click the button 400 times to verify (${clickCount}/400)`;
+    if(clickCount>=400){
+      message.textContent = '✅ Verified!';
+      setTimeout(()=>{currentLevel++; nextLevel();},500);
     }
   }
-  instruction.textContent=`Select all green squares in row ${level2Target}`;
-  level2Verify.style.display='inline-block';
-  message.textContent='';
+  captchaContainer.appendChild(clickerBtn);
+  verifyBtn.style.display = 'none';
 }
 
-level2Verify.onclick=()=>{
-  const cells=document.querySelectorAll('.level2-cell');
-  let correct=true;
+// LEVEL 1 verification
+verifyBtn.onclick = () => {
+  const cells = document.querySelectorAll('.captcha-cell');
+  let correct = true;
   cells.forEach(cell=>{
-    if(parseInt(cell.dataset.row)+1===level2Target && cell.textContent==='🟩' && !cell.classList.contains('selected')) correct=false;
-    if((parseInt(cell.dataset.row)+1!==level2Target || cell.textContent!=='🟩') && cell.classList.contains('selected')) correct=false;
+    if(cell.textContent === currentCaptcha && !cell.classList.contains('selected')) correct = false;
+    if(cell.textContent !== currentCaptcha && cell.classList.contains('selected')) correct = false;
   });
   if(correct){
-    message.textContent='✅ Verified!';
-    message.style.color='green';
-    setTimeout(startLevel3,1000);
-  }else{
-    message.textContent='❌ Try again';
-    message.style.color='red';
+    message.textContent = '✅ Verified!';
+    setTimeout(()=>{currentLevel++; nextLevel();},800);
+  } else {
+    message.textContent = '❌ Try again.';
   }
-};
-
-function startLevel3(){
-  currentLevel=3;
-  levelDisplay.textContent=`Level ${currentLevel}`;
-  captchaContainer.style.display='none';
-  verifyBtn.style.display='none';
-  level2Container.style.display='none';
-  clickerContainer.style.display='flex';
-  clickerContainer.innerHTML='';
-  clickCount=0;
-  const btn=document.createElement('div');
-  btn.className='clicker-btn';
-  btn.textContent='Click me!';
-  btn.onclick=()=>{ clickCount++; instruction.textContent=`Click count: ${clickCount}/400`; };
-  clickerContainer.appendChild(btn);
-  instruction.textContent='Click count: 0/400';
-  clickerVerify.style.display='inline-block';
-  message.textContent='';
 }
 
-clickerVerify.onclick=()=>{
-  if(clickCount>=400){
-    message.textContent='✅ Verified! All levels complete!';
-    message.style.color='green';
-    instruction.textContent='🎉 You are human!';
-    clickerVerify.style.display='none';
-  }else{
-    message.textContent='❌ Not enough clicks!';
-    message.style.color='red';
-  }
-};
+startBtn.onclick = startGame;
 </script>
 
 </body>
