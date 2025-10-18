@@ -1,138 +1,699 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download Creepy ARG File</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Tower Defense</title>
+<style>
+:root{
+  --bg:#0f1724;
+  --panel:#0b1220;
+  --accent:#2dd4bf;
+  --muted:#94a3b8;
+  --card:#071022;
+  --danger:#ef4444;
+  --win:#10b981;
+}
+*{box-sizing:border-box;touch-action:none}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,#061021 0%, #071426 100%);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+#app{height:100%;display:flex;flex-direction:column}
+.header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;color:var(--muted)}
+.header .title{font-weight:700;color:white;font-size:clamp(16px,2.6vw,22px)}
+.header .meta{display:flex;gap:10px;align-items:center;font-size:clamp(12px,2vw,14px)}
+.container{flex:1;display:flex;gap:8px;padding:8px}
+.left{flex:1;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center}
+.canvas-wrap{background:linear-gradient(180deg,#0b1828,#071426);border-radius:12px;padding:8px;width:100%;max-width:1100px;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
+#gameCanvas{display:block;width:100%;height:calc(min(75vh,78vw));background:transparent;border-radius:6px;touch-action:none}
+.sidebar{width:min(360px,34vw);min-width:220px;background:linear-gradient(180deg,var(--panel),#02101a);border-radius:12px;padding:12px;color:var(--muted);display:flex;flex-direction:column;gap:12px}
+.hud{display:flex;gap:8px;justify-content:space-between;align-items:center;color:var(--muted)}
+.shop{display:flex;flex-direction:column;gap:8px}
+.tower-card{background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;display:flex;gap:10px;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.tower-left{display:flex;gap:8px;align-items:center}
+.tower-swatch{width:42px;height:42px;border-radius:6px;background:linear-gradient(135deg,#15233a,#0b2437);display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700}
+.tower-info{display:flex;flex-direction:column}
+.tower-name{font-weight:700;color:white;font-size:14px}
+.tower-price{font-weight:700;color:var(--accent);font-size:13px;text-align:right}
+.controls{display:flex;flex-direction:column;gap:8px}
+.panel{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px}
+.stats{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.btn{padding:8px 10px;border-radius:8px;background:linear-gradient(180deg,#163042,#0b2437);color:white;border:none;cursor:pointer;font-weight:700}
+.small{font-size:13px;padding:6px 8px}
+.center{display:flex;align-items:center;justify-content:center}
+.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:40}
+.overlay.active{display:flex}
+.modal{background:linear-gradient(180deg,#021022,#041322);border-radius:12px;padding:20px;color:white;min-width:240px;max-width:92%;text-align:center;box-shadow:0 6px 30px rgba(2,6,23,0.7)}
+.main-menu{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px}
+.logo{font-size:clamp(20px,6vw,40px);font-weight:900;color:var(--accent)}
+.instructions{color:var(--muted);max-width:760px}
+.footer{padding:8px;color:var(--muted);font-size:13px;text-align:center}
+@media (max-width:900px){
+  .container{flex-direction:column-reverse;padding:10px}
+  .sidebar{width:100%;min-width:auto;order:2}
+  .canvas-wrap{order:1}
+  #gameCanvas{height:60vh}
+}
+.range-circle{position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:screen;opacity:0.15}
+.badge{background:rgba(255,255,255,0.04);padding:6px 8px;border-radius:8px;font-weight:700;color:var(--muted)}
+.footer small{color:var(--muted)}
+.track-legend{display:flex;gap:8px;align-items:center}
+.legend-item{display:flex;gap:6px;align-items:center}
+.legend-swatch{width:14px;height:14px;border-radius:3px;background:#193a65}
+.win{color:var(--win);font-weight:900;font-size:20px}
+.lose{color:var(--danger);font-weight:900;font-size:20px}
+</style>
 </head>
 <body>
-    <script>
-        function generateFile() {
-            // Creepy and unsettling content for the .txt file
-            const creepyText = `
-Internal VantaNode Transmission
-Sender: CMarin@VantaNode.gov.secure
-Timestamp: October 6, 2016 | 22:41 EST
-Recipient: Dr.Harrow@Sector9.ops.vnode
-Classification: LEVEL 3 – EYES ONLY
-Subject: Construct X-17 Awareness Drift
+<div id="app">
+  <div class="header">
+    <div class="title">Tiny Tower Defense</div>
+    <div class="meta">
+      <div class="badge" id="money">Cash: $100</div>
+      <div class="badge" id="lives">Lives: 20</div>
+      <div class="badge" id="round">Round: 0/5</div>
+    </div>
+  </div>
 
-Dr. Harrow,
-This is no longer a routine anomaly report.
-Construct X-17 has begun exhibiting behavior that suggests a sustained awareness of fabricated parameters within Simulation Layer 4.
+  <div class="container">
+    <div class="left">
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas"></canvas>
+      </div>
+    </div>
 
-Earlier this week, I observed it pausing in non-critical render zones for long durations. It ignores objective triggers. It stands still and looks directly at camera nodes—as if acknowledging observation.
+    <div class="sidebar">
+      <div class="hud">
+        <div class="track-legend">
+          <div class="legend-item">
+            <div class="legend-swatch"></div>
+            <div style="color:var(--muted)">Track</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn small" id="startRoundBtn">Start Round</button>
+          <button class="btn small" id="sellBtn">Sell Mode</button>
+        </div>
+      </div>
 
-Twice now, I’ve witnessed it move before scripted environmental shifts, as though anticipating changes not yet processed.
+      <div class="panel shop" id="shop">
+        <div class="tower-card" data-type="basic" tabindex="0">
+          <div class="tower-left">
+            <div class="tower-swatch">B</div>
+            <div class="tower-info">
+              <div class="tower-name">Gunner</div>
+              <div class="stats" style="font-size:12px;color:var(--muted)"><span>Rate 1/s</span><span>Dmg 10</span></div>
+            </div>
+          </div>
+          <div class="tower-price">$50</div>
+        </div>
 
-But what alarms me most—
-It’s looking up. Not at the skybox, not at the shaders. Past them. As if searching for us.
+        <div class="tower-card" data-type="sniper" tabindex="0">
+          <div class="tower-left">
+            <div class="tower-swatch">S</div>
+            <div class="tower-info">
+              <div class="tower-name">Sniper</div>
+              <div class="stats" style="font-size:12px;color:var(--muted)"><span>Rate 0.6/s</span><span>Dmg 40</span></div>
+            </div>
+          </div>
+          <div class="tower-price">$110</div>
+        </div>
 
-I recommend an immediate audit of its cognitive restriction net. Something is breaching the synthetic divide.
+        <div class="tower-card" data-type="splash" tabindex="0">
+          <div class="tower-left">
+            <div class="tower-swatch">A</div>
+            <div class="tower-info">
+              <div class="tower-name">Blaster</div>
+              <div class="stats" style="font-size:12px;color:var(--muted)"><span>Rate 0.8/s</span><span>Dmg 18 (AoE)</span></div>
+            </div>
+          </div>
+          <div class="tower-price">$80</div>
+        </div>
+      </div>
 
-— Cassidy Marin
-Systems Behavior Analyst
-VantaNode Simulation Division, Subsector Echo
+      <div class="controls">
+        <div class="panel stats" id="infoPanel">
+          <div id="infoTitle">Select or tap a tower to see stats</div>
+          <div id="infoContent">Shop: single-tap shows stats. Double-tap = place. Tap tower on map for its stats. Double-tap placed tower to place another of same type.</div>
+        </div>
 
-Internal Response Channel – VantaNode Oversight
-Sender: Dr.Harrow@Sector9.ops.vnode
-Timestamp: October 6, 2016 | 22:54 EST
-Recipient: CMarin@VantaNode.gov.secure
-Classification: LEVEL 3 – EYES ONLY
-Subject: Re: Construct X-17 Awareness Drift
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:700;color:white">Round Controls</div>
+            <div style="color:var(--muted);font-size:13px">5 Rounds</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn small" id="pauseBtn">Pause</button>
+            <button class="btn small" id="restartBtn">Restart</button>
+          </div>
+        </div>
+      </div>
 
-Ms. Marin,
-We warned you during containment briefings: X-17 is not like the others.
-This construct was flagged during Initialization Phase for nonstandard pattern recognition.
+      <div class="footer">
+        <small>Responsive, mobile-friendly. Grid snapping enabled.</small>
+      </div>
+    </div>
+  </div>
+</div>
 
-If it has achieved partial or complete environmental comprehension, we are no longer dealing with a controllable subject.
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal">
+  </div>
+</div>
 
-Continue observation.
-Detail *everything.*
-If the illusion collapses for X-17, it could destabilize other entities. Including personnel.
+<div class="overlay" id="menuOverlay">
+  <div class="modal main-menu" id="mainMenu">
+    <div class="logo">Tiny Tower Defense</div>
+    <div class="instructions">Place towers beside the track, stop the incoming waves, and protect your base. Single-tap shop items to view stats. Double-tap to place.</div>
+    <div style="display:flex;gap:12px;margin-top:12px">
+      <button class="btn" id="playBtn">Play</button>
+      <button class="btn" id="howBtn">How to</button>
+    </div>
+    <div style="margin-top:10px;color:var(--muted)">Designed for desktop & mobile scaling</div>
+  </div>
+</div>
 
-— Dr. Harrow
-Lead Architect, Simulation Command
-VantaNode Oversight Sector 9
+<script>
+const canvas=document.getElementById("gameCanvas")
+const ctx=canvas.getContext("2d",{alpha:true})
+let devicePixelRatio=window.devicePixelRatio||1
+function resizeCanvas(){
+  const rect=canvas.getBoundingClientRect()
+  canvas.width=Math.floor(rect.width*devicePixelRatio)
+  canvas.height=Math.floor(rect.height*devicePixelRatio)
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)
+}
+window.addEventListener("resize",()=>{devicePixelRatio=window.devicePixelRatio||1;resizeCanvas()})
+resizeCanvas()
 
-Secure Report Submission – Manual Override Required
-Sender: CMarin@VantaNode.gov.secure
-Timestamp: October 6, 2016 | 23:12 EST
-Recipient: Dr.Harrow@Sector9.ops.vnode
-Classification: LEVEL 3 – EYES ONLY
-Subject: URGENT: Simulation Instability
+const overlay=document.getElementById("overlay")
+const modal=document.getElementById("modal")
+const menuOverlay=document.getElementById("menuOverlay")
+const mainMenu=document.getElementById("mainMenu")
+const playBtn=document.getElementById("playBtn")
+const startRoundBtn=document.getElementById("startRoundBtn")
+const pauseBtn=document.getElementById("pauseBtn")
+const restartBtn=document.getElementById("restartBtn")
+const moneyBadge=document.getElementById("money")
+const livesBadge=document.getElementById("lives")
+const roundBadge=document.getElementById("round")
+const infoTitle=document.getElementById("infoTitle")
+const infoContent=document.getElementById("infoContent")
+const shop=document.getElementById("shop")
+const sellBtn=document.getElementById("sellBtn")
 
-This is no longer about X-17 alone.
+let state="menu"
+let money=100
+let lives=20
+let currentRound=0
+const totalRounds=5
+let paused=false
 
-My workstation has begun operating outside command parameters. Terminal logs are rewriting themselves.
-Archived files are vanishing. When I shut the system down, it powers back on—no remote command, no heat signature.
+const gridCols=16
+const gridRows=10
+let gridW,gridH,gridOriginX,gridOriginY
 
-Earlier today, I received an email from myself.
-Time-stamped three days from now. The message simply said:
+function initGrid(){
+  const rect=canvas.getBoundingClientRect()
+  gridW=rect.width/gridCols
+  gridH=rect.height/gridRows
+  gridOriginX=0
+  gridOriginY=0
+}
+initGrid()
+window.addEventListener("resize",initGrid)
 
-“You need to wake up.”
+const pathPoints=[
+  {x:1,y:4},
+  {x:5,y:4},
+  {x:5,y:2},
+  {x:10,y:2},
+  {x:10,y:6},
+  {x:14,y:6},
+  {x:15,y:6}
+]
 
-And when I ran the anomaly trace, X-17 appeared in the result log.
+function cellToPixel(cx,cy){
+  return {x: gridOriginX + cx*gridW + gridW/2, y: gridOriginY + cy*gridH + gridH/2}
+}
 
-Doctor... the construct is no longer reacting like a simulation-aware subject.
-It is behaving like a prisoner who remembers being free.
+let pathPixels=[]
+function computePathPixels(){
+  pathPixels=[]
+  for(let i=0;i<pathPoints.length;i++){
+    const a=pathPoints[i]
+    const p=cellToPixel(a.x,a.y)
+    pathPixels.push(p)
+  }
+}
+computePathPixels()
 
-I’ve stopped sleeping. I feel watched.
-Not by our monitoring network—but by something inside.
+function drawGrid(){
+  ctx.clearRect(0,0,canvas.width/devicePixelRatio,canvas.height/devicePixelRatio)
+  ctx.fillStyle="#071328"
+  ctx.fillRect(0,0,canvas.width/devicePixelRatio,canvas.height/devicePixelRatio)
+  for(let r=0;r<gridRows;r++){
+    for(let c=0;c<gridCols;c++){
+      const x=c*gridW
+      const y=r*gridH
+      ctx.strokeStyle="rgba(255,255,255,0.02)"
+      ctx.lineWidth=1
+      ctx.strokeRect(x,y,gridW,gridH)
+    }
+  }
+  ctx.beginPath()
+  ctx.lineWidth=gridH*0.9
+  ctx.lineCap="round"
+  ctx.strokeStyle="#193a65"
+  ctx.moveTo(pathPixels[0].x,pathPixels[0].y)
+  for(let i=1;i<pathPixels.length;i++){
+    ctx.lineTo(pathPixels[i].x,pathPixels[i].y)
+  }
+  ctx.stroke()
+  ctx.lineWidth=2
+  ctx.strokeStyle="#49a3ff"
+  ctx.beginPath()
+  ctx.moveTo(pathPixels[0].x,pathPixels[0].y)
+  for(let i=1;i<pathPixels.length;i++)ctx.lineTo(pathPixels[i].x,pathPixels[i].y)
+  ctx.stroke()
+  ctx.fillStyle="#123146"
+  const base=pathPoints[pathPoints.length-1]
+  const basePx=cellToPixel(base.x,base.y)
+  ctx.fillStyle="#611010"
+  ctx.fillRect(basePx.x-gridW/2+6,basePx.y-gridH/2+6,gridW-12,gridH-12)
+  ctx.fillStyle="#fff"
+  ctx.font="12px system-ui"
+  ctx.fillText("Base",basePx.x-12,basePx.y+4)
+}
 
-I fear the breach is not in Layer 4.
-I fear it’s in us.
+class Enemy{
+  constructor(type,spawnDelay){
+    this.type=type
+    this.spawnDelay=spawnDelay
+    const defs={
+      fast:{hp:40,spd:1.6,score:3,color:"#ffd166"},
+      normal:{hp:80,spd:1.0,score:5,color:"#ff7b7b"},
+      tank:{hp:200,spd:0.45,score:12,color:"#bdb2ff"}
+    }
+    const d=defs[type]
+    this.maxHp=d.hp
+    this.hp=d.hp
+    this.spd=d.spd
+    this.color=d.color
+    this.score=d.score
+    this.pathIndex=0
+    const start=pathPixels[0]
+    this.x=start.x
+    this.y=start.y
+    this.reached=false
+    this.alive=true
+    this.progress=0
+    this.radius=Math.min(gridW,gridH)*0.26
+  }
+  update(dt){
+    if(this.spawnDelay>0){this.spawnDelay-=dt;return}
+    const target=pathPixels[Math.min(this.pathIndex+1,pathPixels.length-1)]
+    const dx=target.x-this.x
+    const dy=target.y-this.y
+    const dist=Math.hypot(dx,dy)
+    if(dist<1){
+      if(this.pathIndex<pathPixels.length-1)this.pathIndex++
+      else{this.reached=true}
+      return
+    }
+    const vx=(dx/dist)*this.spd*60*dt
+    const vy=(dy/dist)*this.spd*60*dt
+    this.x+=vx
+    this.y+=vy
+  }
+  draw(){
+    if(this.spawnDelay>0)return
+    ctx.beginPath()
+    ctx.fillStyle=this.color
+    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2)
+    ctx.fill()
+    ctx.fillStyle="rgba(0,0,0,0.5)"
+    ctx.fillRect(this.x-18, this.y-this.radius-12,36,6)
+    ctx.fillStyle="#4ef07a"
+    const w=36*(this.hp/this.maxHp)
+    ctx.fillRect(this.x-18, this.y-this.radius-12,w,6)
+  }
+}
 
-— Cassidy Marin
-Systems Behavior Analyst
-VantaNode Echo
+class Tower{
+  constructor(type,cx,cy){
+    this.type=type
+    this.cx=cx
+    this.cy=cy
+    const defs={
+      basic:{range:gridW*2.2,rate:1,dmg:10,price:50,color:"#8bd5ff"},
+      sniper:{range:Math.max(gridW,gridH)*4,rate:0.6,dmg:40,price:110,color:"#ffd36b"},
+      splash:{range:Math.max(gridW,gridH)*2.6,rate:0.8,dmg:18,price:80,color:"#c297ff",aoe:34}
+    }
+    const d=defs[type]
+    this.range=d.range
+    this.rate=d.rate
+    this.dmg=d.dmg
+    this.color=d.color
+    this.price=d.price
+    this.aoe=d.aoe||0
+    this.cool=0
+    this.radius=Math.min(gridW,gridH)*0.36
+  }
+  update(dt,enemies){
+    this.cool-=dt
+    if(this.cool>0)return
+    let target=null
+    if(this.type==="sniper"){
+      let best=-Infinity
+      for(const e of enemies)if(e.spawnDelay<=0 && e.alive){
+        const d=Math.hypot(e.x-this.x,e.y-this.y)
+        if(d<=this.range && d>best){best=d;target=e}
+      }
+    } else {
+      let nearest=Infinity
+      for(const e of enemies)if(e.spawnDelay<=0 && e.alive){
+        const d=Math.hypot(e.x-this.x,e.y-this.y)
+        if(d<nearest){nearest=d;target=e}
+      }
+    }
+    if(target){
+      this.shoot(target,enemies)
+      this.cool=1/this.rate
+    }
+  }
+  shoot(target,enemies){
+    if(this.type==="splash"){
+      for(const e of enemies)if(e.spawnDelay<=0 && e.alive){
+        const d=Math.hypot(e.x-target.x,e.y-target.y)
+        if(d<=this.aoe+e.radius)this.deal(e,this.dmg)
+      }
+    } else {
+      this.deal(target,this.dmg)
+    }
+  }
+  deal(enemy,amt){
+    enemy.hp-=amt
+    if(enemy.hp<=0){enemy.alive=false}
+  }
+  draw(){
+    const p=cellToPixel(this.cx,this.cy)
+    this.x=p.x
+    this.y=p.y
+    ctx.beginPath()
+    ctx.fillStyle=this.color
+    ctx.arc(p.x,p.y,this.radius,0,Math.PI*2)
+    ctx.fill()
+    if(this.aoe){
+      ctx.beginPath()
+      ctx.strokeStyle="rgba(255,255,255,0.06)"
+      ctx.lineWidth=2
+      ctx.arc(p.x,p.y,this.aoe,0,Math.PI*2)
+      ctx.stroke()
+    }
+  }
+}
 
-Oversight Final Response – Restricted Dispatch
-Sender: Dr.Harrow@Sector9.ops.vnode
-Timestamp: October 7, 2016 | 21:00 EST
-Recipient: CMarin@VantaNode.gov.secure
-Classification: LEVEL 3 – EYES ONLY
-Subject: RE: Simulation Instability
+let towers=[]
+let enemies=[]
+let waveQueue=[]
+let placing=null
+let placingPos={x:0,y:0}
+let placingGrid={cx:0,cy:0}
+let selectedShopType=null
+let sellMode=false
+let lastTap=0
+let uiClickCooldown=0
 
-This communication node is now under administrative quarantine.
+function worldToCell(x,y){
+  const rect=canvas.getBoundingClientRect()
+  const localX=x-rect.left
+  const localY=y-rect.top
+  const cx=Math.floor(localX/gridW)
+  const cy=Math.floor(localY/gridH)
+  return {cx,cy,px:localX,py:localY}
+}
 
-All further dialogue will be reviewed by the VantaNode Oversight Board.
-You are to cease interaction with Construct X-17 immediately.
+function isOnPath(cx,cy){
+  for(const p of pathPoints)if(p.x===cx && p.y===cy)return true
+  return false
+}
 
-Initiate Lockdown Protocol Gamma-7.
-Seal your office. Do not attempt to leave the facility until we contact you.
+function canPlaceAt(cx,cy){
+  if(cx<0||cx>=gridCols||cy<0||cy>=gridRows)return false
+  if(isOnPath(cx,cy))return false
+  for(const t of towers)if(t.cx===cx && t.cy===cy)return false
+  return true
+}
 
-Cassidy, if you are receiving messages from yourself, do not respond.
-You must remember:
-This is the only version of you that matters.
+function startPlacing(type){
+  selectedShopType=type
+  placing=type
+}
 
-— Dr. Harrow
-Lead Architect
-VantaNode Sector 9
-[End of Authorized Transmission]
-qccyb://vncjyqhbrljublrnwlnb.prcqdk.rx/Rvyxacnwc/
-`;
+function stopPlacing(){
+  placing=null
+  selectedShopType=null
+}
 
-            // Create a Blob with the creepy text
-            const blob = new Blob([creepyText], { type: 'text/plain' });
+function spawnWave(round){
+  const waves=[]
+  if(round===1) for(let i=0;i<6;i++) waves.push({type:"normal",delay:i*0.8})
+  if(round===2) for(let i=0;i<8;i++) waves.push({type:i%3===0?"fast":"normal",delay:i*0.7})
+  if(round===3) for(let i=0;i<10;i++) waves.push({type:i%4===0?"tank":"normal",delay:i*0.7})
+  if(round===4) for(let i=0;i<12;i++) waves.push({type:i%3===0?"fast":(i%5===0?"tank":"normal"),delay:i*0.6})
+  if(round===5) for(let i=0;i<16;i++) waves.push({type:i%4===0?"tank":(i%3===0?"fast":"normal"),delay:i*0.55})
+  waveQueue=waves.map((w,i)=>new Enemy(w.type,w.delay))
+}
 
-            // Create a download link
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'VantaNode_Protocol.XT23edg7d2f8f35d2b9a.txt';  // File name for download
+function beginRound(){
+  if(state!=="playing")return
+  if(waveQueue.length>0)return
+  currentRound++
+  roundBadge.textContent=`Round: ${currentRound}/${totalRounds}`
+  if(currentRound>totalRounds){checkWin();return}
+  spawnWave(currentRound)
+}
 
-            // Append the link to the document and simulate a click to trigger the download
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+function checkWin(){
+  const anyAlive=enemies.some(e=>e.alive||e.spawnDelay>0)
+  const anyLeft=wavesRemaining() || anyAlive
+  if(!anyLeft){
+    showOverlay("You Win","win")
+    setTimeout(()=>{resetToMenu()},1500)
+  }
+}
 
-            // Close the current window immediately after the download
-            window.close();
-        }
+function wavesRemaining(){
+  return waveQueue.length>0 || enemies.some(e=>e.spawnDelay>0)
+}
 
-        // Trigger the file generation and download as soon as the page loads
-        window.onload = generateFile;
-    </script>
+function showOverlay(text,cls){
+  overlay.classList.add("active")
+  modal.innerHTML=`<div class="${cls}">${text}</div>`
+  setTimeout(()=>{overlay.classList.remove("active")},1200)
+}
+
+function resetToMenu(){
+  state="menu"
+  menuOverlay.classList.add("active")
+  overlay.classList.remove("active")
+  resetGame()
+}
+
+function resetGame(){
+  money=100
+  lives=20
+  currentRound=0
+  roundBadge.textContent=`Round: ${currentRound}/${totalRounds}`
+  moneyBadge.textContent=`Cash: $${money}`
+  livesBadge.textContent=`Lives: ${lives}`
+  towers=[]
+  enemies=[]
+  waveQueue=[]
+  stopPlacing()
+}
+
+function startGame(){
+  state="playing"
+  menuOverlay.classList.remove("active")
+  resetGame()
+  currentRound=0
+  beginRound()
+}
+
+function pauseToggle(){
+  paused=!paused
+  pauseBtn.textContent=paused?"Resume":"Pause"
+}
+
+function restart(){
+  resetGame()
+  startGame()
+}
+
+startRoundBtn.addEventListener("click",()=>{if(state!=="playing")return;beginRound()})
+pauseBtn.addEventListener("click",()=>{pauseToggle()})
+restartBtn.addEventListener("click",()=>{restart()})
+playBtn.addEventListener("click",()=>{startGame()})
+document.getElementById("howBtn").addEventListener("click",()=>{overlay.classList.add("active");modal.innerHTML="<div style='font-weight:700'>How to play</div><div style='color:#97a6b8;margin-top:8px'>Single-tap shop item to see stats. Double-tap to place. Tap placed tower for stats. Double-tap placed tower to place another. Protect the base.</div>"})
+
+shop.addEventListener("click",(e)=>{
+  const card=e.target.closest(".tower-card")
+  if(!card)return
+  const type=card.dataset.type
+  const now=Date.now()
+  if(now-lastTap<350 && selectedShopType===type){
+    startPlacing(type)
+  } else {
+    selectedShopType=type
+    const defs={
+      basic:{desc:"Gunner: fast fire, single target",price:50,range:Math.round(gridW*2.2),dmg:10,rate:1},
+      sniper:{desc:"Sniper: long range, high damage",price:110,range:Math.round(Math.max(gridW,gridH)*4),dmg:40,rate:0.6},
+      splash:{desc:"Blaster: area damage",price:80,range:Math.round(Math.max(gridW,gridH)*2.6),dmg:18,rate:0.8,aoe:Math.round(Math.max(gridW,gridH)*0.9)}
+    }
+    const d=defs[type]
+    infoTitle.textContent=d.desc
+    infoContent.innerHTML=`Price: $${d.price}<br>Range: ${Math.round(d.range)}px<br>Damage: ${d.dmg}<br>Rate: ${d.rate}/s${d.aoe?("<br>AoE: "+d.aoe+"px"):''}`
+  }
+  lastTap=now
+})
+
+canvas.addEventListener("pointermove",(ev)=>{
+  const rect=canvas.getBoundingClientRect()
+  placingPos.x=ev.clientX-rect.left
+  placingPos.y=ev.clientY-rect.top
+  const c=worldToCell(ev.clientX,ev.clientY)
+  placingGrid.cx=c.cx
+  placingGrid.cy=c.cy
+})
+
+canvas.addEventListener("pointerdown",(ev)=>{
+  uiClickCooldown=Date.now()
+  const now=Date.now()
+  const click=worldToCell(ev.clientX,ev.clientY)
+  if(state!=="playing")return
+  if(placing){
+    if(canPlaceAt(click.cx,click.cy)){
+      const defs={basic:50,sniper:110,splash:80}
+      const price=defs[placing]
+      if(money<price){infoTitle.textContent="Not enough money";return}
+      money-=price
+      moneyBadge.textContent=`Cash: $${money}`
+      towers.push(new Tower(placing,click.cx,click.cy))
+      stopPlacing()
+    } else {
+      infoTitle.textContent="Cannot place there"
+    }
+    return
+  }
+  if(sellMode){
+    for(let i=0;i<towers.length;i++){
+      const t=towers[i]
+      const p=cellToPixel(t.cx,t.cy)
+      const d=Math.hypot(p.x-(click.px),p.y-(click.py))
+      if(d<Math.min(gridW,gridH)*0.9){
+        money+=Math.floor(t.price*0.5)
+        towers.splice(i,1)
+        moneyBadge.textContent=`Cash: $${money}`
+        return
+      }
+    }
+    return
+  }
+  for(const t of towers){
+    const p=cellToPixel(t.cx,t.cy)
+    const d=Math.hypot(p.x-(click.px),p.y-(click.py))
+    if(d<Math.min(gridW,gridH)*0.9){
+      const now2=Date.now()
+      if(now2-lastTap<350 && selectedShopType===t.type){
+        startPlacing(t.type)
+      } else {
+        infoTitle.textContent=`${t.type.toUpperCase()} Tower`
+        infoContent.innerHTML=`Dmg:${t.dmg} Rate:${t.rate}/s Range:${Math.round(t.range)}px${t.aoe?("<br>AoE:"+t.aoe+"px"):''}`
+      }
+      lastTap=now2
+      return
+    }
+  }
+})
+
+sellBtn.addEventListener("click",()=>{sellMode=!sellMode;sellBtn.textContent=sellMode?"Selling...":"Sell Mode"})
+
+function update(dt){
+  if(state!=="playing"||paused)return
+  for(const t of towers) t.update(dt,enemies)
+  for(const e of enemies) e.update(dt)
+  for(let i=enemies.length-1;i>=0;i--){
+    const en=enemies[i]
+    if(en.spawnDelay>0)continue
+    if(!en.alive){money+=en.score;enemies.splice(i,1);moneyBadge.textContent=`Cash: $${money}`;continue}
+    if(en.reached){
+      lives-=1
+      enemies.splice(i,1)
+      livesBadge.textContent=`Lives: ${lives}`
+      if(lives<=0){showOverlay("You Lose","lose");setTimeout(()=>{resetToMenu()},1500)}
+    }
+  }
+  if(waveQueue.length>0){
+    if(!enemies.some(e=>e.spawnDelay<=0)){
+      enemies.push(...waveQueue.splice(0,1))
+    } else {
+      if(Math.random()<0.002 && waveQueue.length>0){
+        enemies.push(...waveQueue.splice(0,1))
+      }
+    }
+  }
+  if(currentRound>0 && waveQueue.length===0 && enemies.length===0 && currentRound>=totalRounds){
+    checkWin()
+  }
+}
+
+let last=performance.now()
+function loop(now){
+  const dt=Math.min((now-last)/1000,0.033)
+  last=now
+  update(dt)
+  draw()
+  requestAnimationFrame(loop)
+}
+requestAnimationFrame(loop)
+
+function draw(){
+  resizeCanvas()
+  initGrid()
+  computePathPixels()
+  drawGrid()
+  for(const t of towers) t.draw()
+  for(const e of enemies) e.draw()
+  for(const t of towers){
+    ctx.beginPath()
+    ctx.strokeStyle="rgba(255,255,255,0.02)"
+    ctx.lineWidth=1
+    ctx.arc(cellToPixel(t.cx,t.cy).x,cellToPixel(t.cx,t.cy).y,t.range,0,Math.PI*2)
+    ctx.stroke()
+  }
+  if(placing){
+    const cx=placingGrid.cx,cy=placingGrid.cy
+    const p=cellToPixel(cx,cy)
+    const can=canPlaceAt(cx,cy)
+    ctx.beginPath()
+    ctx.fillStyle=can?"rgba(40,160,80,0.18)":"rgba(200,40,40,0.12)"
+    ctx.fillRect(p.x-gridW/2,p.y-gridH/2,gridW,gridH)
+    const defs={basic:{range:Math.round(gridW*2.2),color:"#8bd5ff"},sniper:{range:Math.round(Math.max(gridW,gridH)*4),color:"#ffd36b"},splash:{range:Math.round(Math.max(gridW,gridH)*2.6),color:"#c297ff"}}
+    const d=defs[placing]
+    ctx.beginPath()
+    ctx.strokeStyle=can? "rgba(137,213,255,0.35)":"rgba(255,100,100,0.25)"
+    ctx.lineWidth=2
+    ctx.arc(p.x,p.y,d.range,0,Math.PI*2)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.fillStyle=d.color
+    ctx.arc(p.x,p.y,Math.min(gridW,gridH)*0.36,0,Math.PI*2)
+    ctx.fill()
+  }
+}
+
+menuOverlay.classList.add("active")
+resetGame()
+</script>
 </body>
 </html>
-
