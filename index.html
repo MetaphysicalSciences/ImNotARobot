@@ -1,333 +1,213 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>I am not a robot 🤖</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Emoji Select Captcha</title>
 <style>
-:root{--bg:#0f1724;--card:#0b1220;--accent:#00e0a8;--muted:#9aa8b2}
-*{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
-html,body{height:100%}
-body{margin:0;background:linear-gradient(180deg,#071224 0%,var(--bg) 100%);color:#e6f3f2;display:flex;align-items:center;justify-content:center;padding:24px}
-.container{width:980px;max-width:95%;min-height:520px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:12px;padding:20px;box-shadow:0 10px 40px rgba(2,6,23,0.7);display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
-.left{padding:18px}
-.header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.logo{height:64px;width:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#4dd7c3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:26px;color:#052024;box-shadow:0 6px 20px rgba(0,0,0,0.5)}
-.title{font-size:20px;line-height:1;color:#dff8f0}
-.subtitle{color:var(--muted);font-size:13px;margin-top:4px}
-.menu{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
-.big{font-size:40px;font-weight:800;letter-spacing:-1px;margin:6px 0}
-.play-btn{background:linear-gradient(90deg,var(--accent),#00bfa6);border:none;padding:14px 22px;border-radius:10px;color:#022224;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 24px rgba(0,224,168,0.12)}
-.play-btn:active{transform:translateY(1px)}
-.panel{background:rgba(255,255,255,0.02);border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,0.03)}
-.captcha-area{margin-top:12px;display:flex;flex-direction:column;gap:12px;align-items:center}
-.prompt{font-weight:700;color:#dff8f0}
-.grid{display:grid;grid-template-columns:repeat(3,120px);gap:10px}
-.tile{width:120px;height:120px;border-radius:8px;background:#071826;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;box-shadow:inset 0 -8px 18px rgba(0,0,0,0.4)}
-.tile.selected{outline:4px solid rgba(0,224,168,0.18);transform:translateY(-4px)}
-.tile canvas{border-radius:8px}
+:root{--bg:#0f1724;--card:#0b1220;--accent:#10b981;--muted:#94a3b8;--white:#e6eef8}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071022);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+.wrapper{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
+.card{width:100%;max-width:760px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:12px;padding:22px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px}
+.title{color:var(--white);font-size:18px;font-weight:600}
+.inset{display:flex;gap:8px;align-items:center}
+.hint{color:var(--muted);font-size:13px}
 .controls{display:flex;gap:8px;align-items:center}
-.btn{padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);color:#dff8f0;cursor:pointer;font-weight:700}
+.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--white);cursor:pointer;font-size:13px}
+.btn:active{transform:translateY(1px)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.tile{background:rgba(255,255,255,0.02);border-radius:10px;display:flex;align-items:center;justify-content:center;padding:14px;font-size:34px;cursor:pointer;border:2px solid transparent;user-select:none}
+.tile:focus{outline:none;border-color:rgba(255,255,255,0.06)}
+.tile.selected{border-color:rgba(16,185,129,0.85);box-shadow:0 6px 18px rgba(16,185,129,0.12)}
+.footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;gap:12px;flex-wrap:wrap}
 .small{font-size:13px;color:var(--muted)}
-.right{padding:18px;display:flex;flex-direction:column;gap:12px}
-.chat{height:360px;background:linear-gradient(180deg,rgba(255,255,255,0.015),transparent);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px;overflow:auto;border:1px solid rgba(255,255,255,0.03)}
-.msg{max-width:86%;padding:10px;border-radius:10px;line-height:1.2}
-.bot{align-self:flex-start;background:rgba(0,0,0,0.3);color:#dff8f0}
-.user{align-self:flex-end;background:linear-gradient(90deg,#00bfa6,#00d2b6);color:#022224}
-.hint{font-size:13px;color:var(--muted);margin-top:6px}
-.footer{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px}
-.status{font-size:13px;color:var(--muted)}
-.result{font-weight:800;color:var(--accent)}
-.reload{background:transparent;border:1px dashed rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
-.success{background:linear-gradient(90deg,#00f6b0,#00bfa6);color:#022224;padding:10px;border-radius:10px;font-weight:800;text-align:center}
-.fail{background:linear-gradient(90deg,#ff5c7a,#ff8f8f);color:#2b0810;padding:10px;border-radius:10px;font-weight:800;text-align:center}
-.small-muted{font-size:12px;color:var(--muted)}
-@media(max-width:900px){.container{grid-template-columns:1fr;padding:12px}.right{order:2}.left{order:1}.grid{grid-template-columns:repeat(3,84px)}.tile{width:84px;height:84px}.panel{padding:10px}}
+.success{color:var(--accent);font-weight:700}
+.token{display:inline-block;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);font-family:monospace;font-size:12px}
+.select-mode{display:flex;gap:6px;align-items:center}
+.mode-pill{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:13px;color:var(--muted);cursor:pointer;border:1px solid transparent}
+.mode-pill.active{color:var(--white);border-color:rgba(255,255,255,0.04);background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
+.notice{margin-top:14px;color:var(--muted);font-size:13px}
+@media(max-width:520px){.grid{grid-template-columns:repeat(3,1fr);gap:8px}.tile{font-size:28px;padding:10px}}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="left panel">
+<div class="wrapper">
+  <div class="card" role="region" aria-label="captcha widget">
     <div class="header">
-      <div class="logo">🤖</div>
       <div>
-        <div class="title">I am not a robot 🤖</div>
-        <div class="subtitle">a tiny image-selector captcha game</div>
+        <div class="title">Emoji Captcha</div>
+        <div class="hint" id="challengeHint">Prove you are human</div>
+      </div>
+      <div class="controls">
+        <div class="select-mode" role="tablist" aria-label="captcha types">
+          <button class="mode-pill active" data-mode="emoji" aria-selected="true" role="tab">Emoji</button>
+          <button class="mode-pill" data-mode="shape" aria-selected="false" role="tab">Shapes</button>
+          <button class="mode-pill" data-mode="letters" aria-selected="false" role="tab">Letters</button>
+        </div>
+        <button id="refreshBtn" class="btn" aria-label="refresh captcha">↻</button>
       </div>
     </div>
-    <div class="menu">
-      <div class="big">I am not a robot 🤖</div>
-      <button id="play" class="play-btn">Play</button>
-      <div class="hint small-muted">No uploads. All images are generated on the fly. Try to match the prompt exactly.</div>
-      <div id="game" class="captcha-area" style="display:none">
-        <div class="prompt" id="promptText">Select all images with cars</div>
-        <div class="panel" style="padding:12px">
-          <div class="grid" id="grid"></div>
-        </div>
-        <div class="controls">
-          <button id="check" class="btn">Submit</button>
-          <button id="refresh" class="btn">New</button>
-          <div class="small" id="attempts">Attempts: 0</div>
-        </div>
-        <div id="feedback" class="hint"></div>
+
+    <div id="challengeArea">
+      <div id="instruction" class="hint">Select all tiles that match the target</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+        <div style="font-size:20px;color:var(--muted)">Target:</div>
+        <div id="targetBadge" style="font-size:30px;min-width:48px;display:flex;align-items:center;justify-content:center">❓</div>
+        <div id="counter" class="small" style="margin-left:8px"></div>
       </div>
-    </div>
-  </div>
-  <div class="right panel">
-    <div class="chat" id="chat"></div>
-    <div class="footer">
-      <div class="status" id="status">Ready</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button id="speak" class="reload">Talk</button>
-        <button id="resetChat" class="reload">Reset</button>
+
+      <div class="grid" id="grid" role="grid" aria-label="captcha tiles"></div>
+
+      <div class="footer">
+        <div class="small">Click the correct tiles then press Verify</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="verifyBtn" class="btn">Verify</button>
+          <div id="status" class="small"></div>
+        </div>
       </div>
+
+      <div class="notice">This widget uses only emojis so you don't need to upload images. The structure supports adding new challenge generators.</div>
+
+      <form id="demoForm" style="margin-top:12px">
+        <input type="hidden" name="captcha_token" id="captchaToken" value="">
+        <button id="submitFormBtn" class="btn" type="submit">Submit form (demo)</button>
+        <div style="margin-left:8px" id="formResult" class="small"></div>
+      </form>
     </div>
   </div>
 </div>
 
 <script>
-const targets=["car","tree","house","dog","bike","boat","plane","cup","cat"]
-const play=document.getElementById("play")
-const grid=document.getElementById("grid")
-const promptText=document.getElementById("promptText")
-const game=document.getElementById("game")
-const checkBtn=document.getElementById("check")
-const refreshBtn=document.getElementById("refresh")
-const attemptsLabel=document.getElementById("attempts")
-const feedback=document.getElementById("feedback")
-const chat=document.getElementById("chat")
-const status=document.getElementById("status")
-const speakBtn=document.getElementById("speak")
-const resetChat=document.getElementById("resetChat")
-let targetType=""
-let tiles=[]
-let attempts=0
+const CaptchaManager = (function(){
+  const pools = {
+    emoji: ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🦄","🐔","🐧","🐢","🐙","🦋","🌵","🌲","🌸","🔥","💧","🌙","⭐","⚽","🎲","🎵","🍎","🍌","🍩"],
+    shape: ["⬛","⬜","🔺","🔵","🔶","🔷","🔻","🔸","🔹","🔘","⚫","⚪"],
+    letters: Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+  };
+  const modes = Object.keys(pools);
+  let state = {mode:"emoji",target:null,tiles:[],requiredCount:0,token:"",solved:false};
+  function randInt(n){return Math.floor(Math.random()*n)}
+  function pickTarget(pool){
+    return pool[randInt(pool.length)]
+  }
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
+    return arr
+  }
+  function buildGrid(mode,options={}){
+    const pool = pools[mode].slice()
+    const total = options.total || 9
+    const multiplicity = options.multiplicity || [2,4]
+    const target = pickTarget(pool)
+    const count = multiplicity[0] + Math.floor(Math.random()*(multiplicity[1]-multiplicity[0]+1))
+    const tiles = []
+    for(let i=0;i<count;i++) tiles.push(target)
+    while(tiles.length < total){
+      const pick = pool[randInt(pool.length)]
+      if(tiles.length < total) tiles.push(pick)
+    }
+    shuffle(tiles)
+    state = {mode, target, tiles, requiredCount:count, token:"", solved:false}
+    return state
+  }
+  function verifySelection(selectedIndexes){
+    const hits = selectedIndexes.filter(i => state.tiles[i] === state.target).length
+    const misses = selectedIndexes.length - hits
+    const success = hits === state.requiredCount && misses === 0 && selectedIndexes.length>0
+    if(success){state.token = generateToken(); state.solved = true}
+    return {success,hits,misses,required:state.requiredCount,token:state.token}
+  }
+  function generateToken(){
+    const a = Date.now().toString(36)
+    const b = Math.random().toString(36).slice(2,10)
+    return (a+b)
+  }
+  function listModes(){return modes.slice()}
+  function getState(){return JSON.parse(JSON.stringify(state))}
+  return {buildGrid,verifySelection,listModes,getState,generateToken}
+})();
 
-function randInt(n){return Math.floor(Math.random()*n)}
-function pickTarget(){
-  return targets[randInt(targets.length)]
-}
-function seedGrid(selectedTarget){
-  tiles=[]
-  const cells=9
-  const mustCount=2+randInt(3)
-  let placed=0
-  for(let i=0;i<cells;i++){
-    let t
-    if(placed<mustCount && Math.random()<0.5){
-      t=selectedTarget
-      placed++
-    } else {
-      let other=targets[randInt(targets.length)]
-      while(other===selectedTarget) other=targets[randInt(targets.length)]
-      t=other
-    }
-    tiles.push({type:t,chosen:false})
-  }
-  while(tiles.filter(t=>t.type===selectedTarget).length<mustCount){
-    const idx=randInt(cells)
-    if(tiles[idx].type!==selectedTarget){
-      tiles[idx].type=selectedTarget
-    }
-  }
-  tiles=shuffle(tiles)
-}
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1))
-    const tmp=a[i];a[i]=a[j];a[j]=tmp
-  }
-  return a
-}
-function drawIcon(ctx,type,w,h){
-  ctx.clearRect(0,0,w,h)
-  ctx.save()
-  ctx.translate(w/2,h/2)
-  ctx.scale(1,1)
-  if(type==="car"){
-    ctx.fillStyle="#00bfa6"
-    ctx.beginPath()
-    ctx.moveTo(-36,10)
-    ctx.lineTo(36,10)
-    ctx.lineTo(50,-6)
-    ctx.lineTo(-50,-6)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle="#08333b"
-    ctx.beginPath()
-    ctx.arc(-20,22,8,0,Math.PI*2)
-    ctx.fill()
-    ctx.beginPath()
-    ctx.arc(20,22,8,0,Math.PI*2)
-    ctx.fill()
-  } else if(type==="tree"){
-    ctx.fillStyle="#2ea16c"
-    ctx.beginPath()
-    ctx.arc(0,-6,28,0,Math.PI*2)
-    ctx.fill()
-    ctx.fillStyle="#6a452e"
-    ctx.fillRect(-8,14,16,30)
-  } else if(type==="house"){
-    ctx.fillStyle="#ffd28b"
-    ctx.fillRect(-28,0,56,42)
-    ctx.fillStyle="#a23f3f"
-    ctx.beginPath()
-    ctx.moveTo(-36,0)
-    ctx.lineTo(0,-28)
-    ctx.lineTo(36,0)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle="#5d3a2e"
-    ctx.fillRect(-10,10,18,20)
-  } else if(type==="dog"){
-    ctx.fillStyle="#f4c971"
-    ctx.beginPath()
-    ctx.ellipse(-6,-4,20,12,0,0,Math.PI*2)
-    ctx.fill()
-    ctx.fillRect(12,-2,12,6)
-    ctx.fillStyle="#3b2b1f"
-    ctx.beginPath()
-    ctx.arc(-10,-6,3,0,Math.PI*2)
-    ctx.fill()
-  } else if(type==="bike"){
-    ctx.strokeStyle="#6ec1ff"
-    ctx.lineWidth=6
-    ctx.beginPath()
-    ctx.arc(-18,10,14,0,Math.PI*2)
-    ctx.stroke()
-    ctx.beginPath()
-    ctx.arc(18,10,14,0,Math.PI*2)
-    ctx.stroke()
-    ctx.beginPath()
-    ctx.moveTo(-6,0)
-    ctx.lineTo(6,-2)
-    ctx.lineTo(18,-6)
-    ctx.stroke()
-  } else if(type==="boat"){
-    ctx.fillStyle="#f48f6a"
-    ctx.beginPath()
-    ctx.moveTo(-40,6)
-    ctx.quadraticCurveTo(0,34,40,6)
-    ctx.lineTo(40,18)
-    ctx.lineTo(-40,18)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle="#ffffff"
-    ctx.fillRect(-6,-18,12,20)
-  } else if(type==="plane"){
-    ctx.fillStyle="#cfe9ff"
-    ctx.beginPath()
-    ctx.moveTo(-36,0)
-    ctx.lineTo(36,0)
-    ctx.lineTo(24,6)
-    ctx.lineTo(12,0)
-    ctx.lineTo(12,-8)
-    ctx.lineTo(24,-6)
-    ctx.closePath()
-    ctx.fill()
-  } else if(type==="cup"){
-    ctx.fillStyle="#ffdede"
-    ctx.fillRect(-18,-6,36,26)
-    ctx.fillStyle="#ffffff"
-    ctx.fillRect(18,-2,10,12)
-  } else if(type==="cat"){
-    ctx.fillStyle="#e3c88c"
-    ctx.beginPath()
-    ctx.ellipse(0,0,22,18,0,0,Math.PI*2)
-    ctx.fill()
-    ctx.fillStyle="#3b2b1f"
-    ctx.beginPath()
-    ctx.moveTo(-8,-4)
-    ctx.lineTo(-14,-12)
-    ctx.lineTo(-2,-6)
-    ctx.closePath()
-    ctx.fill()
-    ctx.beginPath()
-    ctx.moveTo(8,-4)
-    ctx.lineTo(14,-12)
-    ctx.lineTo(2,-6)
-    ctx.closePath()
-    ctx.fill()
-  }
-  ctx.restore()
-}
-function renderGrid(){
-  grid.innerHTML=""
-  tiles.forEach((t,idx)=>{
-    const el=document.createElement("div")
-    el.className="tile"
-    const cv=document.createElement("canvas")
-    cv.width=120;cv.height=120
-    el.appendChild(cv)
-    el.addEventListener("click",()=>{
-      t.chosen=!t.chosen
-      el.classList.toggle("selected",t.chosen)
+const gridEl = document.getElementById("grid")
+const targetBadge = document.getElementById("targetBadge")
+const counterEl = document.getElementById("counter")
+const statusEl = document.getElementById("status")
+const verifyBtn = document.getElementById("verifyBtn")
+const refreshBtn = document.getElementById("refreshBtn")
+const captchaTokenInput = document.getElementById("captchaToken")
+const form = document.getElementById("demoForm")
+const formResult = document.getElementById("formResult")
+const modeButtons = document.querySelectorAll(".mode-pill")
+let currentSelection = new Set()
+
+function renderChallenge(mode){
+  const s = CaptchaManager.buildGrid(mode, {total:9, multiplicity:[2,3]})
+  targetBadge.textContent = s.target
+  counterEl.textContent = `Select ${s.requiredCount}`
+  gridEl.innerHTML = ""
+  currentSelection.clear()
+  statusEl.textContent = ""
+  captchaTokenInput.value = ""
+  s.tiles.forEach((t,i)=>{
+    const btn = document.createElement("button")
+    btn.className = "tile"
+    btn.type = "button"
+    btn.setAttribute("role","gridcell")
+    btn.setAttribute("aria-label","tile "+(i+1))
+    btn.dataset.index = i
+    btn.textContent = t
+    btn.addEventListener("click", ()=>{
+      toggleTileSelection(i, btn)
     })
-    grid.appendChild(el)
-    const ctx=cv.getContext("2d")
-    drawIcon(ctx,t.type,120,120)
+    btn.addEventListener("keydown", e=>{
+      if(e.key === "Enter" || e.key === " ") {e.preventDefault(); toggleTileSelection(i, btn)}
+    })
+    gridEl.appendChild(btn)
   })
 }
-function newChallenge(){
-  attempts=0
-  attemptsLabel.textContent="Attempts: 0"
-  feedback.textContent=""
-  targetType=pickTarget()
-  promptText.textContent="Select all images with "+targetType+"s"
-  seedGrid(targetType)
-  renderGrid()
-  status.textContent="Challenge ready"
+
+function toggleTileSelection(i, btn){
+  if(currentSelection.has(i)){ currentSelection.delete(i); btn.classList.remove("selected"); return }
+  currentSelection.add(i)
+  btn.classList.add("selected")
 }
-checkBtn.addEventListener("click",()=>{
-  attempts++
-  attemptsLabel.textContent="Attempts: "+attempts
-  const chosenIndices=tiles.map((t,i)=>t.chosen?i:-1).filter(i=>i!==-1)
-  const correctIndices=tiles.map((t,i)=>t.type===targetType?i:-1).filter(i=>i!==-1)
-  const success=chosenIndices.length===correctIndices.length && chosenIndices.every(i=>correctIndices.includes(i))
-  if(success){
-    feedback.innerHTML='<div class="success">Verified — you passed the check</div>'
-    status.textContent="Verified"
-    botSay("Nice! You passed. I like your clicking style.")
+
+verifyBtn.addEventListener("click", ()=>{
+  const sel = Array.from(currentSelection)
+  const res = CaptchaManager.verifySelection(sel)
+  if(res.success){
+    statusEl.innerHTML = `<span class="success">Verified</span>`
+    captchaTokenInput.value = res.token
   } else {
-    feedback.innerHTML='<div class="fail">Try again</div>'
-    status.textContent="Failed attempt"
-    botSay("Not quite. Look carefully for the "+targetType+". Try again.")
+    statusEl.textContent = `Try again (${res.hits}/${res.required})`
+    Array.from(gridEl.children).forEach(c=>c.classList.remove("selected"))
+    currentSelection.clear()
+    setTimeout(()=>renderChallenge(CaptchaManager.getState().mode),400)
   }
 })
-refreshBtn.addEventListener("click",newChallenge)
-play.addEventListener("click",()=>{
-  game.style.display="flex"
-  play.style.display="none"
-  botSay("Welcome. I will watch you click images. Good luck.")
-  newChallenge()
+
+refreshBtn.addEventListener("click", ()=>{
+  renderChallenge(CaptchaManager.getState().mode)
 })
-function botSay(text){
-  const el=document.createElement("div")
-  el.className="msg bot"
-  typelimited(text,el)
-  chat.appendChild(el)
-  chat.scrollTop=chat.scrollHeight
-}
-function userSay(text){
-  const el=document.createElement("div")
-  el.className="msg user"
-  el.textContent=text
-  chat.appendChild(el)
-  chat.scrollTop=chat.scrollHeight
-}
-speakBtn.addEventListener("click",()=>{botSay(randomBotLine())})
-resetChat.addEventListener("click",()=>{chat.innerHTML="";botSay("Chat reset. I am here.")})
-function randomBotLine(){
-  const lines=["Hey, pick the right pictures.","I'm a tiny captcha helper.","If you want harder, press New.","I can chat while you solve.","I prefer cars but trees are nice too."]
-  return lines[randInt(lines.length)]
-}
-function typelimited(text,el){
-  let i=0
-  el.textContent=""
-  const iv=setInterval(()=>{el.textContent+=text[i++]||"";chat.scrollTop=chat.scrollHeight;if(i>text.length)clearInterval(iv)},20)
-}
-botSay("Hi. Press Play when you're ready.")
-status.textContent="Idle"
+
+modeButtons.forEach(b=>{
+  b.addEventListener("click", ()=>{
+    modeButtons.forEach(x=>{x.classList.remove("active"); x.setAttribute("aria-selected","false")})
+    b.classList.add("active"); b.setAttribute("aria-selected","true")
+    renderChallenge(b.dataset.mode)
+  })
+})
+
+form.addEventListener("submit", e=>{
+  e.preventDefault()
+  const token = captchaTokenInput.value
+  if(!token){ formResult.textContent = "Form blocked: captcha not solved" ; formResult.style.color = "#f43f5e"; return }
+  formResult.textContent = "Form submitted (demo). captcha_token: " + token
+  formResult.style.color = "#10b981"
+})
+
+window.addEventListener("load", ()=>renderChallenge("emoji"))
 </script>
 </body>
 </html>
