@@ -1,213 +1,201 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Emoji Select Captcha</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Im Not a Bot 🤖</title>
 <style>
-:root{--bg:#0f1724;--card:#0b1220;--accent:#10b981;--muted:#94a3b8;--white:#e6eef8}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#071022);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
-.wrapper{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
-.card{width:100%;max-width:760px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:12px;padding:22px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px}
-.title{color:var(--white);font-size:18px;font-weight:600}
-.inset{display:flex;gap:8px;align-items:center}
-.hint{color:var(--muted);font-size:13px}
-.controls{display:flex;gap:8px;align-items:center}
-.btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;color:var(--white);cursor:pointer;font-size:13px}
-.btn:active{transform:translateY(1px)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
-.tile{background:rgba(255,255,255,0.02);border-radius:10px;display:flex;align-items:center;justify-content:center;padding:14px;font-size:34px;cursor:pointer;border:2px solid transparent;user-select:none}
-.tile:focus{outline:none;border-color:rgba(255,255,255,0.06)}
-.tile.selected{border-color:rgba(16,185,129,0.85);box-shadow:0 6px 18px rgba(16,185,129,0.12)}
-.footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;gap:12px;flex-wrap:wrap}
-.small{font-size:13px;color:var(--muted)}
-.success{color:var(--accent);font-weight:700}
-.token{display:inline-block;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);font-family:monospace;font-size:12px}
-.select-mode{display:flex;gap:6px;align-items:center}
-.mode-pill{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:13px;color:var(--muted);cursor:pointer;border:1px solid transparent}
-.mode-pill.active{color:var(--white);border-color:rgba(255,255,255,0.04);background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
-.notice{margin-top:14px;color:var(--muted);font-size:13px}
-@media(max-width:520px){.grid{grid-template-columns:repeat(3,1fr);gap:8px}.tile{font-size:28px;padding:10px}}
+body {
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f0f0f0;
+  margin: 0;
+}
+h1 { margin-bottom: 20px; }
+#main-menu, #game-container { display: flex; flex-direction: column; align-items: center; }
+#captcha-container, #level2-container, #clicker-container { display: grid; grid-template-columns: repeat(3, 80px); grid-gap: 10px; margin-bottom: 20px; }
+.captcha-cell, .level2-cell, .clicker-btn { display: flex; align-items: center; justify-content: center; font-size: 40px; width: 80px; height: 80px; background: white; border: 2px solid #ccc; border-radius: 8px; cursor: pointer; user-select: none; }
+.captcha-cell.selected, .level2-cell.selected { border-color: green; background: #d4ffd4; }
+#verify-btn, #level2-verify, #clicker-verify, #start-btn { padding: 10px 20px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+#message { font-weight: bold; margin-bottom: 10px; }
+#level-display { margin-bottom: 10px; font-weight: bold; }
 </style>
 </head>
 <body>
-<div class="wrapper">
-  <div class="card" role="region" aria-label="captcha widget">
-    <div class="header">
-      <div>
-        <div class="title">Emoji Captcha</div>
-        <div class="hint" id="challengeHint">Prove you are human</div>
-      </div>
-      <div class="controls">
-        <div class="select-mode" role="tablist" aria-label="captcha types">
-          <button class="mode-pill active" data-mode="emoji" aria-selected="true" role="tab">Emoji</button>
-          <button class="mode-pill" data-mode="shape" aria-selected="false" role="tab">Shapes</button>
-          <button class="mode-pill" data-mode="letters" aria-selected="false" role="tab">Letters</button>
-        </div>
-        <button id="refreshBtn" class="btn" aria-label="refresh captcha">↻</button>
-      </div>
-    </div>
 
-    <div id="challengeArea">
-      <div id="instruction" class="hint">Select all tiles that match the target</div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
-        <div style="font-size:20px;color:var(--muted)">Target:</div>
-        <div id="targetBadge" style="font-size:30px;min-width:48px;display:flex;align-items:center;justify-content:center">❓</div>
-        <div id="counter" class="small" style="margin-left:8px"></div>
-      </div>
+<div id="main-menu">
+  <h1>Im Not a Bot 🤖</h1>
+  <button id="start-btn">Verify</button>
+</div>
 
-      <div class="grid" id="grid" role="grid" aria-label="captcha tiles"></div>
-
-      <div class="footer">
-        <div class="small">Click the correct tiles then press Verify</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button id="verifyBtn" class="btn">Verify</button>
-          <div id="status" class="small"></div>
-        </div>
-      </div>
-
-      <div class="notice">This widget uses only emojis so you don't need to upload images. The structure supports adding new challenge generators.</div>
-
-      <form id="demoForm" style="margin-top:12px">
-        <input type="hidden" name="captcha_token" id="captchaToken" value="">
-        <button id="submitFormBtn" class="btn" type="submit">Submit form (demo)</button>
-        <div style="margin-left:8px" id="formResult" class="small"></div>
-      </form>
-    </div>
-  </div>
+<div id="game-container" style="display:none;">
+  <div id="level-display"></div>
+  <div id="instruction"></div>
+  <div id="captcha-container"></div>
+  <div id="level2-container"></div>
+  <div id="clicker-container"></div>
+  <div id="message"></div>
+  <button id="verify-btn" style="display:none;">Verify</button>
+  <button id="level2-verify" style="display:none;">Verify</button>
+  <button id="clicker-verify" style="display:none;">Verify</button>
 </div>
 
 <script>
-const CaptchaManager = (function(){
-  const pools = {
-    emoji: ["🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼","🐨","🐯","🦁","🐮","🐷","🐸","🐵","🦄","🐔","🐧","🐢","🐙","🦋","🌵","🌲","🌸","🔥","💧","🌙","⭐","⚽","🎲","🎵","🍎","🍌","🍩"],
-    shape: ["⬛","⬜","🔺","🔵","🔶","🔷","🔻","🔸","🔹","🔘","⚫","⚪"],
-    letters: Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-  };
-  const modes = Object.keys(pools);
-  let state = {mode:"emoji",target:null,tiles:[],requiredCount:0,token:"",solved:false};
-  function randInt(n){return Math.floor(Math.random()*n)}
-  function pickTarget(pool){
-    return pool[randInt(pool.length)]
+const captchaTypes = ['🐶','🐱','🍎','🍌','🚗','✈️','🌲','🌸'];
+let currentLevel = 1;
+let currentCaptcha = null;
+let clickCount = 0;
+let level2Target = null;
+
+const mainMenu = document.getElementById('main-menu');
+const gameContainer = document.getElementById('game-container');
+const levelDisplay = document.getElementById('level-display');
+const instruction = document.getElementById('instruction');
+const captchaContainer = document.getElementById('captcha-container');
+const level2Container = document.getElementById('level2-container');
+const clickerContainer = document.getElementById('clicker-container');
+const message = document.getElementById('message');
+const verifyBtn = document.getElementById('verify-btn');
+const level2Verify = document.getElementById('level2-verify');
+const clickerVerify = document.getElementById('clicker-verify');
+
+document.getElementById('start-btn').onclick = () => {
+  mainMenu.style.display = 'none';
+  gameContainer.style.display = 'flex';
+  startLevel1();
+};
+
+function startLevel1() {
+  currentLevel = 1;
+  levelDisplay.textContent = `Level ${currentLevel}`;
+  verifyBtn.style.display = 'inline-block';
+  level2Container.style.display = 'none';
+  clickerContainer.style.display = 'none';
+  captchaContainer.style.display = 'grid';
+  generateCaptcha();
+}
+
+function generateCaptcha() {
+  captchaContainer.innerHTML = '';
+  const type = captchaTypes[Math.floor(Math.random() * captchaTypes.length)];
+  currentCaptcha = type;
+  const options = [];
+  const correctCount = 2 + Math.floor(Math.random()*2);
+  const incorrectCount = 9 - correctCount;
+  for (let i=0;i<correctCount;i++) options.push(type);
+  while (options.length<9){
+    let emoji;
+    do { emoji = captchaTypes[Math.floor(Math.random()*captchaTypes.length)]; } while (emoji===type);
+    options.push(emoji);
   }
-  function shuffle(arr){
-    for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}
-    return arr
+  options.sort(()=>Math.random()-0.5);
+  options.forEach(emoji=>{
+    const cell = document.createElement('div');
+    cell.className='captcha-cell';
+    cell.textContent=emoji;
+    cell.onclick=()=>cell.classList.toggle('selected');
+    captchaContainer.appendChild(cell);
+  });
+  instruction.textContent = `Select all ${type}`;
+  message.textContent = '';
+}
+
+verifyBtn.onclick = ()=>{
+  const cells=document.querySelectorAll('.captcha-cell');
+  let correct=true;
+  cells.forEach(cell=>{
+    if(cell.textContent===currentCaptcha&&!cell.classList.contains('selected')) correct=false;
+    if(cell.textContent!==currentCaptcha&&cell.classList.contains('selected')) correct=false;
+  });
+  if(correct){
+    message.textContent='✅ Verified!';
+    message.style.color='green';
+    setTimeout(startLevel2,1000);
+  }else{
+    message.textContent='❌ Try again';
+    message.style.color='red';
   }
-  function buildGrid(mode,options={}){
-    const pool = pools[mode].slice()
-    const total = options.total || 9
-    const multiplicity = options.multiplicity || [2,4]
-    const target = pickTarget(pool)
-    const count = multiplicity[0] + Math.floor(Math.random()*(multiplicity[1]-multiplicity[0]+1))
-    const tiles = []
-    for(let i=0;i<count;i++) tiles.push(target)
-    while(tiles.length < total){
-      const pick = pool[randInt(pool.length)]
-      if(tiles.length < total) tiles.push(pick)
+};
+
+function startLevel2(){
+  currentLevel=2;
+  levelDisplay.textContent=`Level ${currentLevel}`;
+  captchaContainer.style.display='none';
+  verifyBtn.style.display='none';
+  level2Container.style.display='grid';
+  clickerContainer.style.display='none';
+  level2Container.innerHTML='';
+  level2Target=Math.floor(Math.random()*3)+1; // pick a row to select
+  const rows=3;
+  const cols=3;
+  for(let i=0;i<rows;i++){
+    for(let j=0;j<cols;j++){
+      const cell=document.createElement('div');
+      cell.className='level2-cell';
+      const rand=Math.random()<0.5?'🟩':'🟥';
+      cell.textContent=rand;
+      cell.dataset.row=i;
+      cell.onclick=()=>cell.classList.toggle('selected');
+      level2Container.appendChild(cell);
     }
-    shuffle(tiles)
-    state = {mode, target, tiles, requiredCount:count, token:"", solved:false}
-    return state
   }
-  function verifySelection(selectedIndexes){
-    const hits = selectedIndexes.filter(i => state.tiles[i] === state.target).length
-    const misses = selectedIndexes.length - hits
-    const success = hits === state.requiredCount && misses === 0 && selectedIndexes.length>0
-    if(success){state.token = generateToken(); state.solved = true}
-    return {success,hits,misses,required:state.requiredCount,token:state.token}
-  }
-  function generateToken(){
-    const a = Date.now().toString(36)
-    const b = Math.random().toString(36).slice(2,10)
-    return (a+b)
-  }
-  function listModes(){return modes.slice()}
-  function getState(){return JSON.parse(JSON.stringify(state))}
-  return {buildGrid,verifySelection,listModes,getState,generateToken}
-})();
-
-const gridEl = document.getElementById("grid")
-const targetBadge = document.getElementById("targetBadge")
-const counterEl = document.getElementById("counter")
-const statusEl = document.getElementById("status")
-const verifyBtn = document.getElementById("verifyBtn")
-const refreshBtn = document.getElementById("refreshBtn")
-const captchaTokenInput = document.getElementById("captchaToken")
-const form = document.getElementById("demoForm")
-const formResult = document.getElementById("formResult")
-const modeButtons = document.querySelectorAll(".mode-pill")
-let currentSelection = new Set()
-
-function renderChallenge(mode){
-  const s = CaptchaManager.buildGrid(mode, {total:9, multiplicity:[2,3]})
-  targetBadge.textContent = s.target
-  counterEl.textContent = `Select ${s.requiredCount}`
-  gridEl.innerHTML = ""
-  currentSelection.clear()
-  statusEl.textContent = ""
-  captchaTokenInput.value = ""
-  s.tiles.forEach((t,i)=>{
-    const btn = document.createElement("button")
-    btn.className = "tile"
-    btn.type = "button"
-    btn.setAttribute("role","gridcell")
-    btn.setAttribute("aria-label","tile "+(i+1))
-    btn.dataset.index = i
-    btn.textContent = t
-    btn.addEventListener("click", ()=>{
-      toggleTileSelection(i, btn)
-    })
-    btn.addEventListener("keydown", e=>{
-      if(e.key === "Enter" || e.key === " ") {e.preventDefault(); toggleTileSelection(i, btn)}
-    })
-    gridEl.appendChild(btn)
-  })
+  instruction.textContent=`Select all green squares in row ${level2Target}`;
+  level2Verify.style.display='inline-block';
+  message.textContent='';
 }
 
-function toggleTileSelection(i, btn){
-  if(currentSelection.has(i)){ currentSelection.delete(i); btn.classList.remove("selected"); return }
-  currentSelection.add(i)
-  btn.classList.add("selected")
+level2Verify.onclick=()=>{
+  const cells=document.querySelectorAll('.level2-cell');
+  let correct=true;
+  cells.forEach(cell=>{
+    if(parseInt(cell.dataset.row)+1===level2Target && cell.textContent==='🟩' && !cell.classList.contains('selected')) correct=false;
+    if((parseInt(cell.dataset.row)+1!==level2Target || cell.textContent!=='🟩') && cell.classList.contains('selected')) correct=false;
+  });
+  if(correct){
+    message.textContent='✅ Verified!';
+    message.style.color='green';
+    setTimeout(startLevel3,1000);
+  }else{
+    message.textContent='❌ Try again';
+    message.style.color='red';
+  }
+};
+
+function startLevel3(){
+  currentLevel=3;
+  levelDisplay.textContent=`Level ${currentLevel}`;
+  captchaContainer.style.display='none';
+  verifyBtn.style.display='none';
+  level2Container.style.display='none';
+  clickerContainer.style.display='flex';
+  clickerContainer.innerHTML='';
+  clickCount=0;
+  const btn=document.createElement('div');
+  btn.className='clicker-btn';
+  btn.textContent='Click me!';
+  btn.onclick=()=>{ clickCount++; instruction.textContent=`Click count: ${clickCount}/400`; };
+  clickerContainer.appendChild(btn);
+  instruction.textContent='Click count: 0/400';
+  clickerVerify.style.display='inline-block';
+  message.textContent='';
 }
 
-verifyBtn.addEventListener("click", ()=>{
-  const sel = Array.from(currentSelection)
-  const res = CaptchaManager.verifySelection(sel)
-  if(res.success){
-    statusEl.innerHTML = `<span class="success">Verified</span>`
-    captchaTokenInput.value = res.token
-  } else {
-    statusEl.textContent = `Try again (${res.hits}/${res.required})`
-    Array.from(gridEl.children).forEach(c=>c.classList.remove("selected"))
-    currentSelection.clear()
-    setTimeout(()=>renderChallenge(CaptchaManager.getState().mode),400)
+clickerVerify.onclick=()=>{
+  if(clickCount>=400){
+    message.textContent='✅ Verified! All levels complete!';
+    message.style.color='green';
+    instruction.textContent='🎉 You are human!';
+    clickerVerify.style.display='none';
+  }else{
+    message.textContent='❌ Not enough clicks!';
+    message.style.color='red';
   }
-})
-
-refreshBtn.addEventListener("click", ()=>{
-  renderChallenge(CaptchaManager.getState().mode)
-})
-
-modeButtons.forEach(b=>{
-  b.addEventListener("click", ()=>{
-    modeButtons.forEach(x=>{x.classList.remove("active"); x.setAttribute("aria-selected","false")})
-    b.classList.add("active"); b.setAttribute("aria-selected","true")
-    renderChallenge(b.dataset.mode)
-  })
-})
-
-form.addEventListener("submit", e=>{
-  e.preventDefault()
-  const token = captchaTokenInput.value
-  if(!token){ formResult.textContent = "Form blocked: captcha not solved" ; formResult.style.color = "#f43f5e"; return }
-  formResult.textContent = "Form submitted (demo). captcha_token: " + token
-  formResult.style.color = "#10b981"
-})
-
-window.addEventListener("load", ()=>renderChallenge("emoji"))
+};
 </script>
+
 </body>
 </html>
