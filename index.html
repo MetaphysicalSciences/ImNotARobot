@@ -1,246 +1,671 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Babylon Physics Playground</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Im not a bot 🤖</title>
 <style>
-html,body{width:100%;height:100%;margin:0;overflow:hidden;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
-canvas{width:100%;height:100%;display:block;}
-.joystick{position:absolute;width:clamp(72px,12vw,120px);height:clamp(72px,12vw,120px);border-radius:50%;background:rgba(0,0,0,0.28);backdrop-filter:blur(2px);-webkit-tap-highlight-color:transparent;touch-action:none;}
-.joystick-inner{position:absolute;width:50%;height:50%;border-radius:50%;background:rgba(0,0,0,0.48);left:25%;top:25%;}
-#leftJoystick{left:4vw;bottom:4vh;}
-#rightJoystick{right:4vw;bottom:4vh;}
-#jumpButton{position:absolute;width:clamp(56px,9vw,90px);height:clamp(56px,9vw,90px);border-radius:50%;background:rgba(255,40,40,0.85);right:4vw;bottom:calc(4vh + clamp(72px,12vw,120px) + 8px);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;user-select:none;-webkit-user-select:none;touch-action:none;}
-#hud{position:absolute;left:8px;top:8px;color:#fff;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial; font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.6);pointer-events:none;}
-.spawnButtons{position:absolute;right:4vw;top:6vh;display:flex;flex-direction:column;gap:8px;}
-.spawnBtn{min-width:84px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,0.45);color:#fff;font-weight:700;text-align:center;touch-action:none;-webkit-user-select:none;}
-#credits{position:absolute;left:8px;bottom:8px;color:rgba(255,255,255,0.8);font-size:12px;pointer-events:none;}
+:root{
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --accent:#1a73e8;
+  --ok:#16a34a;
+  --danger:#ef4444;
+  --muted:#6b7280;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+  background:linear-gradient(180deg,#eef2ff 0%,var(--bg) 60%);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:28px;
+  color:#111827;
+}
+.app{
+  width:980px;
+  max-width:96%;
+  background:transparent;
+  border-radius:12px;
+  padding:22px;
+  box-shadow:0 10px 30px rgba(17,24,39,0.08);
+}
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:18px;
+}
+.title{
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+.logo{
+  width:56px;
+  height:56px;
+  background:linear-gradient(135deg,#fff,#eef2ff);
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  box-shadow:0 4px 14px rgba(17,24,39,0.06);
+}
+.h1{
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:0.2px;
+}
+.subtitle{color:var(--muted);font-size:13px}
+.controls{display:flex;gap:10px;align-items:center}
+.btn{
+  background:var(--accent);
+  color:white;
+  padding:10px 14px;
+  border-radius:8px;
+  border:0;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(26,115,232,0.18);
+}
+.btn.ghost{
+  background:transparent;color:var(--accent);box-shadow:none;border:1px solid rgba(26,115,232,0.12)
+}
+.layout{
+  display:grid;
+  grid-template-columns: 1fr 320px;
+  gap:18px;
+  align-items:start;
+}
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 6px 20px rgba(15,23,42,0.04);
+}
+.left{min-height:360px}
+.right{height:100%}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.cell{
+  background:linear-gradient(180deg,#fff,#fbfdff);
+  border:2px solid #e6eef9;
+  border-radius:10px;
+  height:96px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:36px;
+  cursor:pointer;
+  user-select:none;
+  transition:transform .12s, box-shadow .12s, border-color .12s;
+}
+.cell:active{transform:scale(.98)}
+.cell.selected{border-color:var(--ok);box-shadow:0 6px 18px rgba(16,185,129,0.08);background:#f6fffa}
+.instruction{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:12px;
+}
+.checkrow{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.fake-checkbox{
+  width:22px;height:22px;border-radius:4px;border:2px solid #cbd5e1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:white;
+}
+.fake-checkbox.on{background:linear-gradient(90deg,#fff,#eceffb);border-color:#9be7a3}
+.small{font-size:13px;color:var(--muted)}
+.message{font-weight:700;margin-top:12px}
+.status{font-size:13px;color:var(--muted);margin-top:8px}
+.side-list{display:flex;flex-direction:column;gap:8px}
+.side-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:#fbfdff;border:1px solid #eef3ff}
+.progress-wrap{margin-top:12px}
+.progress-bar{height:12px;background:#e6eef9;border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#60a5fa)}
+.center{display:flex;align-items:center;justify-content:center}
+.input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef9;font-size:15px}
+.small-muted{font-size:12px;color:var(--muted)}
+.footer{margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hint{font-size:13px;color:var(--muted)}
+.level-badge{background:#eef2ff;color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:700}
+.verify-btn{margin-top:14px;width:100%;padding:12px;border-radius:10px;border:0;font-weight:700;cursor:pointer;background:linear-gradient(90deg,var(--accent),#3b82f6);color:white}
+.small-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:#fff;border-radius:8px;padding:8px;border:1px solid #eef3ff;display:flex;align-items:center;justify-content:center;height:62px;font-size:28px;cursor:pointer}
+.tile.matched{background:#e6ffef;border-color:#bbf7d0;box-shadow:0 6px 18px rgba(16,185,129,0.06)}
+.count-box{font-weight:700;color:var(--muted)}
+.timer{font-weight:700;color:var(--danger)}
+.success{color:var(--ok);font-weight:800}
+.fail{color:var(--danger);font-weight:800}
+.footer-small{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
 </style>
 </head>
 <body>
-<canvas id="renderCanvas"></canvas>
-<div id="leftJoystick" class="joystick"><div class="joystick-inner"></div></div>
-<div id="rightJoystick" class="joystick"><div class="joystick-inner"></div></div>
-<div id="jumpButton">JUMP</div>
-<div class="spawnButtons">
-<div id="spawnGren" class="spawnBtn">Grenade</div>
-<div id="spawnBlock" class="spawnBtn">Block</div>
-<div id="clearBtn" class="spawnBtn">Clear</div>
+<div class="app">
+  <div class="header">
+    <div class="title">
+      <div class="logo">🤖</div>
+      <div>
+        <div class="h1">Im not a bot 🤖</div>
+        <div class="subtitle">a captcha-ish mini game inspired by Neal.fun</div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="level-badge" id="levelBadge">Menu</div>
+      <button class="btn" id="startBtn">Verify</button>
+      <button class="btn ghost" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="card left" id="mainCard">
+      <div id="mainArea">
+        <div class="center" style="flex-direction:column">
+          <h2 id="screenTitle">Main Menu</h2>
+          <div class="small-muted" id="screenSub">Press Verify to start</div>
+          <div style="height:18px"></div>
+          <div style="width:220px">
+            <button class="verify-btn" id="menuVerify">Verify</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card right">
+      <div class="side-list">
+        <div class="side-item">
+          <div>
+            <div class="small-muted">Current Level</div>
+            <div id="sideLevel" style="font-weight:800">—</div>
+          </div>
+          <div id="sideAction" class="small-muted">Waiting</div>
+        </div>
+
+        <div class="side-item">
+          <div>
+            <div class="small-muted">Progress</div>
+            <div class="count-box" id="sideProgress">0 / 9</div>
+          </div>
+          <div class="small-muted" id="sideHint">Complete captchas to advance</div>
+        </div>
+
+        <div class="side-item">
+          <div>
+            <div class="small-muted">Status</div>
+            <div id="sideStatus" style="font-weight:800">Idle</div>
+          </div>
+          <div class="small-muted" id="sideExtra">Good luck!</div>
+        </div>
+
+        <div class="side-item progress-wrap">
+          <div class="small-muted">Level Progress</div>
+          <div class="progress-bar" style="margin-top:8px">
+            <div class="progress-fill" id="levelFill"></div>
+          </div>
+        </div>
+
+        <div class="side-item">
+          <div class="small-muted">Tip</div>
+          <div class="small-muted" id="sideTip">Levels get varied — try different interactions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-small">Built to be extended. Refresh to reset everything.</div>
 </div>
-<div id="hud"></div>
-<div id="credits">Physics Playground • loud russian mode</div>
-<audio id="bgm" src="shorts.mp3" loop autoplay></audio>
-<script src="https://cdn.babylonjs.com/babylon.js"></script>
-<script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+
 <script>
-const canvas=document.getElementById('renderCanvas');
-const engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:true,stencil:true});
-const scene=new BABYLON.Scene(engine);
-scene.clearColor=new BABYLON.Color3(0.06,0.06,0.07);
-const gravity = new BABYLON.Vector3(0,-9.81,0);
-const cannonPlugin = new BABYLON.CannonJSPlugin(true, undefined, CANNON);
-scene.enablePhysics(gravity, cannonPlugin);
-const camera=new BABYLON.UniversalCamera('cam', new BABYLON.Vector3(0,2,0), scene);
-camera.attachControl(canvas,true);
-camera.applyGravity=true;
-camera.checkCollisions=true;
-camera.ellipsoid=new BABYLON.Vector3(0.5,1,0.5);
-const light=new BABYLON.HemisphericLight('h', new BABYLON.Vector3(0.5,1,0.25), scene);
-light.intensity=0.9;
+const emojis = ['🐶','🐱','🐼','🦊','🐻','🐸','🦁','🐷','🐵','🐔','🦄','🐙','🐢','🦋','🍎','🍌','🍇','🍓','🍍','🍑','🚗','🚲','✈️','🛶','🚌','🚕','🌲','🌸','🌵','🔥','💧'];
+let state = {level:0,unlocked:0,clicks:0,progress:0};
+const totalLevels = 9;
+const mainArea = document.getElementById('mainArea');
+const levelBadge = document.getElementById('levelBadge');
+const sideLevel = document.getElementById('sideLevel');
+const sideAction = document.getElementById('sideAction');
+const sideStatus = document.getElementById('sideStatus');
+const sideProgress = document.getElementById('sideProgress');
+const levelFill = document.getElementById('levelFill');
+const sideTip = document.getElementById('sideTip');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const menuVerify = document.getElementById('menuVerify');
+const screenTitle = document.getElementById('screenTitle');
+const screenSub = document.getElementById('screenSub');
+let currentLevelObj = null;
 
-const ground=BABYLON.MeshBuilder.CreateGround('ground',{width:120, height:120}, scene);
-ground.position.y=0;
-ground.checkCollisions=true;
-ground.receiveShadows=true;
-ground.physicsImpostor=new BABYLON.PhysicsImpostor(ground,BABYLON.PhysicsImpostor.BoxImpostor,{mass:0,friction:1,restitution:0.1},scene);
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
-const matGround=new BABYLON.StandardMaterial('gmat',scene);
-matGround.diffuseColor=new BABYLON.Color3(0.18,0.18,0.2);
-ground.material=matGround;
-
-function createWall(name,w,h,d,x,y,z,rotY){
- const m=BABYLON.MeshBuilder.CreateBox(name,{width:w,height:h,depth:d},scene);
- m.position.set(x,y,z);
- if(rotY) m.rotation.y=rotY;
- m.checkCollisions=true;
- m.physicsImpostor=new BABYLON.PhysicsImpostor(m,BABYLON.PhysicsImpostor.BoxImpostor,{mass:0,friction:1,restitution:0.01},scene);
- const mm=new BABYLON.StandardMaterial(name+'mat',scene);
- mm.diffuseColor=new BABYLON.Color3(0.28,0.26,0.24);
- m.material=mm;
- return m;
+function toMenu(){
+  state.level = 0;
+  updateUI();
+  mainArea.innerHTML = `
+    <div class="center" style="flex-direction:column">
+      <h2 id="screenTitle">Main Menu</h2>
+      <div class="small-muted" id="screenSub">Press Verify to start</div>
+      <div style="height:18px"></div>
+      <div style="width:220px">
+        <button class="verify-btn" id="menuVerifyBtn">Verify</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('menuVerifyBtn').onclick = ()=>startLevel(1);
 }
 
-createWall('wallN',80,6,1,0,3, -60);
-createWall('wallS',80,6,1,0,3, 60);
-createWall('wallE',1,6,60,60,3,0);
-createWall('wallW',1,6,60,-60,3,0);
-
-const ramp=BABYLON.MeshBuilder.CreateBox('r',{width:12,height:1.2,depth:12},scene);
-ramp.position.set(-18,0.6,18);
-ramp.rotation.z= -0.35;
-ramp.physicsImpostor=new BABYLON.PhysicsImpostor(ramp,BABYLON.PhysicsImpostor.BoxImpostor,{mass:0,friction:1,restitution:0.1},scene);
-ramp.material=new BABYLON.StandardMaterial('rmat',scene);
-ramp.material.diffuseColor=new BABYLON.Color3(0.22,0.2,0.18);
-
-const crateParent=new BABYLON.TransformNode('crates',scene);
-for(let i=0;i<12;i++){
- const b=BABYLON.MeshBuilder.CreateBox('box'+i,{size:2},scene);
- b.position.set(-10 + (i%4)*2.4,1 + Math.floor(i/4)*2.1, -8 + Math.floor(i/4)*3.2);
- b.physicsImpostor=new BABYLON.PhysicsImpostor(b,BABYLON.PhysicsImpostor.BoxImpostor,{mass:3,friction:0.8,restitution:0.05},scene);
- b.checkCollisions=true;
- b.material=new BABYLON.StandardMaterial('bm'+i,scene);
- b.material.diffuseColor=new BABYLON.Color3(Math.random()*0.6+0.2,Math.random()*0.6+0.2,Math.random()*0.6+0.2);
- b.parent=crateParent;
+function updateUI(){
+  levelBadge.textContent = state.level===0 ? 'Menu' : `Lv ${state.level}`;
+  sideLevel.textContent = state.level===0 ? 'Menu' : `Level ${state.level}`;
+  sideAction.textContent = state.level===0 ? 'Start' : 'In progress';
+  sideStatus.textContent = state.level===0 ? 'Idle' : 'Playing';
+  sideProgress.textContent = `${state.unlocked} / ${totalLevels}`;
+  const pct = Math.round((state.unlocked/totalLevels)*100);
+  levelFill.style.width = pct + '%';
 }
 
-const pillar=BABYLON.MeshBuilder.CreateCylinder('p',{diameter:3,height:8, tessellation:24},scene);
-pillar.position.set(18,4, -18);
-pillar.physicsImpostor=new BABYLON.PhysicsImpostor(pillar,BABYLON.PhysicsImpostor.CylinderImpostor,{mass:0,friction:1,restitution:0.05},scene);
-pillar.material=new BABYLON.StandardMaterial('pm',scene);
-pillar.material.diffuseColor=new BABYLON.Color3(0.26,0.26,0.28);
-
-let moveForward=0, moveRight=0, lookX=0, lookY=0;
-let verticalVelocity=0;
-const GRAV=-0.035;
-const JUMP_SPEED=0.55;
-const left=document.getElementById('leftJoystick');
-const right=document.getElementById('rightJoystick');
-const jumpBtn=document.getElementById('jumpButton');
-const hud=document.getElementById('hud');
-
-function setupJoystick(joystick,cb){
- let active=false, sx=0, sy=0;
- const inner=joystick.querySelector('.joystick-inner');
- joystick.addEventListener('touchstart', e=>{
-   e.preventDefault();
-   active=true;
-   const t=e.touches[0];
-   sx=t.clientX; sy=t.clientY;
- },{passive:false});
- joystick.addEventListener('touchmove', e=>{
-   e.preventDefault();
-   if(!active) return;
-   const t=e.touches[0];
-   const dx=t.clientX-sx, dy=t.clientY-sy;
-   inner.style.transform=`translate(${dx/2}px,${dy/2}px)`;
-   cb(dx/50,dy/50);
- },{passive:false});
- joystick.addEventListener('touchend', e=>{
-   e.preventDefault();
-   active=false;
-   inner.style.transform='translate(0px,0px)';
-   cb(0,0);
- },{passive:false});
+function startLevel(n){
+  state.level = n;
+  updateUI();
+  mainArea.innerHTML = '';
+  currentLevelObj = levels[n];
+  if(!currentLevelObj) return;
+  currentLevelObj.render(mainArea,()=>levelSuccess());
 }
 
-setupJoystick(left,(x,y)=>{ moveRight = x; moveForward = -y; });
-setupJoystick(right,(x,y)=>{ lookX = x*1.6; lookY = y*1.6; });
-
-let jumpPressed=false;
-jumpBtn.addEventListener('touchstart', e=>{ e.preventDefault(); jumpPressed=true; },{passive:false});
-jumpBtn.addEventListener('touchend', e=>{ e.preventDefault(); jumpPressed=false; },{passive:false});
-
-function isGrounded(){
- const origin = camera.position.clone();
- const down = origin.clone().add(new BABYLON.Vector3(0,-1.25,0));
- const r = new BABYLON.Ray(origin, down.subtract(origin).normalize(), 1.4);
- const hit = scene.pickWithRay(r, (m)=>{ return m!==camera; });
- if(hit && hit.hit) return {hit:true,point:hit.pickedPoint};
- return {hit:false};
+function levelSuccess(){
+  state.unlocked = Math.max(state.unlocked, state.level);
+  state.progress = state.unlocked;
+  updateUI();
+  mainArea.innerHTML = `
+    <div class="center" style="flex-direction:column">
+      <div style="font-size:36px" class="success">✅ Verified!</div>
+      <div style="height:12px"></div>
+      <div class="small-muted">Level ${state.level} complete</div>
+      <div style="height:18px"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" id="nextBtn">Next</button>
+        <button class="btn ghost" id="menuBtn">Menu</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('nextBtn').onclick = ()=>{
+    const next = Math.min(totalLevels, state.level+1);
+    if(state.level >= totalLevels) toMenu(); else startLevel(next);
+  };
+  document.getElementById('menuBtn').onclick = ()=>toMenu();
 }
 
-scene.onBeforeRenderObservable.add(()=>{
- camera.rotation.y += lookX*0.02;
- camera.rotation.x += lookY*0.02;
- if(camera.rotation.x>Math.PI/2) camera.rotation.x=Math.PI/2;
- if(camera.rotation.x<-Math.PI/2) camera.rotation.x=-Math.PI/2;
- const forwardVec = new BABYLON.Vector3(Math.sin(camera.rotation.y),0,Math.cos(camera.rotation.y));
- const rightVec = new BABYLON.Vector3(Math.sin(camera.rotation.y+Math.PI/2),0,Math.cos(camera.rotation.y+Math.PI/2));
- camera.position.addInPlace(forwardVec.scale(moveForward*0.2));
- camera.position.addInPlace(rightVec.scale(moveRight*0.2));
- const g = isGrounded();
- if(g.hit && verticalVelocity<=0){
-   verticalVelocity = 0;
-   camera.position.y = g.point.y + camera.ellipsoid.y;
-   if(jumpPressed){ verticalVelocity = JUMP_SPEED; }
- } else {
-   if(jumpPressed && verticalVelocity>0.001){} 
-   verticalVelocity += GRAV;
-   camera.position.y += verticalVelocity;
- }
-});
-
-engine.runRenderLoop(()=>{ scene.render(); hud.innerText = Math.round(engine.getFps()) + " FPS"; });
-
-window.addEventListener('resize', ()=>{ engine.resize(); });
-
-const spawnGren=document.getElementById('spawnGren');
-const spawnBlock=document.getElementById('spawnBlock');
-const clearBtn=document.getElementById('clearBtn');
-const spawned=[];
-
-function spawnBlockAt(pos, size=1.6){
- const b=BABYLON.MeshBuilder.CreateBox('spawnB'+Date.now(),{size:size},scene);
- b.position.copyFrom(pos);
- b.position.y += 1.2;
- b.physicsImpostor=new BABYLON.PhysicsImpostor(b,BABYLON.PhysicsImpostor.BoxImpostor,{mass:2,friction:0.8,restitution:0.05},scene);
- b.material=new BABYLON.StandardMaterial('smat',scene);
- b.material.diffuseColor=new BABYLON.Color3(Math.random(),Math.random(),Math.random());
- spawned.push(b);
- return b;
+resetBtn.onclick = ()=>{
+  state = {level:0,unlocked:0,clicks:0,progress:0};
+  toMenu();
 }
 
-function spawnGrenade(){
- const s=BABYLON.MeshBuilder.CreateSphere('gren'+Date.now(),{diameter:0.9,segments:12},scene);
- s.position = camera.position.clone();
- const forward = new BABYLON.Vector3(Math.sin(camera.rotation.y), Math.sin(-camera.rotation.x)*0.2, Math.cos(camera.rotation.y));
- s.position.addInPlace(forward.scale(1.6));
- s.physicsImpostor=new BABYLON.PhysicsImpostor(s,BABYLON.PhysicsImpostor.SphereImpostor,{mass:1,friction:0.4,restitution:0.2},scene);
- const mat=new BABYLON.StandardMaterial('gmat',scene); mat.emissiveColor=new BABYLON.Color3(0.9,0.25,0.1);
- s.material=mat;
- const impulse = forward.scale(10);
- s.physicsImpostor.applyImpulse(impulse, s.getAbsolutePosition());
- spawned.push(s);
- setTimeout(()=>{ explodeAt(s.getAbsolutePosition()); if(!s.isDisposed()) s.dispose(); },1200);
+startBtn.onclick = ()=>{
+  if(state.level===0) startLevel(1); else {
+    if(currentLevelObj && currentLevelObj.verify) currentLevelObj.verify();
+  }
 }
 
-function explodeAt(center){
- const radius=8;
- const all=scene.meshes;
- for(let i=0;i<all.length;i++){
-   const m=all[i];
-   if(m.physicsImpostor && m.physicsImpostor.getParam) {
-     const pos = m.getAbsolutePosition();
-     const to = pos.subtract(center);
-     const dist = Math.max(0.0001, to.length());
-     if(dist < radius && m.physicsImpostor.getMass && m.physicsImpostor.getMass() > 0){
-       const forceMag = 180 / (dist*dist);
-       const impulse = to.normalize().scale(forceMag);
-       m.physicsImpostor.applyImpulse(impulse, pos);
-     }
-   } else if(m.physicsImpostor){
-     const pos = m.getAbsolutePosition();
-     const to = pos.subtract(center);
-     const dist = Math.max(0.0001, to.length());
-     if(dist < radius){
-       const forceMag = 180 / (dist*dist);
-       const impulse = to.normalize().scale(forceMag);
-       try{ m.physicsImpostor.applyImpulse(impulse, pos);}catch(e){}
-     }
-   }
- }
-}
+menuVerify.onclick = ()=>startLevel(1);
 
-spawnBlock.addEventListener('touchstart', e=>{ e.preventDefault(); const dir=new BABYLON.Vector3(Math.sin(camera.rotation.y), -Math.sin(camera.rotation.x)*0.2, Math.cos(camera.rotation.y)); const pos=camera.position.clone().add(dir.scale(2.2)); spawnBlockAt(pos,1.8); },{passive:false});
-spawnGren.addEventListener('touchstart', e=>{ e.preventDefault(); spawnGrenade(); },{passive:false});
-clearBtn.addEventListener('touchstart', e=>{ e.preventDefault(); for(const s of spawned){ if(s && !s.isDisposed()) s.dispose(); } spawned.length=0; },{passive:false});
+toMenu();
 
-const music=document.getElementById('bgm');
-music.volume=0.95;
-music.play().catch(()=>{});
+const levels = {
+  1:{
+    render(container,done){
+      screenTitle.textContent = 'Level 1 — Pick the target';
+      screenSub.textContent = 'Select all tiles that match the target emoji.';
+      const target = rand(emojis);
+      const correctCount = 2 + Math.floor(Math.random()*2);
+      let options = [];
+      for(let i=0;i<correctCount;i++) options.push(target);
+      while(options.length<9) options.push(rand(emojis).replace);
+      options = options.map((o,i)=> options[i]===undefined?rand(emojis):options[i]);
+      while(options.length<9) options.push(rand(emojis));
+      options = shuffle(options);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div class="instruction">
+          <div class="checkrow"><div class="fake-checkbox on" id="fcb"></div></div>
+          <div>
+            <div style="font-weight:800">Select all ${target}</div>
+            <div class="small-muted">Click tiles to select. Then press Verify or use the Verify button.</div>
+          </div>
+        </div>
+        <div class="grid" id="grid"></div>
+        <div class="message" id="lvlMsg"></div>
+      `;
+      container.appendChild(wrapper);
+      const grid = wrapper.querySelector('#grid');
+      options.forEach((em,i)=>{
+        const c = document.createElement('div');
+        c.className='cell';
+        c.textContent = em;
+        c.onclick = ()=>c.classList.toggle('selected');
+        grid.appendChild(c);
+      });
+      this.verify = ()=>{
+        const cells = grid.querySelectorAll('.cell');
+        let ok=true;
+        cells.forEach(c=>{
+          if(c.textContent===target && !c.classList.contains('selected')) ok=false;
+          if(c.textContent!==target && c.classList.contains('selected')) ok=false;
+        });
+        const msg = wrapper.querySelector('#lvlMsg');
+        if(ok){msg.textContent='Correct'; msg.style.color='var(--ok)'; setTimeout(done,700)} else {msg.textContent='Try again'; msg.style.color='var(--danger)'}
+      };
+    }
+  },
 
+  2:{
+    render(container,done){
+      screenTitle.textContent = 'Level 2 — Odd one out';
+      screenSub.textContent = 'Click the single tile that is different from the rest.';
+      const base = rand(emojis);
+      let other = base;
+      while(other===base) other = rand(emojis);
+      const tiles = Array(8).fill(base).concat([other]);
+      shuffle(tiles);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div class="instruction">
+          <div style="font-weight:800">Find the odd one</div>
+          <div class="small-muted">There is exactly one tile that differs.</div>
+        </div>
+        <div class="grid" id="grid2"></div>
+        <div class="message" id="lvlMsg2"></div>
+      `;
+      container.appendChild(wrapper);
+      const grid = wrapper.querySelector('#grid2');
+      tiles.forEach(t=>{
+        const c = document.createElement('div');
+        c.className='cell';
+        c.textContent = t;
+        c.onclick = ()=>{
+          const msg = wrapper.querySelector('#lvlMsg2');
+          if(t!==base){msg.textContent='Correct'; msg.style.color='var(--ok)'; setTimeout(done,700)} else {msg.textContent='Nope'; msg.style.color='var(--danger)'}
+        };
+        grid.appendChild(c);
+      });
+      this.verify = ()=>{};
+    }
+  },
+
+  3:{
+    render(container,done){
+      screenTitle.textContent = 'Level 3 — Clicker';
+      screenSub.textContent = 'Click 400 times to prove perseverance.';
+      state.clicks = 0;
+      const target = 400;
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-weight:800">Clicks: <span id="clickCount">0</span> / ${target}</div>
+          <div class="small-muted">Tap anywhere on the button fast</div>
+        </div>
+        <div style="height:12px"></div>
+        <div class="center">
+          <button id="bigBtn" style="padding:22px 34px;border-radius:14px;font-size:18px;background:linear-gradient(90deg,#f97316,#fb923c);border:0;color:white;cursor:pointer">Click me</button>
+        </div>
+        <div class="message" id="clkMsg"></div>
+      `;
+      container.appendChild(wrapper);
+      const btn = wrapper.querySelector('#bigBtn');
+      const count = wrapper.querySelector('#clickCount');
+      const msg = wrapper.querySelector('#clkMsg');
+      btn.onclick = ()=>{
+        state.clicks++;
+        count.textContent = state.clicks;
+        if(state.clicks>=target){msg.textContent='Nice job!'; msg.style.color='var(--ok)'; setTimeout(done,500)}
+      };
+      this.verify = ()=>{ if(state.clicks>=target) done(); else {msg.textContent='Keep clicking'; msg.style.color='var(--danger)'} };
+    }
+  },
+
+  4:{
+    render(container,done){
+      screenTitle.textContent = 'Level 4 — Slider align';
+      screenSub.textContent = 'Slide until the marker falls into the green zone, then Verify.';
+      const target = 20 + Math.floor(Math.random()*60);
+      const slack = 6;
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div class="instruction">
+          <div style="font-weight:800">Match the hidden position</div>
+          <div class="small-muted">Stop the slider as close to the target area as possible.</div>
+        </div>
+        <div style="padding:8px 0">
+          <input type="range" id="sld" min="0" max="100" value="50" style="width:100%">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px">
+            <div>0</div><div>100</div>
+          </div>
+        </div>
+        <div style="height:8px"></div>
+        <div class="small-muted">Green band (visual) approximates the target zone.</div>
+        <div style="height:10px"></div>
+        <div style="height:18px;position:relative">
+          <div style="position:absolute;left:${target}%;transform:translateX(-50%);top:0;background:#ecfdf5;border-radius:6px;padding:4px 6px;color:#065f46;font-weight:700">✓</div>
+        </div>
+        <div class="message" id="sldMsg"></div>
+      `;
+      container.appendChild(wrapper);
+      const sld = wrapper.querySelector('#sld');
+      const msg = wrapper.querySelector('#sldMsg');
+      this.verify = ()=>{
+        const v = Number(sld.value);
+        if(Math.abs(v-target) <= slack){msg.textContent='Good alignment'; msg.style.color='var(--ok)'; setTimeout(done,700)} else {msg.textContent='Not aligned'; msg.style.color='var(--danger)'}
+      };
+    }
+  },
+
+  5:{
+    render(container,done){
+      screenTitle.textContent = 'Level 5 — Type the emoji name';
+      screenSub.textContent = 'Type the name of the shown emoji (simple English, lowercase acceptable).';
+      const pool = ['dog','cat','fox','bear','panda','lion','owl','pig','monkey','chicken','unicorn','octopus','turtle','butterfly','apple','banana','grape','strawberry','pineapple','peach','car','bike','plane','bus','tree','flower','cactus','fire','water'];
+      const word = rand(pool);
+      const map = {
+        dog:'🐶',cat:'🐱',fox:'🦊',bear:'🐻',panda:'🐼',lion:'🦁',owl:'🦉',pig:'🐷',monkey:'🐵',chicken:'🐔',unicorn:'🦄',octopus:'🐙',turtle:'🐢',butterfly:'🦋',apple:'🍎',banana:'🍌',grape:'🍇',strawberry:'🍓',pineapple:'🍍',peach:'🍑',car:'🚗',bike:'🚲',plane:'✈️',bus:'🚌',tree:'🌲',flower:'🌸',cactus:'🌵',fire:'🔥',water:'💧'
+      };
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div style="font-size:40px;text-align:center">${map[word]||'❓'}</div>
+        <div style="height:12px"></div>
+        <div class="small-muted" style="text-align:center">Enter the English word for the emoji above.</div>
+        <div style="height:12px"></div>
+        <input class="input" id="typed" placeholder="type the word here">
+        <div class="message" id="wordMsg"></div>
+      `;
+      container.appendChild(wrapper);
+      const typed = wrapper.querySelector('#typed');
+      const msg = wrapper.querySelector('#wordMsg');
+      this.verify = ()=>{
+        const v = typed.value.trim().toLowerCase();
+        if(v===word){msg.textContent='Correct';msg.style.color='var(--ok)';setTimeout(done,600)} else {msg.textContent='Incorrect';msg.style.color='var(--danger)'}
+      };
+    }
+  },
+
+  6:{
+    render(container,done){
+      screenTitle.textContent = 'Level 6 — Memory match';
+      screenSub.textContent = 'Find all matching pairs (limited board).';
+      const pairs = 3;
+      const pool = shuffle(emojis.slice()).slice(0,pairs);
+      let tiles = pool.concat(pool);
+      tiles = shuffle(tiles);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div class="small-muted">Flip two tiles; find all ${pairs} pairs.</div>
+        <div style="height:12px"></div>
+        <div class="small-grid" id="mg"></div>
+        <div class="message" id="memMsg"></div>
+      `;
+      container.appendChild(wrapper);
+      const grid = wrapper.querySelector('#mg');
+      let first=null;
+      let lock=false;
+      let matches=0;
+      tiles.forEach((t,i)=>{
+        const tile = document.createElement('div');
+        tile.className='tile';
+        tile.textContent = '';
+        tile.dataset.val = t;
+        tile.onclick = ()=>{
+          if(lock || tile.classList.contains('matched')) return;
+          tile.textContent = t;
+          if(!first){first=tile;return}
+          if(first===tile) return;
+          lock=true;
+          setTimeout(()=>{
+            if(first.dataset.val===tile.dataset.val){
+              first.classList.add('matched');
+              tile.classList.add('matched');
+              matches++;
+              if(matches===pairs){wrapper.querySelector('#memMsg').textContent='All matched';wrapper.querySelector('#memMsg').style.color='var(--ok)';setTimeout(done,700)}
+            } else {
+              first.textContent='';tile.textContent='';
+            }
+            first=null;lock=false;
+          },500);
+        };
+        grid.appendChild(tile);
+      });
+      this.verify = ()=>{};
+    }
+  },
+
+  7:{
+    render(container,done){
+      screenTitle.textContent = 'Level 7 — Quick math';
+      screenSub.textContent = 'Solve the shown arithmetic.';
+      const a = 2 + Math.floor(Math.random()*8);
+      const b = 1 + Math.floor(Math.random()*9);
+      const ops = ['+','-','×'];
+      const op = rand(ops);
+      let result = 0;
+      if(op==='+') result = a+b;
+      if(op==='-') result = a-b;
+      if(op==='×') result = a*b;
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div style="font-weight:800;font-size:22px">${a} ${op} ${b} = ?</div>
+        <div style="height:10px"></div>
+        <input class="input" id="mathIn" placeholder="enter result">
+        <div class="message" id="mathMsg"></div>
+      `;
+      container.appendChild(wrapper);
+      const mi = wrapper.querySelector('#mathIn');
+      const msg = wrapper.querySelector('#mathMsg');
+      this.verify = ()=>{
+        const v = Number(mi.value.trim());
+        if(v===result){msg.textContent='Correct';msg.style.color='var(--ok)';setTimeout(done,600)} else {msg.textContent='Wrong';msg.style.color='var(--danger)'}
+      };
+    }
+  },
+
+  8:{
+    render(container,done){
+      screenTitle.textContent = 'Level 8 — Order the clicks';
+      screenSub.textContent = 'Click the tiles in numeric order 1 → 5.';
+      const count = 5;
+      const nums = [];
+      for(let i=1;i<=count;i++) nums.push(i);
+      shuffle(nums);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div class="small-muted">Click numbers from 1 to ${count} in order.</div>
+        <div style="height:12px"></div>
+        <div class="small-grid" id="numGrid"></div>
+        <div class="message" id="ordMsg"></div>
+      `;
+      container.appendChild(wrapper);
+      const grid = wrapper.querySelector('#numGrid');
+      let next = 1;
+      nums.forEach(n=>{
+        const t = document.createElement('div');
+        t.className='tile';
+        t.textContent = n;
+        t.onclick = ()=>{
+          if(n===next){
+            t.classList.add('matched');
+            next++;
+            if(next>count){wrapper.querySelector('#ordMsg').textContent='Done';wrapper.querySelector('#ordMsg').style.color='var(--ok)';setTimeout(done,600)}
+          } else {
+            wrapper.querySelector('#ordMsg').textContent='Wrong order';wrapper.querySelector('#ordMsg').style.color='var(--danger)';
+          }
+        };
+        grid.appendChild(t);
+      });
+      this.verify = ()=>{};
+    }
+  },
+
+  9:{
+    render(container,done){
+      screenTitle.textContent = 'Level 9 — Repeat the pattern';
+      screenSub.textContent = 'Watch the short sequence, then repeat it. Time matters.';
+      const seqLen = 4;
+      const pool = ['🔴','🔵','🟢','🟡','🟣'];
+      const seq = [];
+      for(let i=0;i<seqLen;i++) seq.push(rand(pool));
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <div class="small-muted">Watch, then repeat by clicking the color tiles in the same order.</div>
+        <div style="height:12px"></div>
+        <div class="small-grid" id="patternGrid"></div>
+        <div style="height:12px"></div>
+        <div class="small-muted" id="replayMsg"></div>
+      `;
+      container.appendChild(wrapper);
+      const grid = wrapper.querySelector('#patternGrid');
+      pool.forEach(p=>{
+        const t = document.createElement('div');
+        t.className='tile';
+        t.textContent = p;
+        grid.appendChild(t);
+      });
+      const replayMsg = wrapper.querySelector('#replayMsg');
+      let playback = true;
+      let userIdx = 0;
+      let displayed = [];
+      function playSequence(i=0){
+        if(i>=seq.length){playback=false;replayMsg.textContent='Your turn';return}
+        const val = seq[i];
+        const tile = Array.from(grid.children).find(n=>n.textContent===val);
+        if(!tile) return;
+        const old = tile.textContent;
+        tile.style.transform='scale(1.08)';
+        setTimeout(()=>tile.style.transform='',350);
+        setTimeout(()=>playSequence(i+1),500);
+      }
+      setTimeout(()=>playSequence(),300);
+      Array.from(grid.children).forEach(t=>{
+        t.onclick = ()=>{
+          if(playback) return;
+          const want = seq[userIdx];
+          if(t.textContent===want){
+            userIdx++;
+            if(userIdx===seq.length){replayMsg.textContent='Pattern matched';replayMsg.style.color='var(--ok)';setTimeout(done,600)}
+          } else {
+            replayMsg.textContent='Wrong pattern';replayMsg.style.color='var(--danger)';playback=true;userIdx=0;setTimeout(()=>{playSequence();replayMsg.textContent='';},800);
+          }
+        };
+      });
+      this.verify = ()=>{};
+    }
+  }
+};
 </script>
 </body>
 </html>
