@@ -5,19 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I'm Not a Bot 🤖</title>
 <style>
-body{margin:0;font-family:Arial,sans-serif;background:#f1f1f1;display:flex;justify-content:center;align-items:center;min-height:100vh}
-#container{background:white;border-radius:10px;padding:30px;box-shadow:0 4px 12px rgba(0,0,0,0.2);text-align:center;width:90%;max-width:400px}
-h1{margin-top:0;font-size:22px}
-button{background:#4285f4;color:white;border:none;border-radius:5px;padding:10px 20px;font-size:16px;cursor:pointer}
-button:hover{background:#357ae8}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;justify-items:center;margin:20px 0}
-.cell{width:80px;height:80px;border:2px solid #ccc;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:36px;cursor:pointer;background:#fff;user-select:none}
-.selected{background:#c8e6c9;border-color:#4caf50}
-#message{font-weight:bold;margin-top:10px}
-#progress{margin-top:10px;font-size:14px}
-input[type=text]{width:80%;padding:8px;font-size:16px;border-radius:4px;border:1px solid #ccc}
-#bar{height:15px;width:100%;background:#ddd;border-radius:10px;overflow:hidden;margin-top:15px}
-#bar-inner{height:100%;width:0%;background:#4caf50;transition:width 0.2s}
+body {
+  margin: 0;
+  font-family: Arial,sans-serif;
+  background:#f1f1f1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+#container {
+  background:white;
+  border-radius:10px;
+  padding:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  text-align:center;
+  max-width:350px;
+  width:90%;
+}
+h1 { margin-top:0;font-size:22px;}
+button {
+  background:#4285f4;color:white;border:none;border-radius:5px;padding:10px 20px;font-size:16px;cursor:pointer;
+}
+button:hover{background:#357ae8;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;}
+.cell{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:36px;border:2px solid #ccc;border-radius:5px;cursor:pointer;background:#fff;}
+.selected{background:#c8e6c9;border-color:#4caf50;}
+#message{font-weight:bold;margin-top:10px;}
+#progress{margin-top:10px;font-size:14px;}
+input[type=text]{width:80%;padding:8px;font-size:16px;border-radius:4px;border:1px solid #ccc;}
+#bar{height:15px;width:100%;background:#ddd;border-radius:10px;overflow:hidden;margin-top:15px;}
+#bar-inner{height:100%;width:0%;background:#4caf50;transition:width 0.2s;}
 </style>
 </head>
 <body>
@@ -26,7 +44,7 @@ input[type=text]{width:80%;padding:8px;font-size:16px;border-radius:4px;border:1
 <div id="menu">
 <button id="start">Verify</button>
 </div>
-<div id="game" style="display:none"></div>
+<div id="game" style="display:none;"></div>
 <div id="message"></div>
 <div id="progress"></div>
 </div>
@@ -39,7 +57,12 @@ document.getElementById('start').onclick=()=>startLevel(1)
 
 function next(){
 level++
-if(level>18){msg.textContent='✅ You are truly human!';game.innerHTML='';prog.textContent='';return}
+if(level>18){
+msg.textContent='✅ You are truly human!'
+game.innerHTML=''
+prog.textContent=''
+return
+}
 startLevel(level)
 }
 
@@ -136,35 +159,43 @@ inner.id='bar-inner'
 bar.appendChild(inner)
 game.appendChild(bar)
 let count=0
-function increment(){count++;inner.style.width=(count/50*100)+'%';if(count>=50){msg.textContent='✅ Passed';document.removeEventListener('click',increment);setTimeout(next,1000)}}
-document.addEventListener('click',increment)
+game.onclick=()=>{
+count++
+inner.style.width=(count/50*100)+'%'
+if(count>=50){msg.textContent='✅ Passed';game.onclick=null;setTimeout(next,1000)}
+}
 }
 
 function levelFour(){
 const text=document.createElement('div')
-text.textContent='Click all squares with a dot'
+text.textContent='Select the odd one out'
 game.appendChild(text)
 const grid=document.createElement('div')
 grid.className='grid'
 game.appendChild(grid)
-const dots=[]
-while(dots.length<3){let d=Math.floor(Math.random()*9);if(!dots.includes(d))dots.push(d)}
-for(let i=0;i<9;i++){
+const symbols=['⬛','⬛','⬛','⬛','⬜','⬛','⬛','⬛','⬛']
+symbols.sort(()=>Math.random()-0.5)
+symbols.forEach((s,i)=>{
 const c=document.createElement('div')
 c.className='cell'
-c.onclick=()=>{if(dots.includes(i)){c.style.background='#4caf50';dots.splice(dots.indexOf(i),1);if(dots.length==0){msg.textContent='✅ Passed';setTimeout(next,1000)}}else msg.textContent='❌ Wrong'}
+c.textContent=s
+c.onclick=()=>{if(s=='⬜'){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'}
 grid.appendChild(c)
-}
+})
 }
 
 function levelFive(){
 const text=document.createElement('div')
-text.textContent='Tap the screen rapidly 20 times'
+text.textContent='Tap the button repeatedly 10 times'
 game.appendChild(text)
-let taps=0
-function tapHandler(){taps++;msg.textContent=`${taps}/20`;if(taps>=20){msg.textContent='✅ Passed';document.removeEventListener('touchstart',tapHandler);document.removeEventListener('click',tapHandler);setTimeout(next,1000)}}
-document.addEventListener('touchstart',tapHandler)
-document.addEventListener('click',tapHandler)
+const btn=document.createElement('button')
+btn.textContent='Tap me'
+let count=0
+btn.onclick=()=>{
+count++
+if(count>=10){msg.textContent='✅ Passed';setTimeout(next,1000)}
+}
+game.appendChild(btn)
 }
 
 function levelSix(){
@@ -179,13 +210,15 @@ range.value=0
 game.appendChild(range)
 const btn=document.createElement('button')
 btn.textContent='Verify'
-btn.onclick=()=>{if(range.value==100){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Not full'}
+btn.onclick=()=>{
+if(range.value==100){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Not full'
+}
 game.appendChild(btn)
 }
 
 function levelSeven(){
 const text=document.createElement('div')
-text.textContent='Select the green square (changes each second)'
+text.textContent='Click the green square (changes each second)'
 game.appendChild(text)
 const grid=document.createElement('div')
 grid.className='grid'
@@ -237,7 +270,6 @@ if(e.key=='ArrowRight')pos+=3
 pos=Math.max(0,Math.min(190,pos))
 dot.style.left=pos+'px'
 }
-
 }
 
 function levelNine(){
@@ -256,7 +288,8 @@ inp.type='text'
 const btn=document.createElement('button')
 btn.textContent='Submit'
 btn.onclick=()=>{
-if(parseInt(inp.value)==ans){score++;msg.textContent='✅';q.remove();inp.remove();btn.remove();if(score==3){msg.textContent='✅ Passed';setTimeout(next,1000)}else ask()}else msg.textContent='❌'}
+if(parseInt(inp.value)==ans){score++;msg.textContent='✅';q.remove();inp.remove();btn.remove();if(score==3){msg.textContent='✅ Passed';setTimeout(next,1000)}else ask()}else msg.textContent='❌'
+}
 game.append(q,inp,btn)
 }
 ask()
@@ -264,169 +297,205 @@ ask()
 
 function levelTen(){
 const text=document.createElement('div')
-text.textContent='Tap the odd emoji out'
+text.textContent='Find 3 hidden dots in 2 rounds'
 game.appendChild(text)
-const emojis=['🐶','🐶','🐶','🐱']
+let round=0,found=0
+function roundFunc(){
 const grid=document.createElement('div')
 grid.className='grid'
 game.appendChild(grid)
-emojis.sort(()=>Math.random()-0.5).forEach((e,i)=>{
+const hidden=[]
+while(hidden.length<3){const n=Math.floor(Math.random()*9);if(!hidden.includes(n))hidden.push(n)}
+for(let i=0;i<9;i++){
 const c=document.createElement('div')
 c.className='cell'
-c.textContent=e
-c.onclick=()=>{if(e=='🐱'){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'}
+c.onclick=()=>{if(hidden.includes(i)){found++}if(found>=3){round++;found=0;grid.remove();if(round>=2){msg.textContent='✅ Passed';setTimeout(next,1000)}else roundFunc()}}
 grid.appendChild(c)
-})
+}
+}
+roundFunc()
 }
 
 function levelEleven(){
 const text=document.createElement('div')
-text.textContent='Click squares in ascending number'
+text.textContent='Select all fruits (round)'
 game.appendChild(text)
-const nums=[]
-while(nums.length<4){let n=Math.floor(Math.random()*9)+1;if(!nums.includes(n))nums.push(n)}
+const fruits=['🍎','🍌','🍎','🍌','🐶','🐱','🍎','🍌','🐸']
+const rounds=2
+let round=0
+function roundFunc(){
 const grid=document.createElement('div')
 grid.className='grid'
 game.appendChild(grid)
-let order=0
-nums.forEach(n=>{
+const opts=[]
+for(let i=0;i<fruits.length;i++) opts.push(fruits[i])
+opts.sort(()=>Math.random()-0.5)
+opts.forEach(e=>{
 const c=document.createElement('div')
 c.className='cell'
-c.textContent=n
-c.onclick=()=>{if(n==nums[order]){order++;c.style.background='#4caf50';if(order==4){msg.textContent='✅ Passed';setTimeout(next,1000)}}else msg.textContent='❌ Wrong'}
+c.textContent=e
+c.onclick=()=>{
+if(e=='🍎'||e=='🍌'){c.classList.add('selected');const selected=grid.querySelectorAll('.selected').length
+if(selected>=4){round++;grid.remove();if(round>=rounds){msg.textContent='✅ Passed';setTimeout(next,1000)}else roundFunc()}}else msg.textContent='❌ Wrong'
+}
 grid.appendChild(c)
 })
+}
+roundFunc()
 }
 
 function levelTwelve(){
 const text=document.createElement('div')
-text.textContent='Select all red squares (3 rounds)'
+text.textContent='Solve 5 quick math sums consecutively'
 game.appendChild(text)
-let round=0
-function roundFunc(){
-game.querySelectorAll('.grid,.cell').forEach(e=>e.remove())
-const grid=document.createElement('div')
-grid.className='grid'
-game.appendChild(grid)
-const reds=[]
-while(reds.length<3){let r=Math.floor(Math.random()*9);if(!reds.includes(r))reds.push(r)}
-for(let i=0;i<9;i++){
-const c=document.createElement('div')
-c.className='cell'
-c.onclick=()=>{if(reds.includes(i)){c.style.background='#f44336';reds.splice(reds.indexOf(i),1);if(reds.length==0){round++;if(round<3){roundFunc()}else{msg.textContent='✅ Passed';setTimeout(next,1000)}}}else msg.textContent='❌ Wrong'}}
-grid.appendChild(c)
+let score=0
+function ask(){
+const a=Math.floor(Math.random()*15)
+const b=Math.floor(Math.random()*15)
+const ans=a+b
+const q=document.createElement('div')
+q.textContent=`${a}+${b}=?`
+const inp=document.createElement('input')
+inp.type='text'
+const btn=document.createElement('button')
+btn.textContent='Submit'
+btn.onclick=()=>{
+if(parseInt(inp.value)==ans){score++;msg.textContent='✅';q.remove();inp.remove();btn.remove();if(score>=5){msg.textContent='✅ Passed';setTimeout(next,1000)}else ask()}else msg.textContent='❌'
 }
+game.append(q,inp,btn)
 }
-roundFunc()
+ask()
 }
 
 function levelThirteen(){
 const text=document.createElement('div')
-text.textContent='Shake your device 5 times (or click rapidly)'
-game.appendChild(text)
-let count=0
-function handler(){count++;msg.textContent=`${count}/5`;if(count>=5){msg.textContent='✅ Passed';window.removeEventListener('devicemotion',handler);document.removeEventListener('click',handler);setTimeout(next,1000)}}
-window.addEventListener('devicemotion',handler)
-document.addEventListener('click',handler)
-}
-
-function levelFourteen(){
-const text=document.createElement('div')
-text.textContent='Click alternating squares 10 times'
-game.appendChild(text)
-let last=null
-let count=0
-const grid=document.createElement('div')
-grid.className='grid'
-game.appendChild(grid)
-for(let i=0;i<4;i++){
-const c=document.createElement('div')
-c.className='cell'
-c.onclick=()=>{if(i!=last){count++;last=i;c.style.background='#4caf50';if(count>=10){msg.textContent='✅ Passed';setTimeout(next,1000)}}else msg.textContent='❌ Same square'}
-grid.appendChild(c)
-}
-}
-
-function levelFifteen(){
-const text=document.createElement('div')
-text.textContent='Type the word shown backwards'
-game.appendChild(text)
-const words=['HUMAN','ROBOT','VERIFY','CAPTCHA']
-const word=words[Math.floor(Math.random()*words.length)]
-const disp=document.createElement('div')
-disp.textContent=word.split('').reverse().join('')
-disp.style.letterSpacing='5px'
-game.appendChild(disp)
-const input=document.createElement('input')
-input.type='text'
-const btn=document.createElement('button')
-btn.textContent='Verify'
-btn.onclick=()=>{if(input.value.toUpperCase()==word){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'}
-game.appendChild(input)
-game.appendChild(btn)
-}
-
-function levelSixteen(){
-const text=document.createElement('div')
-text.textContent='Slide the blocks in order (2 rounds)'
+text.textContent='Tap squares that turn green within 1s (round 3)'
 game.appendChild(text)
 let round=0
 function roundFunc(){
-game.querySelectorAll('.grid,.cell').forEach(e=>e.remove())
 const grid=document.createElement('div')
 grid.className='grid'
 game.appendChild(grid)
-let nums=[1,2,3,4]
-nums.sort(()=>Math.random()-0.5)
-let order=0
-nums.forEach(n=>{
-const c=document.createElement('div')
-c.className='cell'
-c.textContent=n
-c.onclick=()=>{if(n==order+1){order++;c.style.background='#4caf50';if(order==4){round++;if(round<2){roundFunc()}else{msg.textContent='✅ Passed';setTimeout(next,1000)}}}else msg.textContent='❌ Wrong'}
-grid.appendChild(c)
-})
-}
-roundFunc()
-}
-
-function levelSeventeen(){
-const text=document.createElement('div')
-text.textContent='Click on all moving squares (3 rounds)'
-game.appendChild(text)
-let round=0
-function roundFunc(){
-game.querySelectorAll('.grid,.cell').forEach(e=>e.remove())
-const grid=document.createElement('div')
-grid.className='grid'
-game.appendChild(grid)
-const moving=[]
-while(moving.length<2){let r=Math.floor(Math.random()*9);if(!moving.includes(r))moving.push(r)}
+let green=Math.floor(Math.random()*9)
+grid.querySelectorAll('.cell').forEach(c=>c.remove())
 for(let i=0;i<9;i++){
 const c=document.createElement('div')
 c.className='cell'
 grid.appendChild(c)
-if(moving.includes(i)){
-let dir=1
-setInterval(()=>{c.style.transform=`translateX(${(Math.sin(Date.now()/200)*10)}px)`},16)
-c.onclick=()=>{c.style.background='#4caf50';moving.splice(moving.indexOf(i),1);if(moving.length==0){round++;if(round<3){roundFunc()}else{msg.textContent='✅ Passed';setTimeout(next,1000)}}}
 }
+function flash(){
+grid.querySelectorAll('.cell').forEach((c,i)=>{
+c.style.background=i==green?'#4caf50':'#fff'
+c.onclick=()=>{if(i==green){green=Math.floor(Math.random()*9);flash()}}
+})
 }
+flash()
+round++;if(round>=3){msg.textContent='✅ Passed';setTimeout(next,1000)}
 }
 roundFunc()
 }
 
-function levelEighteen(){
+function levelFourteen(){
 const text=document.createElement('div')
-text.textContent='Final verification: type YES to complete'
+text.textContent='Drag slider to exact 50%'
 game.appendChild(text)
+const range=document.createElement('input')
+range.type='range'
+range.min=0
+range.max=100
+range.value=0
+game.appendChild(range)
+const btn=document.createElement('button')
+btn.textContent='Verify'
+btn.onclick=()=>{
+if(range.value>=48&&range.value<=52){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Not centered'
+}
+game.appendChild(btn)
+}
+
+function levelFifteen(){
+const text=document.createElement('div')
+text.textContent='Click moving square 5 times in 3 rounds'
+game.appendChild(text)
+let round=0,count=0
+function roundFunc(){
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+let pos=Math.floor(Math.random()*9)
+for(let i=0;i<9;i++){
+const c=document.createElement('div')
+c.className='cell'
+grid.appendChild(c)
+}
+grid.querySelectorAll('.cell')[pos].onclick=()=>{
+count++
+if(count>=5){round++;count=0;grid.remove();if(round>=3){msg.textContent='✅ Passed';setTimeout(next,1000)}else roundFunc()}}
+}
+roundFunc()
+}
+
+function levelSixteen(){
+const text=document.createElement('div')
+text.textContent='Type the reversed code'
+game.appendChild(text)
+const code=Math.random().toString(36).substring(2,6).toUpperCase()
+const disp=document.createElement('div')
+disp.style.letterSpacing='5px'
+disp.style.fontFamily='monospace'
+disp.style.fontSize='22px'
+disp.textContent=code
 const input=document.createElement('input')
 input.type='text'
 const btn=document.createElement('button')
 btn.textContent='Verify'
-btn.onclick=()=>{if(input.value.toUpperCase()=='YES'){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'}
-game.appendChild(input)
-game.appendChild(btn)
+btn.onclick=()=>{
+if(input.value.toUpperCase()==code.split('').reverse().join('')){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'
+}
+game.append(disp,input,btn)
+}
+
+function levelSeventeen(){
+const text=document.createElement('div')
+text.textContent='Tap squares in numerical order 1→9'
+game.appendChild(text)
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+const numbers=[1,2,3,4,5,6,7,8,9]
+let index=0
+numbers.forEach(n=>{
+const c=document.createElement('div')
+c.className='cell'
+c.textContent=n
+c.onclick=()=>{
+if(n==numbers[index]){index++;c.style.background='#4caf50';if(index>=9){msg.textContent='✅ Passed';setTimeout(next,1000)}}else msg.textContent='❌ Wrong order'
+}
+grid.appendChild(c)
+})
+}
+
+function levelEighteen(){
+const text=document.createElement('div')
+text.textContent='Final: Solve 5 quick problems in 2 rounds'
+game.appendChild(text)
+let round=0,score=0
+function roundFunc(){
+const a=Math.floor(Math.random()*20)
+const b=Math.floor(Math.random()*20)
+const ans=a+b
+const q=document.createElement('div')
+q.textContent=`${a}+${b}=?`
+const inp=document.createElement('input')
+inp.type='text'
+const btn=document.createElement('button')
+btn.textContent='Submit'
+btn.onclick=()=>{
+if(parseInt(inp.value)==ans){score++;msg.textContent='✅';q.remove();inp.remove();btn.remove();if(score>=5){round++;score=0;if(round>=2){msg.textContent='✅ Passed';setTimeout(next,1000)}else roundFunc()}else roundFunc()}else msg.textContent='❌'
+}
+game.append(q,inp,btn)
+}
+roundFunc()
 }
 </script>
 </body>
