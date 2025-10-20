@@ -1,495 +1,472 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I'm Not a Bot 🤖</title>
 <style>
-  :root{
-    --primary:#1a73e8;
-    --bg:#f3f4f6;
-    --card:#ffffff;
-    --muted:#666;
-    --good:#4caf50;
-    --bad:#e53935;
-    --shadow: 0 6px 20px rgba(10,10,10,0.12);
-  }
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial; background:var(--bg); -webkit-font-smoothing:antialiased;}
-  .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
-  .card{width:100%;max-width:520px;background:var(--card);border-radius:12px;padding:20px;box-shadow:var(--shadow);box-sizing:border-box;}
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-  h1{font-size:20px;margin:0;display:flex;align-items:center;gap:10px}
-  .tag{font-size:12px;color:var(--muted);background:#eef6ff;padding:6px 10px;border-radius:999px}
-  .area{margin-top:14px}
-  .center{display:flex;align-items:center;justify-content:center;flex-direction:column}
-  .menu{display:flex;flex-direction:column;gap:12px;align-items:center}
-  button{background:var(--primary);color:white;border:none;padding:10px 18px;border-radius:8px;font-size:15px;cursor:pointer;box-shadow:0 4px 10px rgba(26,115,232,0.18)}
-  button.secondary{background:transparent;color:var(--primary);border:2px solid rgba(26,115,232,0.12);box-shadow:none}
-  #game{display:none}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;justify-items:center;align-items:center}
-  .cell{width:calc(min(80px,22vw));height:calc(min(80px,22vw));border-radius:8px;background:#fff;border:2px solid #e6e6e6;display:flex;align-items:center;justify-content:center;font-size:calc(min(36px,8vw));user-select:none;-webkit-user-select:none;touch-action:manipulation}
-  .cell.selected{border-color:var(--good);background:#e9f7ec}
-  .hint{font-size:14px;color:var(--muted);margin-bottom:8px}
-  .message{min-height:22px;font-weight:600;margin-top:10px}
-  #progress{margin-top:10px;color:var(--muted);font-size:13px}
-  input[type=text]{width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;font-size:15px;box-sizing:border-box}
-  #bar{width:100%;height:14px;background:#eee;border-radius:999px;overflow:hidden;margin-top:12px}
-  #bar-inner{height:100%;width:0%;background:var(--good);transition:width .15s}
-  .row{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
-  .small{font-size:13px;color:var(--muted)}
-  .control{display:flex;gap:8px;align-items:center;justify-content:center}
-  .tile{width:calc(min(60px,16vw));height:calc(min(60px,16vw));border-radius:6px;background:#fafafa;border:1px solid #eee;display:flex;align-items:center;justify-content:center;font-weight:700}
-  @media(min-width:640px){
-    .grid{grid-template-columns:repeat(3,96px)}
-    .cell{width:96px;height:96px;font-size:36px}
-    .tile{width:72px;height:72px}
-  }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f1f1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+#container {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
+h1 {
+  margin-top: 0;
+  font-size: 22px;
+}
+button {
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+button:hover { background: #357ae8; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
+}
+.cell {
+  width: 80px;
+  height: 80px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  cursor: pointer;
+  background: #fff;
+}
+.selected { background: #c8e6c9; border-color: #4caf50; }
+#message { font-weight: bold; margin-top: 10px; }
+#progress { margin-top: 10px; font-size: 14px; }
+input[type=text], input[type=number] {
+  width: 80%;
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+#bar {
+  height: 15px;
+  width: 100%;
+  background: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 15px;
+}
+#bar-inner {
+  height: 100%;
+  width: 0%;
+  background: #4caf50;
+  transition: width 0.2s;
+}
+@media(max-width:400px){
+  .grid {grid-template-columns: repeat(3, 60px);}
+  .cell {width:60px;height:60px;font-size:28px;}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card" role="application">
-    <header>
-      <h1>I'm Not a Bot <span aria-hidden>🤖</span></h1>
-      <div class="tag" id="stageTag">Level 1/18</div>
-    </header>
-
-    <main class="area center" id="mainArea">
-      <div id="menu" class="menu">
-        <div class="hint small">Prove you are human</div>
-        <button id="startBtn">Verify</button>
-        <div class="row small">
-          <button id="how" class="secondary">How it works</button>
-        </div>
-      </div>
-
-      <div id="game" aria-live="polite"></div>
-
-      <div class="message" id="message" role="status"></div>
-      <div id="progress" class="small"></div>
-    </main>
-
-  </div>
+<div id="container">
+<h1>I'm Not a Bot 🤖</h1>
+<div id="menu">
+  <button id="start">Verify</button>
 </div>
-
+<div id="game" style="display:none;"></div>
+<div id="message"></div>
+<div id="progress"></div>
+</div>
 <script>
 let level = 1
-const TOTAL = 18
-const main = document.getElementById('mainArea')
-const menu = document.getElementById('menu')
 const game = document.getElementById('game')
 const msg = document.getElementById('message')
 const prog = document.getElementById('progress')
-const stageTag = document.getElementById('stageTag')
-document.getElementById('startBtn').addEventListener('click',()=>startLevel(1))
-document.getElementById('how').addEventListener('click',()=>{msg.textContent='Complete each verification challenge to advance. Levels get harder.'})
+document.getElementById('start').onclick = () => startLevel(1)
 
-function updateStage(){stageTag.textContent='Level '+level+'/'+TOTAL; prog.textContent='Level '+level+' of '+TOTAL}
-
-function startLevel(n){
-  level = n
-  updateStage()
-  menu.style.display='none'
-  game.style.display='block'
-  game.innerHTML=''
-  msg.textContent=''
-  switch(level){
-    case 1: levelOne(); break
-    case 2: levelTwo(); break
-    case 3: levelThree(); break
-    case 4: levelFour(); break
-    case 5: levelFive(); break
-    case 6: levelSix(); break
-    case 7: levelSeven(); break
-    case 8: levelEight(); break
-    case 9: levelNine(); break
-    case 10: levelTen(); break
-    case 11: levelEleven(); break
-    case 12: levelTwelve(); break
-    case 13: levelThirteen(); break
-    case 14: levelFourteen(); break
-    case 15: levelFifteen(); break
-    case 16: levelSixteen(); break
-    case 17: levelSeventeen(); break
-    case 18: levelEighteen(); break
-    default: victory(); break
+function next() {
+  level++
+  if (level>18) {
+    msg.textContent='✅ You are truly human!'
+    game.innerHTML=''
+    prog.textContent=''
+    return
   }
+  startLevel(level)
 }
 
-function nextLevel(){
-  if(level<TOTAL){startLevel(level+1)}else victory()
-}
-
-function victory(){
+function startLevel(lvl) {
+  document.getElementById('menu').style.display='none'
+  game.style.display='block'
+  msg.textContent=''
+  prog.textContent='Level '+lvl+'/18'
   game.innerHTML=''
-  msg.style.color = 'var(--good)'
-  msg.textContent = '✅ All checks passed — you are human!'
-  prog.textContent = 'Complete'
-  const btn = document.createElement('button')
-  btn.textContent = 'Play again'
-  btn.addEventListener('click',()=>{level=1; updateStage(); menu.style.display='block'; game.style.display='none'; msg.textContent=''; prog.textContent='';})
-  game.appendChild(btn)
+  if (lvl==1) levelOne()
+  if (lvl==2) levelTwo()
+  if (lvl==3) levelThree()
+  if (lvl==4) levelFour()
+  if (lvl==5) levelFive()
+  if (lvl==6) levelSix()
+  if (lvl==7) levelSeven()
+  if (lvl==8) levelEight()
+  if (lvl==9) levelNine()
+  if (lvl==10) levelTen()
+  if (lvl==11) levelEleven()
+  if (lvl==12) levelTwelve()
+  if (lvl==13) levelThirteen()
+  if (lvl==14) levelFourteen()
+  if (lvl==15) levelFifteen()
+  if (lvl==16) levelSixteen()
+  if (lvl==17) levelSeventeen()
+  if (lvl==18) levelEighteen()
 }
 
-/* Level 1 - Emoji selector (basic) */
-function levelOne(){
+function levelOne() {
   const emojis=['🐶','🐱','🍎','🚗','🌸','🌲','🍌','🐸','🐟']
-  const target = emojis[Math.floor(Math.random()*emojis.length)]
-  const instruct = document.createElement('div')
-  instruct.className='hint'
-  instruct.textContent = 'Select all '+target
+  const target=emojis[Math.floor(Math.random()*emojis.length)]
+  const instruct=document.createElement('div')
+  instruct.textContent='Select all '+target
   game.appendChild(instruct)
-  const grid = document.createElement('div')
+  const grid=document.createElement('div')
   grid.className='grid'
   game.appendChild(grid)
   const opts=[]
-  const correctCount = 2 + Math.floor(Math.random()*2)
-  for(let i=0;i<correctCount;i++) opts.push(target)
+  const correct=2+Math.floor(Math.random()*2)
+  for(let i=0;i<correct;i++) opts.push(target)
   while(opts.length<9){
-    let e = emojis[Math.floor(Math.random()*emojis.length)]
-    if(e!==target) opts.push(e)
+    let e=emojis[Math.floor(Math.random()*emojis.length)]
+    if(e!=target)opts.push(e)
   }
   opts.sort(()=>Math.random()-0.5)
   opts.forEach(e=>{
-    const c = document.createElement('div'); c.className='cell'; c.textContent=e
-    c.addEventListener('click',()=>c.classList.toggle('selected'))
+    const c=document.createElement('div')
+    c.className='cell'
+    c.textContent=e
+    c.onclick=()=>c.classList.toggle('selected')
     grid.appendChild(c)
   })
-  const v = document.createElement('button'); v.textContent='Verify'
-  v.addEventListener('click',()=>{
+  const btn=document.createElement('button')
+  btn.textContent='Verify'
+  btn.onclick=()=>{
     let ok=true
     grid.querySelectorAll('.cell').forEach(c=>{
-      if(c.textContent===target && !c.classList.contains('selected')) ok=false
-      if(c.textContent!==target && c.classList.contains('selected')) ok=false
+      if(c.textContent==target&&!c.classList.contains('selected'))ok=false
+      if(c.textContent!=target&&c.classList.contains('selected'))ok=false
     })
-    if(ok){msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,800)} else {msg.style.color='var(--bad)'; msg.textContent='❌ Try again'}
-  })
-  game.appendChild(v)
+    if(ok){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Try again'
+  }
+  game.appendChild(btn)
 }
 
-/* Level 2 - Type shown code */
-function levelTwo(){
-  const code = Math.random().toString(36).substring(2,7).toUpperCase()
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Type the characters you see'
-  const disp = document.createElement('div'); disp.style.fontFamily='monospace'; disp.style.letterSpacing='6px'; disp.style.fontSize='20px'; disp.textContent=code
-  const input = document.createElement('input'); input.type='text'; input.placeholder='Enter code'
-  const v = document.createElement('button'); v.textContent='Verify'
-  v.addEventListener('click',()=>{ if(input.value.toUpperCase()===code){msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,700)} else {msg.style.color='var(--bad)'; msg.textContent='❌ Wrong'} })
-  game.append(instruct,disp,input,v)
+function levelTwo() {
+  const text=document.createElement('div')
+  text.textContent='Type the characters:'
+  const code=Math.random().toString(36).substring(2,7).toUpperCase()
+  const disp=document.createElement('div')
+  disp.style.letterSpacing='5px'
+  disp.style.fontFamily='monospace'
+  disp.style.fontSize='22px'
+  disp.textContent=code
+  const input=document.createElement('input')
+  input.type='text'
+  const btn=document.createElement('button')
+  btn.textContent='Verify'
+  btn.onclick=()=>{
+    if(input.value.toUpperCase()==code){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'
+  }
+  game.append(text,disp,input,btn)
 }
 
-/* Level 3 - Click 50 times (was 400) */
-function levelThree(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Tap / Click anywhere inside the box 50 times'
-  const box = document.createElement('div'); box.style.width='100%'; box.style.minHeight='160px'; box.style.border='2px dashed #e6e6e6'; box.style.borderRadius='10px'; box.style.display='flex'; box.style.alignItems='center'; box.style.justifyContent='center'; box.style.fontSize='20px'; box.style.background='#fff'
-  const counter = document.createElement('div'); counter.textContent='0 / 50'
-  box.appendChild(counter)
-  game.append(instruct,box)
-  let count = 0
-  function add(){ if(count>=50) return; count++; counter.textContent = count+' / 50'; if(count>=50){msg.style.color='var(--good)'; msg.textContent='✅ Passed'; box.removeEventListener('pointerdown',on); setTimeout(nextLevel,700)} }
-  function on(e){ e.preventDefault(); add() }
-  box.addEventListener('pointerdown', on)
-  box.addEventListener('touchstart', on)
+function levelThree() {
+  const text=document.createElement('div')
+  text.textContent='Click 50 times to verify'
+  game.appendChild(text)
+  const bar=document.createElement('div')
+  bar.id='bar'
+  const inner=document.createElement('div')
+  inner.id='bar-inner'
+  bar.appendChild(inner)
+  game.appendChild(bar)
+  let count=0
+  game.onclick=()=>{
+    count++
+    inner.style.width=(count/50*100)+'%'
+    if(count>=50){msg.textContent='✅ Passed';game.onclick=null;setTimeout(next,1000)}
+  }
 }
 
-/* Level 4 - Hold for 5 seconds (touch & mouse) */
-function levelFour(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Press and hold the button for 5 seconds'
-  const btn = document.createElement('button'); btn.textContent='Hold'
-  let timer = null, held=false
-  function startHold(){ if(timer) return; held=false; timer = setTimeout(()=>{ held=true; msg.style.color='var(--good)'; msg.textContent='✅ Passed'; clearTimeout(timer); timer=null; setTimeout(nextLevel,700) },5000); msg.textContent='Holding...' }
-  function endHold(){ if(timer){ clearTimeout(timer); timer=null; if(!held) { msg.style.color='var(--bad)'; msg.textContent='❌ Too short' } } }
-  btn.addEventListener('pointerdown', startHold)
-  window.addEventListener('pointerup', endHold)
-  btn.addEventListener('touchstart', startHold)
-  window.addEventListener('touchend', endHold)
-  game.append(instruct,btn)
+function levelFour() {
+  const text=document.createElement('div')
+  text.textContent='Hold the button for 5 seconds to verify'
+  const btn=document.createElement('button')
+  btn.textContent='Hold'
+  let timer
+  btn.onmousedown=()=>{
+    msg.textContent='⏳ Holding...'
+    timer=setTimeout(()=>{msg.textContent='✅ Passed';setTimeout(next,1000)},5000)
+  }
+  btn.onmouseup=()=>{clearTimeout(timer);msg.textContent='❌ Too short'}
+  game.append(text,btn)
 }
 
-/* Level 5 - Find hidden dot (one correct tile) */
-function levelFive(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Tap the square with a faint dot'
-  const grid = document.createElement('div'); grid.className='grid'
-  const hidden = Math.floor(Math.random()*9)
+function levelFive() {
+  const text=document.createElement('div')
+  text.textContent='Select the square with a hidden dot'
+  game.appendChild(text)
+  const grid=document.createElement('div')
+  grid.className='grid'
+  game.appendChild(grid)
+  const hidden=Math.floor(Math.random()*9)
   for(let i=0;i<9;i++){
-    const c = document.createElement('div'); c.className='cell'
-    c.addEventListener('click', ()=>{ if(i===hidden){ msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,700) } else { msg.style.color='var(--bad)'; msg.textContent='❌ Wrong' } })
-    if(i===hidden){
-      const dot = document.createElement('div'); dot.style.width='6px'; dot.style.height='6px'; dot.style.borderRadius='50%'; dot.style.background='#000'; dot.style.opacity='0.07'
-      c.appendChild(dot)
+    const c=document.createElement('div')
+    c.className='cell'
+    c.onclick=()=>{
+      if(i==hidden){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong one'
     }
     grid.appendChild(c)
   }
-  game.append(instruct,grid)
 }
 
-/* Level 6 - Slider to 100% */
-function levelSix(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Slide the control all the way to 100%'
-  const input = document.createElement('input'); input.type='range'; input.min=0; input.max=100; input.value=0; input.style.width='100%'
-  const v = document.createElement('button'); v.textContent='Verify'
-  v.addEventListener('click', ()=>{ if(parseInt(input.value)===100){ msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,700)} else { msg.style.color='var(--bad)'; msg.textContent='❌ Not full' } })
-  game.append(instruct,input,v)
-}
-
-/* Level 7 - Moving green square, click it (changes every 800ms) */
-function levelSeven(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Click the green square when it appears (3 hits)'
-  const grid = document.createElement('div'); grid.className='grid'
-  for(let i=0;i<9;i++){ const c=document.createElement('div'); c.className='cell'; grid.appendChild(c) }
-  game.append(instruct,grid)
-  let green = Math.floor(Math.random()*9), hits=0
-  function refresh(){
-    const cells = grid.querySelectorAll('.cell')
-    cells.forEach((c,i)=>{ c.style.background = (i===green)? '#c8f7d0' : '#fff'; c.style.borderColor = (i===green)? 'var(--good)' : '#e6e6e6'; c.onclick = ()=>{ if(i===green){ hits++; msg.style.color='var(--good)'; msg.textContent='Hit '+hits+'/3'; if(hits>=3){ clearInterval(iv); setTimeout(nextLevel,700) } } else { msg.style.color='var(--bad)'; msg.textContent='Miss' } } })
-    green = Math.floor(Math.random()*9)
+function levelSix() {
+  const text=document.createElement('div')
+  text.textContent='Drag the slider to 100%'
+  game.appendChild(text)
+  const range=document.createElement('input')
+  range.type='range'
+  range.min=0
+  range.max=100
+  range.value=0
+  game.appendChild(range)
+  const btn=document.createElement('button')
+  btn.textContent='Verify'
+  btn.onclick=()=>{
+    if(range.value==100){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Not full'
   }
+  game.appendChild(btn)
+}
+
+function levelSeven() {
+  const text=document.createElement('div')
+  text.textContent='Click the green square (changes each second)'
+  game.appendChild(text)
+  const grid=document.createElement('div')
+  grid.className='grid'
+  game.appendChild(grid)
+  let green=Math.floor(Math.random()*9)
+  for(let i=0;i<9;i++){
+    const c=document.createElement('div')
+    c.className='cell'
+    grid.appendChild(c)
+  }
+  function refresh(){
+    grid.querySelectorAll('.cell').forEach((c,i)=>{
+      c.style.background=i==green?'#4caf50':'#fff'
+      c.onclick=()=>{if(i==green){msg.textContent='✅ Passed';clearInterval(interval);setTimeout(next,1000)}else msg.textContent='❌ Missed'}
+    })
+    green=Math.floor(Math.random()*9)
+  }
+  const interval=setInterval(refresh,1000)
   refresh()
-  const iv = setInterval(refresh,800)
 }
 
-/* Level 8 - Balance bar with arrow keys (center for 3s) */
-function levelEight(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Use arrow keys to keep the dot centered for 3 seconds'
-  const bar = document.createElement('div'); bar.style.width='100%'; bar.style.height='14px'; bar.style.background='#eee'; bar.style.borderRadius='999px'; bar.style.position='relative'; bar.style.marginTop='12px'
-  const dot = document.createElement('div'); dot.style.width='12px'; dot.style.height='12px'; dot.style.borderRadius='50%'; dot.style.background='var(--good)'; dot.style.position='absolute'; dot.style.left='calc(50% - 6px)'
+function levelEight() {
+  const text=document.createElement('div')
+  text.textContent='Balance the bar in center (use arrow keys)'
+  game.appendChild(text)
+  const bar=document.createElement('div')
+  bar.style.width='200px'
+  bar.style.height='10px'
+  bar.style.background='#ccc'
+  bar.style.margin='20px auto'
+  bar.style.position='relative'
+  const dot=document.createElement('div')
+  dot.style.width='10px'
+  dot.style.height='10px'
+  dot.style.background='#4caf50'
+  dot.style.position='absolute'
+  dot.style.left='95px'
   bar.appendChild(dot)
-  game.append(instruct,bar)
-  let pos = 50, hold=0
-  const iv = setInterval(()=>{
-    if(pos>45 && pos<55) hold++ ; else hold=0
-    if(hold>=60){ clearInterval(iv); document.onkeydown=null; msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,700) }
+  game.appendChild(bar)
+  let pos=95
+  let score=0
+  const interval=setInterval(()=>{
+    if(pos>90&&pos<110){score++}else score=0
+    if(score>=100){msg.textContent='✅ Passed';clearInterval(interval);document.onkeydown=null;setTimeout(next,1000)}
   },50)
-  document.onkeydown = (e)=>{ if(e.key==='ArrowLeft') pos = Math.max(0,pos-2); if(e.key==='ArrowRight') pos = Math.min(100,pos+2); dot.style.left = `calc(${pos}% - 6px)` }
+  document.onkeydown=e=>{
+    if(e.key=='ArrowLeft')pos-=3
+    if(e.key=='ArrowRight')pos+=3
+    pos=Math.max(0,Math.min(190,pos))
+    dot.style.left=pos+'px'
+  }
 }
 
-/* Level 9 - Quick math 3 rounds */
-function levelNine(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Solve 3 quick math problems'
-  game.append(instruct)
-  let solved=0
+function levelNine() {
+  const text=document.createElement('div')
+  text.textContent='Solve 3 quick math problems'
+  game.appendChild(text)
+  let score=0
   function ask(){
-    const a = Math.floor(Math.random()*20); const b = Math.floor(Math.random()*20); const op = Math.random()<0.5 ? '+' : '-'; const ans = op==='+'? a+b : a-b
-    const q = document.createElement('div'); q.textContent = `${a} ${op} ${b} = ?`
-    const input = document.createElement('input'); input.type='text' ; input.placeholder='Answer'
-    const btn = document.createElement('button'); btn.textContent='Submit'
-    btn.addEventListener('click', ()=>{ if(parseInt(input.value)===ans){ solved++; msg.style.color='var(--good)'; msg.textContent='✅'; q.remove(); input.remove(); btn.remove(); if(solved>=3){ setTimeout(nextLevel,700) } else ask() } else { msg.style.color='var(--bad)'; msg.textContent='❌' } })
-    game.append(q,input,btn)
+    const a=Math.floor(Math.random()*10)
+    const b=Math.floor(Math.random()*10)
+    const ans=a+b
+    const q=document.createElement('div')
+    q.textContent=`${a} + ${b} = ?`
+    const inp=document.createElement('input')
+    inp.type='number'
+    const btn=document.createElement('button')
+    btn.textContent='Submit'
+    btn.onclick=()=>{
+      if(parseInt(inp.value)==ans){score++;msg.textContent='✅';q.remove();inp.remove();btn.remove();if(score==3){msg.textContent='✅ Passed';setTimeout(next,1000)}else ask()}else msg.textContent='❌'}
+    game.append(q,inp,btn)
   }
   ask()
 }
 
-/* Level 10 - Wave selector: multiple rounds where you must pick target emoji quickly */
-function levelTen(){
-  const emojis=['📦','📷','🎯','🔑','🔔','💡','📎','🧩','⭐']
-  let round = 1, rounds = 4, hits = 0
-  const target = ()=> emojis[Math.floor(Math.random()*emojis.length)]
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Complete rounds: quickly tap the target each round'
-  const display = document.createElement('div'); display.style.fontSize='18px'; display.style.margin='8px 0'
-  game.append(instruct,display)
-  const grid = document.createElement('div'); grid.className='grid'; game.append(grid)
-  function startRound(){
-    grid.innerHTML=''; display.textContent='Round '+round+' / '+rounds
-    const t = target()
-    display.textContent += ' — Tap '+t
-    const opts = []
-    for(let i=0;i<3;i++) opts.push(emojis[Math.floor(Math.random()*emojis.length)])
-    opts.push(t)
-    while(opts.length<9) opts.push(emojis[Math.floor(Math.random()*emojis.length)])
+// Level 10-18 harder / rounds / mixed
+function levelTen(){simpleRounds(5,'Press the button 5 times quickly')}
+function levelEleven(){sliderChallenge(80)}
+function levelTwelve(){emojiRound('🍒',3)}
+function levelThirteen(){mathRounds(5)}
+function levelFourteen(){holdMultiple(3,2000)}
+function levelFifteen(){movingSquare(5)}
+function levelSixteen(){clickFast(30)}
+function levelSeventeen(){captchaTextRound(3)}
+function levelEighteen(){balanceChallenge(120)}
+
+// reusable functions for new levels
+function simpleRounds(times,text){
+  const instr=document.createElement('div');instr.textContent=text;game.appendChild(instr)
+  let count=0
+  const btn=document.createElement('button');btn.textContent='Press'
+  btn.onclick=()=>{count++;if(count>=times){msg.textContent='✅ Passed';setTimeout(next,1000)}}
+  game.appendChild(btn)
+}
+
+function sliderChallenge(target){
+  const text=document.createElement('div');text.textContent='Move slider to '+target+'%';game.appendChild(text)
+  const s=document.createElement('input');s.type='range';s.min=0;s.max=100;s.value=0;game.appendChild(s)
+  const btn=document.createElement('button');btn.textContent='Verify'
+  btn.onclick=()=>{if(s.value>=target){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Not enough'}
+  game.appendChild(btn)
+}
+
+function emojiRound(emoji,times){
+  const text=document.createElement('div');text.textContent='Select all '+emoji+' for '+times+' rounds';game.appendChild(text)
+  let round=0
+  function nextRound(){
+    if(round>=times){msg.textContent='✅ Passed';setTimeout(next,1000);return}
+    round++
+    const grid=document.createElement('div');grid.className='grid';game.appendChild(grid)
+    const opts=[]
+    const correct=2+Math.floor(Math.random()*2)
+    const emojis=['🐶','🐱','🍎','🚗','🌸','🌲','🍌','🐸','🐟']
+    for(let i=0;i<correct;i++) opts.push(emoji)
+    while(opts.length<9){let e=emojis[Math.floor(Math.random()*emojis.length)];if(e!=emoji)opts.push(e)}
     opts.sort(()=>Math.random()-0.5)
     opts.forEach(e=>{
-      const c = document.createElement('div'); c.className='cell'; c.textContent=e
-      c.addEventListener('click', ()=>{
-        if(e===t){ hits++; msg.style.color='var(--good)'; msg.textContent='Good'
-          round++; if(round>rounds){ msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,900) } else setTimeout(startRound,300)
-        } else { msg.style.color='var(--bad)'; msg.textContent='❌ Wrong — round failed'; setTimeout(()=>{ round=1; startRound() },700) }
-      })
-      grid.appendChild(c)
+      const c=document.createElement('div');c.className='cell';c.textContent=e;c.onclick=()=>c.classList.toggle('selected');grid.appendChild(c)
     })
-  }
-  startRound()
-}
-
-/* Level 11 - Pattern memory (2 rounds, memorize sequence) */
-function levelEleven(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Memorize the sequence and repeat it'
-  const grid = document.createElement('div'); grid.className='grid'; game.append(instruct,grid)
-  const cells = []
-  for(let i=0;i<9;i++){ const c=document.createElement('div'); c.className='cell'; c.dataset.i=i; grid.appendChild(c); cells.push(c) }
-  let seq = [], round=1, rounds=2
-  function playSequence(len){
-    seq = []
-    for(let i=0;i<len;i++) seq.push(Math.floor(Math.random()*9))
-    let idx=0
-    const iv = setInterval(()=>{
-      cells.forEach((c,j)=> c.style.background = (j===seq[idx])? '#ffe8a8' : '#fff')
-      idx++
-      if(idx>seq.length){ clearInterval(iv); cells.forEach(c=>c.style.background='#fff'); listenInput(0) }
-    },600)
-  }
-  let userIdx=0
-  function listenInput(start){
-    userIdx = start
-    cells.forEach((c,i)=>{ c.onclick = ()=>{ if(i===seq[userIdx]){ userIdx++; if(userIdx>=seq.length){ round++; if(round>rounds){ msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,900) } else { playSequence(seq.length+1) } } } else { msg.style.color='var(--bad)'; msg.textContent='❌ Wrong'; setTimeout(()=>{ round=1; playSequence(2) },700) } } })
-  }
-  playSequence(2)
-}
-
-/* Level 12 - Invisible click: follow moving invisible cursor for 5 hits */
-function levelTwelve(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Follow the invisible moving target and click where it was (5 times)'
-  const box = document.createElement('div'); box.style.width='100%'; box.style.height='160px'; box.style.background='#fff'; box.style.border='2px solid #eee'; box.style.borderRadius='8px'; box.style.position='relative'
-  game.append(instruct,box)
-  let x=20, y=50, hits=0
-  const dot = document.createElement('div'); dot.style.width='10px'; dot.style.height='10px'; dot.style.borderRadius='50%'; dot.style.position='absolute'; dot.style.left='-20px'; dot.style.top='-20px'; dot.style.pointerEvents='none'
-  box.appendChild(dot)
-  const iv = setInterval(()=>{ x = Math.random()*80; y = Math.random()*120; dot.style.left = x+'%'; dot.style.top = y+'px'; setTimeout(()=>{ dot.style.left='-20px'; dot.style.top='-20px' },400) },700)
-  box.addEventListener('click',(e)=>{ const rect = box.getBoundingClientRect(); const cx = (e.clientX-rect.left)/rect.width * 100; const cy = e.clientY-rect.top; const dx = Math.abs(cx - x); if(dx<12){ hits++; msg.style.color='var(--good)'; msg.textContent='Hit '+hits+'/5'; if(hits>=5){ clearInterval(iv); setTimeout(nextLevel,800) } } else { msg.style.color='var(--bad)'; msg.textContent='Miss' } })
-}
-
-/* Level 13 - Typing speed: type the sentence in 8 seconds */
-function levelThirteen(){
-  const sentenceList = ['quick brown fox','verify me human','open the gate','secure token','hello world test']
-  const sentence = sentenceList[Math.floor(Math.random()*sentenceList.length)]
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Type the sentence within 8 seconds'
-  const disp = document.createElement('div'); disp.style.fontFamily='monospace'; disp.style.margin='10px 0'; disp.textContent = `"${sentence}"`
-  const input = document.createElement('input'); input.type='text'; input.placeholder='Type here'
-  const v = document.createElement('button'); v.textContent='Start & Verify'
-  let started=false; let timer=null
-  v.addEventListener('click', ()=>{
-    if(started) return
-    started=true; input.disabled=false; input.focus(); msg.textContent='You have 8 seconds'
-    timer = setTimeout(()=>{ if(input.value.trim()===sentence){ msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,700) } else { msg.style.color='var(--bad)'; msg.textContent='❌ Time up or wrong'; started=false } },8000)
-  })
-  game.append(instruct,disp,input,v)
-}
-
-/* Level 14 - Match the pair (memory) with 6 pairs (3 rounds) */
-function levelFourteen(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Match pairs. Complete 3 rounds.'
-  const grid = document.createElement('div'); grid.className='grid'
-  game.append(instruct,grid)
-  let round = 1, pairs=6
-  function makeRound(p){
-    grid.innerHTML=''
-    const icons = ['🍀','🔔','🏆','🌙','☀️','⚡','🎵','📌','🔒','💎','🔥','🍩']
-    const pool = icons.slice(0,p)
-    const arr = pool.concat(pool).sort(()=>Math.random()-0.5)
-    arr.forEach((ic,i)=>{ const c=document.createElement('div'); c.className='cell'; c.dataset.idx=i; c.dataset.val=ic; c.textContent=''; c.addEventListener('click', ()=>{ if(c.classList.contains('revealed')) return; reveal(c) }) ; grid.appendChild(c) })
-    let first=null, found=0
-    function reveal(el){
-      el.classList.add('revealed'); el.textContent = el.dataset.val
-      if(!first) first = el; else {
-        if(first.dataset.val === el.dataset.val){ found++; first=null; if(found>=p){ round++; if(round>3){ msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,800) } else { makeRound(Math.max(3,p-1)) } } }
-        else { msg.style.color='var(--bad)'; msg.textContent='❌ Mismatch'; setTimeout(()=>{ first.textContent=''; el.textContent=''; first.classList.remove('revealed'); el.classList.remove('revealed'); first=null; msg.textContent=''; },500) }
-      }
+    const btn=document.createElement('button');btn.textContent='Verify'
+    btn.onclick=()=>{
+      let ok=true
+      grid.querySelectorAll('.cell').forEach(c=>{
+        if(c.textContent==emoji&&!c.classList.contains('selected'))ok=false
+        if(c.textContent!=emoji&&c.classList.contains('selected'))ok=false
+      })
+      if(ok){grid.remove();nextRound()}else msg.textContent='❌ Try again'
     }
+    game.appendChild(btn)
   }
-  makeRound(6)
+  nextRound()
 }
 
-/* Level 15 - Tap rhythm: follow 4-beat rhythm (3 rounds) */
-function levelFifteen(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Tap the box following the 4-beat rhythm (3 rounds)'
-  const box = document.createElement('div'); box.style.width='100%'; box.style.height='140px'; box.style.background='#fff'; box.style.border='2px solid #eee'; box.style.borderRadius='8px'; box.style.display='flex'; box.style.alignItems='center'; box.style.justifyContent='center'; box.style.fontSize='18px'
-  box.textContent='Tap when it pulses'
-  game.append(instruct,box)
-  let pattern = [1,0,1,1], round=1, rounds=3, idx=0, hits=0
-  function pulse(){
-    box.style.background = '#ffe'; setTimeout(()=> box.style.background='#fff',300)
-    idx=0
+function mathRounds(times){
+  let score=0
+  const text=document.createElement('div');text.textContent='Solve '+times+' math problems';game.appendChild(text)
+  function ask(){
+    const a=Math.floor(Math.random()*20);const b=Math.floor(Math.random()*20);const ans=a+b
+    const q=document.createElement('div');q.textContent=a+' + '+b+' = ?'
+    const inp=document.createElement('input');inp.type='number'
+    const btn=document.createElement('button');btn.textContent='Submit'
+    btn.onclick=()=>{if(parseInt(inp.value)==ans){score++;q.remove();inp.remove();btn.remove();if(score==times){msg.textContent='✅ Passed';setTimeout(next,1000)}else ask()}else msg.textContent='❌'}
+    game.append(q,inp,btn)
   }
-  function startRound(){
-    hits=0; idx=0
-    const iv = setInterval(()=>{
-      const beat = pattern[idx%pattern.length]
-      if(beat===1){ box.style.background='#dff3ff'; setTimeout(()=> box.style.background='#fff',220) }
-      idx++
-      if(idx>pattern.length*4){ clearInterval(iv); idx=0; }
-    },400)
-    let allowed=false
-    box.onclick = ()=>{ if(!allowed) return; hits++; if(hits>=4){ msg.style.color='var(--good)'; msg.textContent='Round '+round+' passed'; round++; if(round>rounds){ setTimeout(nextLevel,800) } else setTimeout(startRound,500) } }
-    setTimeout(()=>{ allowed=true },400)
-  }
-  startRound()
+  ask()
 }
 
-/* Level 16 - Complex slider: bring three sliders to target (rounds) */
-function levelSixteen(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Align all three sliders to their targets (2 rounds)'
-  const container = document.createElement('div'); container.style.width='100%'
-  const rows = []
-  for(let i=0;i<3;i++){
-    const r = document.createElement('div'); r.style.display='flex'; r.style.alignItems='center'; r.style.gap='8px'; r.style.marginTop='8px'
-    const label = document.createElement('div'); label.textContent='Target'
-    const targetVal = Math.floor(60+Math.random()*30)
-    const targ = document.createElement('div'); targ.className='tile'; targ.textContent = targetVal+'%'
-    const input = document.createElement('input'); input.type='range'; input.min=0; input.max=100; input.value=0; input.style.flex='1'
-    r.appendChild(targ); r.appendChild(input)
-    container.appendChild(r)
-    rows.push({input,target:targetVal})
-  }
-  const v = document.createElement('button'); v.textContent='Verify'
-  v.addEventListener('click', ()=>{ let ok=true; rows.forEach(r=>{ if(Math.abs(parseInt(r.input.value)-r.target)>3) ok=false }); if(ok){ msg.style.color='var(--good)'; msg.textContent='✅ Passed'; setTimeout(nextLevel,700) } else { msg.style.color='var(--bad)'; msg.textContent='❌ Misaligned' } })
-  game.append(instruct,container,v)
+function holdMultiple(times,ms){
+  const text=document.createElement('div');text.textContent='Hold button '+times+' times for '+ms/1000+'s each';game.appendChild(text)
+  let count=0
+  const btn=document.createElement('button');btn.textContent='Hold'
+  btn.onmousedown=()=>{timer=setTimeout(()=>{count++;if(count>=times){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='✔ Next';},ms)}
+  btn.onmouseup=()=>{clearTimeout(timer)}
+  game.appendChild(btn)
 }
 
-/* Level 17 - Hidden shapes: count how many squares (2 rounds increasing) */
-function levelSeventeen(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Count how many squares are shown'
-  const grid = document.createElement('div'); grid.className='grid'; game.append(instruct,grid)
-  let round = 1, rounds = 2
-  function make(r){
-    grid.innerHTML=''
-    const count = 3 + r + Math.floor(Math.random()*4)
-    const icons = []
-    for(let i=0;i<count;i++) icons.push('■')
-    while(icons.length<9) icons.push(Math.random()<0.5? '■' : '●')
-    icons.sort(()=>Math.random()-0.5)
-    icons.forEach(ic=>{ const c=document.createElement('div'); c.className='cell'; c.textContent=ic; grid.appendChild(c) })
-    const input = document.createElement('input'); input.type='text'; input.placeholder='Number'
-    const v = document.createElement('button'); v.textContent='Verify'
-    v.addEventListener('click', ()=>{ if(parseInt(input.value)===count){ msg.style.color='var(--good)'; msg.textContent='✅ Passed'; round++; if(round>rounds) setTimeout(nextLevel,700); else setTimeout(()=>make(round),500) } else { msg.style.color='var(--bad)'; msg.textContent='❌ Wrong' } })
-    game.append(input,v)
+function movingSquare(times){
+  const text=document.createElement('div');text.textContent='Click the moving green square '+times+' times';game.appendChild(text)
+  const grid=document.createElement('div');grid.className='grid';game.appendChild(grid)
+  for(let i=0;i<9;i++){const c=document.createElement('div');c.className='cell';grid.appendChild(c)}
+  let count=0
+  function refresh(){
+    const green=Math.floor(Math.random()*9)
+    grid.querySelectorAll('.cell').forEach((c,i)=>{c.style.background=i==green?'#4caf50':'#fff';c.onclick=()=>{if(i==green){count++;if(count>=times){msg.textContent='✅ Passed';clearInterval(interval);setTimeout(next,1000)}}}})
   }
-  make(round)
+  const interval=setInterval(refresh,800)
 }
 
-/* Level 18 - Final mixed challenge: 3 micro-rounds (emoji pick, quick math, slider) */
-function levelEighteen(){
-  const instruct = document.createElement('div'); instruct.className='hint'; instruct.textContent='Final: complete 3 quick micro-challenges'
-  game.append(instruct)
-  let step=0
-  function step1(){
-    const emojis=['🍉','🍓','🍇','🍒','🥝','🍍','🍋','🥭','🍑']
-    const target = emojis[Math.floor(Math.random()*emojis.length)]
-    const disp = document.createElement('div'); disp.textContent='Pick '+target
-    const grid = document.createElement('div'); grid.className='grid'
-    const opts = []
-    for(let i=0;i<9;i++) opts.push(emojis[Math.floor(Math.random()*emojis.length)])
-    opts[Math.floor(Math.random()*9)] = target
-    opts.forEach(e=>{ const c=document.createElement('div'); c.className='cell'; c.textContent=e; c.addEventListener('click', ()=>{ if(e===target){ msg.style.color='var(--good)'; msg.textContent='Good'; setTimeout(step2,400) } else { msg.style.color='var(--bad)'; msg.textContent='❌ Wrong'; setTimeout(()=>{ startLevel(16) },700) } }); grid.appendChild(c) })
-    game.innerHTML=''; game.append(disp,grid)
-  }
-  function step2(){
-    const a=Math.floor(Math.random()*10), b=Math.floor(Math.random()*10); const ans=a+b
-    const q = document.createElement('div'); q.textContent=`${a} + ${b} = ?`
-    const input = document.createElement('input'); input.type='text'
-    const v = document.createElement('button'); v.textContent='Submit'
-    v.addEventListener('click', ()=>{ if(parseInt(input.value)===ans){ msg.style.color='var(--good)'; msg.textContent='Nice'; setTimeout(step3,400) } else { msg.style.color='var(--bad)'; msg.textContent='❌ Wrong'; setTimeout(()=>{ startLevel(14) },700) } })
-    game.innerHTML=''; game.append(q,input,v)
-  }
-  function step3(){
-    const instr = document.createElement('div'); instr.className='hint'; instr.textContent='Slide to 73%'
-    const r = document.createElement('input'); r.type='range'; r.min=0; r.max=100; r.value=0
-    const v = document.createElement('button'); v.textContent='Verify'
-    v.addEventListener('click', ()=>{ if(Math.abs(parseInt(r.value)-73)<=2){ msg.style.color='var(--good)'; msg.textContent='✅ Final Passed'; setTimeout(nextLevel,700) } else { msg.style.color='var(--bad)'; msg.textContent='❌ Off target'; setTimeout(()=>{ startLevel(12) },700) } })
-    game.innerHTML=''; game.append(instr,r,v)
-  }
-  step1()
+function clickFast(times){
+  const text=document.createElement('div');text.textContent='Click the button '+times+' times quickly';game.appendChild(text)
+  let count=0
+  const btn=document.createElement('button');btn.textContent='Click'
+  btn.onclick=()=>{count++;if(count>=times){msg.textContent='✅ Passed';setTimeout(next,1000)}}
+  game.appendChild(btn)
 }
 
-updateStage()
+function captchaTextRound(times){
+  const text=document.createElement('div');text.textContent='Type the codes '+times+' rounds';game.appendChild(text)
+  let round=0
+  function nextRound(){
+    if(round>=times){msg.textContent='✅ Passed';setTimeout(next,1000);return}
+    round++
+    const code=Math.random().toString(36).substring(2,6).toUpperCase()
+    const disp=document.createElement('div');disp.style.letterSpacing='5px';disp.style.fontFamily='monospace';disp.textContent=code;game.appendChild(disp)
+    const inp=document.createElement('input');inp.type='text';game.appendChild(inp)
+    const btn=document.createElement('button');btn.textContent='Verify'
+    btn.onclick=()=>{if(inp.value.toUpperCase()==code){disp.remove();inp.remove();btn.remove();nextRound()}else msg.textContent='❌ Wrong'}
+    game.appendChild(btn)
+  }
+  nextRound()
+}
+
+function balanceChallenge(frames){
+  const text=document.createElement('div');text.textContent='Balance the bar in center using arrows';game.appendChild(text)
+  const bar=document.createElement('div');bar.style.width='200px';bar.style.height='10px';bar.style.background='#ccc';bar.style.margin='20px auto';bar.style.position='relative'
+  const dot=document.createElement('div');dot.style.width='10px';dot.style.height='10px';dot.style.background='#4caf50';dot.style.position='absolute';dot.style.left='95px';bar.appendChild(dot);game.appendChild(bar)
+  let pos=95;let score=0
+  const interval=setInterval(()=>{if(pos>90&&pos<110){score++}else score=0;if(score>=frames){msg.textContent='✅ Passed';clearInterval(interval);document.onkeydown=null;setTimeout(next,1000)}},50)
+  document.onkeydown=e=>{if(e.key=='ArrowLeft')pos-=3;if(e.key=='ArrowRight')pos+=3;pos=Math.max(0,Math.min(190,pos));dot.style.left=pos+'px'}
+}
 </script>
 </body>
 </html>
