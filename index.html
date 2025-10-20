@@ -1,193 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced 2D Water Simulation</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; background: #87CEEB; }
-        #controls { position: absolute; top: 10px; left: 10px; z-index: 10; }
-        input[type="range"] { width: 200px; }
-        button { margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced 2D Water Simulation</title>
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.17.1/build/matter.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fluid-canvas@latest"></script>
+  <style>
+    body, html { margin: 0; padding: 0; overflow: hidden; }
+    canvas { display: block; }
+    #controls { position: absolute; top: 10px; left: 10px; z-index: 100; }
+    .slider { margin: 10px 0; }
+    .slider input { width: 200px; }
+  </style>
 </head>
 <body>
-    <div id="controls">
-        <label for="density">Density: </label><input type="range" id="density" min="0.1" max="2" step="0.1" value="1"><br>
-        <label for="pressure">Pressure: </label><input type="range" id="pressure" min="0.1" max="3" step="0.1" value="1.5"><br>
-        <label for="viscosity">Viscosity: </label><input type="range" id="viscosity" min="0.01" max="0.1" step="0.01" value="0.05"><br>
-        <button id="spawnCube">Spawn Cube</button>
+  <div id="controls">
+    <div class="slider">
+      <label for="density">Density: </label>
+      <input type="range" id="density" min="0.01" max="0.1" step="0.01" value="0.05">
+      <span id="densityValue">0.05</span>
     </div>
-    <canvas id="canvas"></canvas>
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const densitySlider = document.getElementById('density');
-        const pressureSlider = document.getElementById('pressure');
-        const viscositySlider = document.getElementById('viscosity');
-        const spawnButton = document.getElementById('spawnCube');
+    <div class="slider">
+      <label for="viscosity">Viscosity: </label>
+      <input type="range" id="viscosity" min="0.01" max="0.1" step="0.01" value="0.05">
+      <span id="viscosityValue">0.05</span>
+    </div>
+    <button id="spawnCube">Spawn Cube</button>
+  </div>
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+  <canvas id="fluidCanvas"></canvas>
 
-        const particles = [];
-        const cubes = [];
+  <script>
+    const canvas = document.getElementById('fluidCanvas');
+    const densitySlider = document.getElementById('density');
+    const viscositySlider = document.getElementById('viscosity');
+    const spawnCubeButton = document.getElementById('spawnCube');
+    const densityValue = document.getElementById('densityValue');
+    const viscosityValue = document.getElementById('viscosityValue');
 
-        const settings = {
-            density: parseFloat(densitySlider.value),
-            pressure: parseFloat(pressureSlider.value),
-            viscosity: parseFloat(viscositySlider.value),
-        };
+    let engine, world, fluid, spawnArea;
+    let cube;
 
-        class Particle {
-            constructor(x, y, vx = 0, vy = 0) {
-                this.x = x;
-                this.y = y;
-                this.vx = vx;
-                this.vy = vy;
-                this.ax = 0;
-                this.ay = 0;
-                this.density = 0;
-                this.pressure = 0;
-            }
+    function setup() {
+      resizeCanvas();
+      engine = Matter.Engine.create();
+      world = engine.world;
+      fluid = new Fluid(canvas);
+      fluid.activate();
+      spawnArea = { x: canvas.width / 2, y: canvas.height - 50, width: 100, height: 20 };
 
-            applyForce(fx, fy) {
-                this.ax += fx;
-                this.ay += fy;
-            }
+      Matter.World.add(world, [
+        Matter.Bodies.rectangle(spawnArea.x, spawnArea.y, spawnArea.width, spawnArea.height, { isStatic: true })
+      ]);
 
-            update() {
-                this.vx += this.ax;
-                this.vy += this.ay;
-                this.x += this.vx;
-                this.y += this.vy;
-                this.ax = 0;
-                this.ay = 0;
-            }
+      Matter.Events.on(engine, 'beforeUpdate', () => {
+        fluid.setDensity(densitySlider.value);
+        fluid.setViscosity(viscositySlider.value);
+      });
 
-            render() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 0, 255, 0.5)';
-                ctx.fill();
-            }
-        }
+      Matter.Engine.run(engine);
+      fluid.render();
+    }
 
-        class Cube {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.width = 50;
-                this.height = 50;
-                this.vx = 0;
-                this.vy = 0;
-                this.mass = 10;
-            }
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
 
-            applyForce(fx, fy) {
-                this.vx += fx / this.mass;
-                this.vy += fy / this.mass;
-            }
+    function spawnCube() {
+      if (cube) {
+        Matter.World.remove(world, cube);
+      }
+      cube = Matter.Bodies.rectangle(spawnArea.x, spawnArea.y - 100, 40, 40, { restitution: 0.9 });
+      Matter.World.add(world, cube);
+    }
 
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vx *= 0.99; // Friction
-                this.vy *= 0.99; // Friction
-            }
+    window.addEventListener('resize', resizeCanvas);
+    spawnCubeButton.addEventListener('click', spawnCube);
 
-            render() {
-                ctx.fillStyle = 'red';
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-            }
-        }
+    densitySlider.addEventListener('input', () => {
+      densityValue.textContent = densitySlider.value;
+    });
 
-        function spawnWater(x, y) {
-            for (let i = 0; i < 100; i++) {
-                particles.push(new Particle(x + Math.random() * 10 - 5, y + Math.random() * 10 - 5));
-            }
-        }
+    viscositySlider.addEventListener('input', () => {
+      viscosityValue.textContent = viscositySlider.value;
+    });
 
-        function spawnCubeAtMouse() {
-            const cube = new Cube(mouse.x - 25, mouse.y - 25);
-            cubes.push(cube);
-        }
-
-        function updatePhysics() {
-            // Update particle densities and pressures
-            particles.forEach(p => {
-                p.density = 0;
-                particles.forEach(other => {
-                    const dx = p.x - other.x;
-                    const dy = p.y - other.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 50) {
-                        p.density += settings.density * (1 - dist / 50);
-                    }
-                });
-                p.pressure = Math.max(0, p.density - 1);
-            });
-
-            // Apply forces and update particles
-            particles.forEach(p => {
-                p.ax = 0;
-                p.ay = 0;
-                particles.forEach(other => {
-                    if (p !== other) {
-                        const dx = p.x - other.x;
-                        const dy = p.y - other.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 50) {
-                            const force = settings.pressure * (1 - dist / 50);
-                            p.applyForce(force * dx / dist, force * dy / dist);
-                        }
-                    }
-                });
-                p.update();
-            });
-
-            // Update cubes
-            cubes.forEach(cube => {
-                cube.update();
-            });
-        }
-
-        function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => p.render());
-            cubes.forEach(cube => cube.render());
-        }
-
-        function gameLoop() {
-            updatePhysics();
-            render();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Event listeners
-        canvas.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
-
-        spawnButton.addEventListener('click', spawnCubeAtMouse);
-
-        densitySlider.addEventListener('input', () => {
-            settings.density = parseFloat(densitySlider.value);
-        });
-
-        pressureSlider.addEventListener('input', () => {
-            settings.pressure = parseFloat(pressureSlider.value);
-        });
-
-        viscositySlider.addEventListener('input', () => {
-            settings.viscosity = parseFloat(viscositySlider.value);
-        });
-
-        // Initialize
-        spawnWater(canvas.width / 2, canvas.height / 2);
-        gameLoop();
-    </script>
+    setup();
+  </script>
 </body>
 </html>
