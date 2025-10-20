@@ -2,419 +2,469 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Im not a bot 🤖</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>I'm Not a Bot 🤖</title>
 <style>
-:root{
-  --bg:#f4f6f8;--card:#ffffff;--accent:#1a73e8;--ok:#16a34a;--danger:#ef4444;--muted:#6b7280
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#eef2ff 0%,var(--bg) 60%);display:flex;justify-content:center;align-items:center;padding:20px;color:#111827}
-.app{width:980px;max-width:96%;padding:22px;background:transparent}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.title{display:flex;gap:14px;align-items:center}
-.logo{width:56px;height:56px;background:linear-gradient(135deg,#fff,#eef2ff);border-radius:10px;display:flex;justify-content:center;align-items:center;font-size:26px;box-shadow:0 4px 14px rgba(17,24,39,0.06)}
-.h1{font-size:20px;font-weight:700;letter-spacing:0.2px}
-.subtitle{color:var(--muted);font-size:13px}
-.controls{display:flex;gap:10px;align-items:center}
-.btn{background:var(--accent);color:white;padding:10px 14px;border-radius:8px;border:0;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(26,115,232,0.18)}
-.btn.ghost{background:transparent;color:var(--accent);box-shadow:none;border:1px solid rgba(26,115,232,0.12)}
-.layout{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
-.card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(15,23,42,0.04)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.cell{background:linear-gradient(180deg,#fff,#fbfdff);border:2px solid #e6eef9;border-radius:10px;height:96px;display:flex;align-items:center;justify-content:center;font-size:36px;cursor:pointer;user-select:none;transition:transform .12s,box-shadow .12s,border-color .12s}
-.cell:active{transform:scale(.98)}
-.cell.selected{border-color:var(--ok);box-shadow:0 6px 18px rgba(16,185,129,0.08);background:#f6fffa}
-.instruction{display:flex;gap:12px;align-items:center;margin-bottom:12px}
-.fake-checkbox{width:22px;height:22px;border-radius:4px;border:2px solid #cbd5e1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:white}
-.fake-checkbox.on{background:linear-gradient(90deg,#fff,#eceffb);border-color:#9be7a3}
-.small{font-size:13px;color:var(--muted)}
-.message{font-weight:700;margin-top:12px}
-.side-list{display:flex;flex-direction:column;gap:8px}
-.side-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:#fbfdff;border:1px solid #eef3ff}
-.progress-wrap{margin-top:12px}
-.progress-bar{height:12px;background:#e6eef9;border-radius:999px;overflow:hidden}
-.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#60a5fa)}
-.level-badge{background:#eef2ff;color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:700}
-.verify-btn{margin-top:14px;width:100%;padding:12px;border-radius:10px;border:0;font-weight:700;cursor:pointer;background:linear-gradient(90deg,var(--accent),#3b82f6);color:white}
-.small-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.tile{background:#fff;border-radius:8px;padding:8px;border:1px solid #eef3ff;display:flex;align-items:center;justify-content:center;height:62px;font-size:28px;cursor:pointer}
-.tile.matched{background:#e6ffef;border-color:#bbf7d0;box-shadow:0 6px 18px rgba(16,185,129,0.06)}
-.input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef9;font-size:15px}
-.footer-small{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f1f1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    touch-action: manipulation;
+  }
+  #container {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 90%;
+    max-width: 340px;
+  }
+  h1 {
+    margin-top: 0;
+    font-size: 22px;
+  }
+  button {
+    background: #4285f4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:hover, button:active { background: #357ae8; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    justify-content: center;
+    margin: 15px 0;
+  }
+  .cell {
+    aspect-ratio: 1/1;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    background: #fff;
+    user-select: none;
+  }
+  .selected { background: #c8e6c9; border-color: #4caf50; }
+  #message { font-weight: bold; margin-top: 10px; min-height: 20px; }
+  #progress { margin-top: 10px; font-size: 14px; }
+  input[type=text], input[type=number] {
+    width: 80%;
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin: 5px;
+  }
+  #bar { height: 15px; width: 100%; background: #ddd; border-radius: 10px; overflow: hidden; margin-top: 15px; }
+  #bar-inner { height: 100%; width: 0%; background: #4caf50; transition: width 0.2s; }
 </style>
 </head>
 <body>
-<div class="app">
-<div class="header">
-  <div class="title">
-    <div class="logo">🤖</div>
-    <div>
-      <div class="h1">Im not a bot 🤖</div>
-      <div class="subtitle">captcha-style mini game adventure</div>
-    </div>
-  </div>
-  <div class="controls">
-    <div class="level-badge" id="levelBadge">Menu</div>
-    <button class="btn" id="startBtn">Verify</button>
-    <button class="btn ghost" id="resetBtn">Reset</button>
-  </div>
+<div id="container">
+  <h1>I'm Not a Bot 🤖</h1>
+  <div id="menu"><button id="start">Verify</button></div>
+  <div id="game" style="display:none;"></div>
+  <div id="message"></div>
+  <div id="progress"></div>
 </div>
-
-<div class="layout">
-  <div class="card left" id="mainCard">
-    <div id="mainArea">
-      <div class="center" style="flex-direction:column">
-        <h2 id="screenTitle">Main Menu</h2>
-        <div class="small-muted" id="screenSub">Press Verify to start</div>
-        <div style="height:18px"></div>
-        <div style="width:220px">
-          <button class="verify-btn" id="menuVerify">Verify</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card right">
-    <div class="side-list">
-      <div class="side-item">
-        <div>
-          <div class="small-muted">Current Level</div>
-          <div id="sideLevel" style="font-weight:800">—</div>
-        </div>
-        <div id="sideAction" class="small-muted">Waiting</div>
-      </div>
-
-      <div class="side-item">
-        <div>
-          <div class="small-muted">Progress</div>
-          <div class="count-box" id="sideProgress">0 / 18</div>
-        </div>
-        <div class="small-muted" id="sideHint">Complete captchas to advance</div>
-      </div>
-
-      <div class="side-item">
-        <div>
-          <div class="small-muted">Status</div>
-          <div id="sideStatus" style="font-weight:800">Idle</div>
-        </div>
-        <div class="small-muted" id="sideExtra">Good luck!</div>
-      </div>
-
-      <div class="side-item progress-wrap">
-        <div class="small-muted">Level Progress</div>
-        <div class="progress-bar" style="margin-top:8px">
-          <div class="progress-fill" id="levelFill"></div>
-        </div>
-      </div>
-
-      <div class="side-item">
-        <div class="small-muted">Tip</div>
-        <div class="small-muted" id="sideTip">Levels get varied — try different interactions.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="footer-small">Built to be extended. Refresh to reset everything.</div>
-</div>
-
 <script>
-const emojis = ['🐶','🐱','🐼','🦊','🐻','🐸','🦁','🐷','🐵','🐔','🦄','🐙','🐢','🦋','🍎','🍌','🍇','🍓','🍍','🍑','🚗','🚲','✈️','🚌','🌲','🌸','🌵','🔥','💧','🔴','🔵','🟢','🟡','🟣'];
-let state = {level:0,unlocked:0,clicks:0,progress:0,flappyScore:0};
-const totalLevels = 18;
-const mainArea = document.getElementById('mainArea');
-const levelBadge = document.getElementById('levelBadge');
-const sideLevel = document.getElementById('sideLevel');
-const sideAction = document.getElementById('sideAction');
-const sideStatus = document.getElementById('sideStatus');
-const sideProgress = document.getElementById('sideProgress');
-const levelFill = document.getElementById('levelFill');
-const sideTip = document.getElementById('sideTip');
-const startBtn = document.getElementById('startBtn');
-const resetBtn = document.getElementById('resetBtn');
-const menuVerify = document.getElementById('menuVerify');
-const screenTitle = document.getElementById('screenTitle');
-const screenSub = document.getElementById('screenSub');
-let currentLevelObj = null;
+let level = 1
+const game = document.getElementById('game')
+const msg = document.getElementById('message')
+const prog = document.getElementById('progress')
+document.getElementById('start').onclick = () => startLevel(1)
 
-function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
-function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-
-function toMenu(){
-  state.level = 0;
-  updateUI();
-  mainArea.innerHTML = `
-    <div class="center" style="flex-direction:column">
-      <h2 id="screenTitle">Main Menu</h2>
-      <div class="small-muted" id="screenSub">Press Verify to start</div>
-      <div style="height:18px"></div>
-      <div style="width:220px">
-        <button class="verify-btn" id="menuVerifyBtn">Verify</button>
-      </div>
-    </div>
-  `;
-  document.getElementById('menuVerifyBtn').onclick = ()=>startLevel(1);
+function next() {
+  level++
+  if (level>18) {
+    msg.textContent='✅ You are truly human!'
+    game.innerHTML=''
+    prog.textContent=''
+    return
+  }
+  startLevel(level)
 }
 
-function updateUI(){
-  levelBadge.textContent = state.level===0 ? 'Menu' : `Lv ${state.level}`;
-  sideLevel.textContent = state.level===0 ? 'Menu' : `Level ${state.level}`;
-  sideAction.textContent = state.level===0 ? 'Start' : 'In progress';
-  sideStatus.textContent = state.level===0 ? 'Idle' : 'Playing';
-  sideProgress.textContent = `${state.unlocked} / ${totalLevels}`;
-  const pct = Math.round((state.unlocked/totalLevels)*100);
-  levelFill.style.width = pct + '%';
+function startLevel(lvl) {
+  document.getElementById('menu').style.display='none'
+  game.style.display='block'
+  msg.textContent=''
+  prog.textContent='Level '+lvl+'/18'
+  game.innerHTML=''
+  if (lvl==1) levelOne()
+  if (lvl==2) levelTwo()
+  if (lvl==3) levelThree()
+  if (lvl==4) levelFour()
+  if (lvl==5) levelFive()
+  if (lvl==6) levelSix()
+  if (lvl==7) levelSeven()
+  if (lvl==8) levelEight()
+  if (lvl==9) levelNine()
+  if (lvl==10) levelTen()
+  if (lvl==11) levelEleven()
+  if (lvl==12) levelTwelve()
+  if (lvl==13) levelThirteen()
+  if (lvl==14) levelFourteen()
+  if (lvl==15) levelFifteen()
+  if (lvl==16) levelSixteen()
+  if (lvl==17) levelSeventeen()
+  if (lvl==18) levelEighteen()
 }
 
-function startLevel(n){
-  state.level = n;
-  updateUI();
-  mainArea.innerHTML = '';
-  currentLevelObj = levels[n];
-  if(!currentLevelObj) return;
-  currentLevelObj.render(mainArea,()=>levelSuccess());
+function pass(){msg.textContent='✅ Passed';setTimeout(next,1000)}
+
+function levelOne() {
+  const emojis=['🐶','🐱','🍎','🚗','🌸','🌲','🍌','🐸','🐟']
+  const target=emojis[Math.floor(Math.random()*emojis.length)]
+  const instruct=document.createElement('div')
+  instruct.textContent='Select all '+target
+  game.appendChild(instruct)
+  const grid=document.createElement('div')
+  grid.className='grid'
+  game.appendChild(grid)
+  const opts=[]
+  const correct=2+Math.floor(Math.random()*2)
+  for(let i=0;i<correct;i++) opts.push(target)
+  while(opts.length<9){
+    let e=emojis[Math.floor(Math.random()*emojis.length)]
+    if(e!=target)opts.push(e)
+  }
+  opts.sort(()=>Math.random()-0.5)
+  opts.forEach(e=>{
+    const c=document.createElement('div')
+    c.className='cell'
+    c.textContent=e
+    c.onclick=()=>c.classList.toggle('selected')
+    grid.appendChild(c)
+  })
+  const btn=document.createElement('button')
+  btn.textContent='Verify'
+  btn.onclick=()=>{
+    let ok=true
+    grid.querySelectorAll('.cell').forEach(c=>{
+      if(c.textContent==target&&!c.classList.contains('selected'))ok=false
+      if(c.textContent!=target&&c.classList.contains('selected'))ok=false
+    })
+    if(ok)pass();else msg.textContent='❌ Try again'
+  }
+  game.appendChild(btn)
 }
 
-function levelSuccess(){
-  state.unlocked = Math.max(state.unlocked, state.level);
-  state.progress = state.unlocked;
-  updateUI();
-  mainArea.innerHTML = `
-    <div class="center" style="flex-direction:column">
-      <div style="font-size:36px" class="success">✅ Verified!</div>
-      <div style="height:12px"></div>
-      <div class="small-muted">Level ${state.level} complete</div>
-      <div style="height:16px"></div>
-      <button class="verify-btn" id="nextLevelBtn">Next Level</button>
-    </div>
-  `;
-  document.getElementById('nextLevelBtn').onclick = ()=>{
-    if(state.level+1 <= totalLevels) startLevel(state.level+1);
-    else toMenu();
+function levelTwo() {
+  const text=document.createElement('div')
+  text.textContent='Type the characters:'
+  const code=Math.random().toString(36).substring(2,7).toUpperCase()
+  const disp=document.createElement('div')
+  disp.style.letterSpacing='5px'
+  disp.style.fontFamily='monospace'
+  disp.style.fontSize='22px'
+  disp.textContent=code
+  const input=document.createElement('input')
+  input.type='text'
+  const btn=document.createElement('button')
+  btn.textContent='Verify'
+  btn.onclick=()=>{if(input.value.toUpperCase()==code)pass();else msg.textContent='❌ Wrong'}
+  game.append(text,disp,input,btn)
+}
+
+function levelThree() {
+  const text=document.createElement('div')
+  text.textContent='Click 50 times to verify'
+  game.appendChild(text)
+  const bar=document.createElement('div')
+  bar.id='bar'
+  const inner=document.createElement('div')
+  inner.id='bar-inner'
+  bar.appendChild(inner)
+  game.appendChild(bar)
+  let count=0
+  game.onclick=()=>{
+    count++
+    inner.style.width=(count/50*100)+'%'
+    if(count>=50){game.onclick=null;pass()}
   }
 }
 
-resetBtn.onclick = ()=>location.reload();
-startBtn.onclick = ()=>startLevel(1);
-menuVerify.onclick = ()=>startLevel(1);
-
-const levels = {
-  1:{
-    render(parent,done){
-      const target = rand(emojis);
-      const options = shuffle([target,rand(emojis),rand(emojis),rand(emojis)]);
-      parent.innerHTML = `<div class="instruction">Select <b>${target}</b></div><div class="grid"></div>`;
-      const grid = parent.querySelector('.grid');
-      options.forEach(e=>{
-        const div = document.createElement('div');div.className='cell';div.textContent=e;
-        div.onclick=()=>{if(e===target)done(); else div.style.borderColor='red'}
-        grid.appendChild(div);
-      });
-    }
-  },
-  2:{
-    render(parent,done){
-      const txt = rand(['Type the word bot','Click the boxes','Find the 🔥 emoji','Select two matching','Press green']);
-      parent.innerHTML = `<div class="instruction">${txt}</div>`;
-      const btn = document.createElement('button');btn.className='verify-btn';btn.textContent='Done';
-      btn.onclick=done;parent.appendChild(btn);
-    }
-  },
-  3:{
-    render(parent,done){
-      state.clicks = 0;
-      parent.innerHTML = `<div class="instruction">Click the button 400 times</div><button class="verify-btn" id="clickerBtn">Click Me!</button><div id="clickCount">0 / 400</div>`;
-      const btn = parent.querySelector('#clickerBtn');
-      const countDiv = parent.querySelector('#clickCount');
-      btn.onclick = ()=>{
-        state.clicks++;
-        countDiv.textContent = `${state.clicks} / 400`;
-        if(state.clicks>=400) done();
-      }
-    }
-  },
-  4:{
-    render(parent,done){
-      parent.innerHTML = `<div class="instruction">Memory Test: Click the tiles in order</div><div class="small-grid"></div>`;
-      const grid = parent.querySelector('.small-grid');
-      let sequence = shuffle(['🐶','🐱','🐼','🦊','🐻']).slice(0,4);
-      let clicks = [];
-      shuffle([...sequence,...shuffle(emojis).slice(0,5)]).forEach(e=>{
-        const div = document.createElement('div');div.className='tile';div.textContent=e;
-        div.onclick=()=>{
-          clicks.push(e);
-          if(sequence[clicks.length-1]!==e){div.style.background='red'; clicks=[];}
-          else div.classList.add('matched');
-          if(clicks.length===sequence.length) done();
-        };
-        grid.appendChild(div);
-      });
-    }
-  },
-  5:{
-    render(parent,done){
-      parent.innerHTML = `<div class="instruction">Quick Reaction: Press button when it turns green</div><button class="verify-btn" id="reactBtn">Wait...</button>`;
-      const btn = parent.querySelector('#reactBtn');
-      setTimeout(()=>{btn.textContent='Click!';btn.style.background='linear-gradient(90deg,#16a34a,#4ade80)'; btn.onclick=done;},Math.random()*3000+1000);
-    }
-  },
-  6:{
-    render(parent,done){
-      parent.innerHTML = `<div class="instruction">Drag the 🔥 emoji into the box</div><div style="display:flex;gap:12px"><div class="cell" id="fire">🔥</div><div class="cell" id="drop" style="flex:1;height:96px"></div></div>`;
-      const fire = document.getElementById('fire'); const drop = document.getElementById('drop');
-      fire.draggable = true;
-      fire.ondragstart = e=>{e.dataTransfer.setData('text/plain','🔥')};
-      drop.ondragover = e=>e.preventDefault();
-      drop.ondrop = e=>{
-        const data = e.dataTransfer.getData('text/plain');
-        if(data==='🔥') done();
-      }
-    }
-  },
-  7:{
-    render(parent,done){
-      parent.innerHTML = `<div class="instruction">Type "I am not a bot" exactly</div><input class="input" id="textInput" placeholder="Type here...">`;
-      const input = document.getElementById('textInput');
-      input.addEventListener('input',()=>{if(input.value==='I am not a bot') done()});
-    }
-  },
-  8:{
-    render(parent,done){
-      parent.innerHTML = `<div class="instruction">Slide the slider to 100</div><input type="range" min="0" max="100" value="0" id="sliderInput">`;
-      const slider = document.getElementById('sliderInput');
-      slider.oninput = ()=>{if(Number(slider.value)>=100) done()};
-    }
-  },
-  9:{
-    render(parent,done){
-      parent.innerHTML = `<div class="instruction">Solve the puzzle: Click all emojis with 🐶</div><div class="grid"></div>`;
-      const grid = parent.querySelector('.grid');
-      let corrects = 0;
-      const pool = shuffle(['🐶','🐱','🐶','🐼','🦊','🐶']);
-      pool.forEach(e=>{
-        const div = document.createElement('div');div.className='cell';div.textContent=e;
-        div.onclick=()=>{
-          if(e==='🐶'){corrects++; div.classList.add('selected'); if(corrects===3) done();}
-          else div.style.borderColor='red';
-        };grid.appendChild(div);
-      });
-    }
-  },
-  10:{ // Flappy Bird Level
-    render(parent,done){
-      parent.innerHTML = `<div class="instruction">Flappy Bird: Score 11 points to verify</div><canvas id="flappyCanvas" width="400" height="400" style="background:#eef2ff;border:1px solid #cbd5e1;border-radius:10px"></canvas><div style="margin-top:8px"><button class="btn" id="redoFlappy">Redo</button></div><div style="margin-top:8px">Score: <span id="flappyScore">0</span></div>`;
-      const canvas = document.getElementById('flappyCanvas');
-      const ctx = canvas.getContext('2d');
-      let bird = {x:50,y:200,vy:0};
-      let pipes = [];
-      let frame=0;
-      state.flappyScore=0;
-      let over=false;
-      function addPipe(){const h=Math.floor(Math.random()*180+60);pipes.push({x:400,y:0,w:40,h:h});pipes.push({x:400,y:h+100,w:40,h:400-h-100})}
-      function loop(){
-        if(over)return;
-        ctx.clearRect(0,0,400,400);
-        bird.vy+=0.6; bird.y+=bird.vy;
-        ctx.fillStyle='orange'; ctx.fillRect(bird.x,bird.y,20,20);
-        if(frame%90===0)addPipe();
-        for(let p of pipes){p.x-=2; ctx.fillStyle='green'; ctx.fillRect(p.x,p.y,p.w,p.h); if(p.x+20===bird.x) state.flappyScore++; }
-        pipes = pipes.filter(p=>p.x+40>0);
-        document.getElementById('flappyScore').textContent=state.flappyScore;
-        if(bird.y>380||bird.y<0 || pipes.some(p=>bird.x+20>p.x && bird.x< p.x+p.w && bird.y+20>p.y && bird.y<p.y+p.h)){over=true; alert('Game Over'); }
-        if(state.flappyScore>=11){done(); return;}
-        frame++; requestAnimationFrame(loop);
-      }
-      canvas.onclick=()=>{bird.vy=-8};
-      loop();
-      document.getElementById('redoFlappy').onclick=()=>{over=false;bird.y=200;bird.vy=0;pipes=[];state.flappyScore=0;frame=0;loop();}
-    }
-  }
-};
-
-// For levels 11-18, I will generate unique creative mini-games
-for(let i=11;i<=18;i++){
-  levels[i]={
-    render(parent,done){
-      switch(i){
-        case 11:
-          parent.innerHTML=`<div class="instruction">Pattern Repeat: Click emojis in the repeating pattern</div><div class="grid"></div>`;
-          const grid11 = parent.querySelector('.grid');
-          let pattern=['🐱','🐶','🐱']; let user=[];
-          shuffle([...pattern,...shuffle(emojis).slice(0,3)]).forEach(e=>{
-            const div=document.createElement('div');div.className='cell';div.textContent=e;
-            div.onclick=()=>{
-              user.push(e);
-              if(pattern[user.length-1]!==e){user=[];div.style.borderColor='red'}
-              else div.style.borderColor='green';
-              if(user.length===pattern.length) done();
-            };grid11.appendChild(div);
-          }); break;
-        case 12:
-          parent.innerHTML=`<div class="instruction">Catch the moving emoji 5 times</div><div id="catchArea" style="width:300px;height:300px;position:relative;background:#f4f6f8;margin-top:12px;border-radius:12px"></div>`;
-          const catchArea=document.getElementById('catchArea'); let caught=0;
-          const target12=document.createElement('div'); target12.textContent='🔥'; target12.style.position='absolute'; target12.style.fontSize='28px';
-          catchArea.appendChild(target12);
-          function moveTarget(){target12.style.top=Math.random()*260+'px'; target12.style.left=Math.random()*260+'px';}
-          moveTarget();
-          target12.onclick=()=>{
-            caught++; moveTarget();
-            if(caught>=5) done();
-          }
-          break;
-        case 13:
-          parent.innerHTML=`<div class="instruction">Rapid Type: Press space 50 times</div><div id="rapidCount">0 / 50</div>`;
-          state.clicks=0;
-          document.body.onkeydown=(e)=>{if(e.code==='Space'){state.clicks++; document.getElementById('rapidCount').textContent=`${state.clicks} / 50`; if(state.clicks>=50){document.body.onkeydown=null; done();}}}
-          break;
-        case 14:
-          parent.innerHTML=`<div class="instruction">Emoji Drag Puzzle: Arrange 🐶🐱🐼 in order</div><div style="display:flex;gap:12px"><div class="cell" draggable="true">🐼</div><div class="cell" draggable="true">🐱</div><div class="cell" draggable="true">🐶</div></div>`;
-          const cells14=Array.from(parent.querySelectorAll('.cell')); let order=['🐶','🐱','🐼'];
-          cells14.forEach(c=>{
-            c.ondragstart=e=>{e.dataTransfer.setData('text',c.textContent);}
-          });
-          cells14.forEach(c=>{
-            c.ondragover=e=>e.preventDefault();
-            c.ondrop=e=>{
-              const data=e.dataTransfer.getData('text'); const tmp=c.textContent; c.textContent=data; cells14.find(x=>x.textContent===data && x!==c).textContent=tmp;
-              if(cells14.map(x=>x.textContent).join('')===order.join('')) done();
-            }
-          });
-          break;
-        case 15:
-          parent.innerHTML=`<div class="instruction">Hold the button for 3 seconds</div><button class="verify-btn" id="holdBtn">Hold Me</button>`;
-          const holdBtn=document.getElementById('holdBtn'); let holdTimer;
-          holdBtn.onmousedown=()=>{holdTimer=setTimeout(done,3000)};
-          holdBtn.onmouseup=()=>{clearTimeout(holdTimer)};
-          break;
-        case 16:
-          parent.innerHTML=`<div class="instruction">Math Challenge: 7+5=?</div><input class="input" id="mathInput" placeholder="Answer">`;
-          const mathInput=document.getElementById('mathInput');
-          mathInput.oninput=()=>{if(mathInput.value==='12') done();}
-          break;
-        case 17:
-          parent.innerHTML=`<div class="instruction">Click emojis with 🔥 but avoid ❌</div><div class="grid"></div>`;
-          const grid17=parent.querySelector('.grid'); let score17=0;
-          const pool17=shuffle(['🔥','❌','🔥','🐶','🔥']);
-          pool17.forEach(e=>{
-            const div=document.createElement('div'); div.className='cell'; div.textContent=e;
-            div.onclick=()=>{
-              if(e==='🔥'){score17++; div.classList.add('selected'); if(score17===3) done();}
-              else{div.style.borderColor='red'}
-            };grid17.appendChild(div);
-          }); break;
-        case 18:
-          parent.innerHTML=`<div class="instruction">Final Level: Type the emoji sequence 🐶🐱🐼</div><input class="input" id="finalInput" placeholder="🐶🐱🐼">`;
-          const finalInput=document.getElementById('finalInput');
-          finalInput.oninput=()=>{if(finalInput.value==='🐶🐱🐼') done();}
-          break;
-      }
-    }
+function levelFour() {
+  const text=document.createElement('div')
+  text.textContent='Find the odd square'
+  const grid=document.createElement('div')
+  grid.className='grid'
+  game.appendChild(text)
+  game.appendChild(grid)
+  const odd=Math.floor(Math.random()*9)
+  for(let i=0;i<9;i++){
+    const c=document.createElement('div')
+    c.className='cell'
+    c.style.background=i==odd?'#e0e0e0':'#ddd'
+    c.onclick=()=>{if(i==odd)pass();else msg.textContent='❌'}
+    grid.appendChild(c)
   }
 }
 
-toMenu();
-</script>
-</body>
-</html>
+function levelFive() {
+  const text=document.createElement('div')
+  text.textContent='Tap the button 3 times in a row quickly'
+  const btn=document.createElement('button')
+  btn.textContent='Tap!'
+  let taps=0
+  let timer
+  btn.onclick=()=>{
+    taps++
+    clearTimeout(timer)
+    if(taps==3){pass()}
+    timer=setTimeout(()=>taps=0,800)
+  }
+  game.append(text,btn)
+}
+
+function levelSix() {
+  const text=document.createElement('div')
+  text.textContent='Drag the slider to 100%'
+  game.appendChild(text)
+  const range=document.createElement('input')
+  range.type='range'
+  range.min=0
+  range.max=100
+  range.value=0
+  game.appendChild(range)
+  const btn=document.createElement('button')
+  btn.textContent='Verify'
+  btn.onclick=()=>{if(range.value==100)pass();else msg.textContent='❌ Not full'}
+  game.appendChild(btn)
+}
+
+function levelSeven() {
+  const text=document.createElement('div')
+  text.textContent='Click the green square (changes each second)'
+  const grid=document.createElement('div')
+  grid.className='grid'
+  game.appendChild(text)
+  game.appendChild(grid)
+  let green=Math.floor(Math.random()*9)
+  for(let i=0;i<9;i++){
+    const c=document.createElement('div')
+    c.className='cell'
+    grid.appendChild(c)
+  }
+  function refresh(){
+    grid.querySelectorAll('.cell').forEach((c,i)=>{
+      c.style.background=i==green?'#4caf50':'#fff'
+      c.onclick=()=>{if(i==green){clearInterval(interval);pass()}else msg.textContent='❌'}
+    })
+    green=Math.floor(Math.random()*9)
+  }
+  const interval=setInterval(refresh,1000)
+  refresh()
+}
+
+function levelEight() {
+  const text=document.createElement('div')
+  text.textContent='Balance the bar in center (use arrows / swipe)'
+  const bar=document.createElement('div')
+  bar.style.width='200px'
+  bar.style.height='10px'
+  bar.style.background='#ccc'
+  bar.style.margin='20px auto'
+  bar.style.position='relative'
+  const dot=document.createElement('div')
+  dot.style.width='10px'
+  dot.style.height='10px'
+  dot.style.background='#4caf50'
+  dot.style.position='absolute'
+  dot.style.left='95px'
+  bar.appendChild(dot)
+  game.append(text,bar)
+  let pos=95
+  let score=0
+  const interval=setInterval(()=>{
+    if(pos>90&&pos<110){score++}else score=0
+    if(score>=80){clearInterval(interval);document.onkeydown=null;pass()}
+  },50)
+  document.onkeydown=e=>{if(e.key=='ArrowLeft')pos-=3;if(e.key=='ArrowRight')pos+=3;pos=Math.max(0,190);dot.style.left=pos+'px'}
+  let startX=null
+  bar.ontouchstart=e=>startX=e.touches[0].clientX
+  bar.ontouchmove=e=>{
+    if(startX!=null){
+      let dx=e.touches[0].clientX-startX
+      pos+=dx/10
+      pos=Math.max(0,190)
+      dot.style.left=pos+'px'
+      startX=e.touches[0].clientX
+    }
+  }
+  bar.ontouchend=()=>startX=null
+}
+
+function levelNine() {
+  const text=document.createElement('div')
+  text.textContent='Solve 3 quick math problems'
+  game.appendChild(text)
+  let score=0
+  function ask(){
+    const a=Math.floor(Math.random()*10)
+    const b=Math.floor(Math.random()*10)
+    const ans=a+b
+    const q=document.createElement('div')
+    q.textContent=`${a} + ${b} = ?`
+    const inp=document.createElement('input')
+    inp.type='number'
+    const btn=document.createElement('button')
+    btn.textContent='Submit'
+    btn.onclick=()=>{
+      if(parseInt(inp.value)==ans){score++;q.remove();inp.remove();btn.remove();if(score==3)pass();else ask()}else msg.textContent='❌'}
+    game.append(q,inp,btn)
+  }
+  ask()
+}
+
+function levelTen(){
+  const text=document.createElement('div')
+  text.textContent='Memorize the sequence'
+  const seq=[]
+  for(let i=0;i<4;i++)seq.push(Math.floor(Math.random()*9))
+  const grid=document.createElement('div')
+  grid.className='grid'
+  for(let i=0;i<9;i++){const c=document.createElement('div');c.className='cell';grid.appendChild(c)}
+  game.append(text,grid)
+  let showing=true
+  let index=0
+  function flash(i){grid.children[i].style.background='#4caf50';setTimeout(()=>grid.children[i].style.background='#fff',500)}
+  let showInt=setInterval(()=>{flash(seq[index]);index++;if(index==seq.length){clearInterval(showInt);showing=false}},800)
+  let input=[]
+  grid.querySelectorAll('.cell').forEach((c,i)=>{
+    c.onclick=()=>{if(showing)return;input.push(i);if(input.length==seq.length){if(JSON.stringify(input)==JSON.stringify(seq))pass();else msg.textContent='❌'}}
+  })
+}
+
+function levelEleven(){
+  const text=document.createElement('div')
+  text.textContent='Press the button only when it turns green'
+  const btn=document.createElement('button')
+  btn.textContent='Wait...'
+  btn.disabled=true
+  game.append(text,btn)
+  setTimeout(()=>{
+    btn.textContent='Now!'
+    btn.disabled=false
+    btn.style.background='#4caf50'
+    const start=Date.now()
+    btn.onclick=()=>{if(Date.now()-start>200){pass()}else msg.textContent='❌ Too early'}
+  },1500+Math.random()*2000)
+}
+
+function levelTwelve(){
+  const text=document.createElement('div')
+  text.textContent='Pick all even numbers'
+  const grid=document.createElement('div')
+  grid.className='grid'
+  game.append(text,grid)
+  let nums=[]
+  for(let i=0;i<9;i++){nums.push(Math.floor(Math.random()*20))}
+  nums.forEach(n=>{
+    const c=document.createElement('div')
+    c.className='cell'
+    c.textContent=n
+    c.onclick=()=>c.classList.toggle('selected')
+    grid.appendChild(c)
+  })
+  const btn=document.createElement('button')
+  btn.textContent='Verify'
+  btn.onclick=()=>{
+    let ok=true
+    grid.querySelectorAll('.cell').forEach(c=>{
+      let n=parseInt(c.textContent)
+      if(n%2==0&&!c.classList.contains('selected'))ok=false
+      if(n%2!=0&&c.classList.contains('selected'))ok=false
+    })
+    if(ok)pass();else msg.textContent='❌ Wrong'
+  }
+  game.append(btn)
+}
+
+function levelThirteen(){
+  const text=document.createElement('div')
+  text.textContent='Shake your device / move mouse fast to verify'
+  game.append(text)
+  let moved=0
+  window.ondevicemotion=e=>{if(Math.abs(e.acceleration.x)>10||Math.abs(e.acceleration.y)>10){pass();window.ondevicemotion=null}}
+  window.onmousemove=()=>{moved++;if(moved>100){window.onmousemove=null;pass()}}
+}
+
+function levelFourteen(){
+  const text=document.createElement('div')
+  text.textContent='Spot the number 5 among letters'
+  const grid=document.createElement('div')
+  grid.className='grid'
+  const chars=[]
+  for(let i=0;i<9;i++)chars.push(i==Math.floor(Math.random()*9)?'5':String.fromCharCode(65+Math.floor(Math.random()*26)))
+  chars.forEach(ch=>{
+    const c=document.createElement('div')
+    c.className='cell'
+    c.textContent=ch
+    c.onclick=()=>{if(ch=='5')pass();else msg.textContent='❌'}
+    grid.appendChild(c)
+  })
+  game.append(text,grid)
+}
+
+function levelFifteen(){
+  const text=document.createElement('div')
+  text.textContent='Slide the tiles to make them all green (3 taps each)'
+  game.append(text)
+  const grid=document.createElement('div')
+  grid.className='grid'
+  game.append(grid)
+  let states=Array(9).fill(0)
+  function update(){
+    grid.innerHTML=''
+    for(let i=0;i<9;i++){
+      const c=document.createElement('div')
+      c.className='cell'
+      c.style.background=states[i]==3?'#4caf50':'#fff'
+      c.onclick=()=>{
+        if(states[i]<3)states[i]++
+        update()
+        if(states.every(v=>v==3))pass()
+      }
+      grid.appendChild(c)
+    }
+  }
+  update()
+}
+
+function levelSixteen(){
+  const text=document.createElement('div')
+  text.textContent='Don’t click anything for 5 seconds'
+  game.append(text)
+  let fail=false
+  game.onclick=()=>{fail=true;msg.textContent='❌ You clicked!'}
+  setTimeout(()=>{if(!fail){game.onclick=null;pass()}},5000)
+}
+
+function levelSeventeen(){
+  const text=document.createElement('div')
+  text.textContent='Match pairs of identical icons'
+  game.append(text)
+  const grid=document.createElement('div')
+  grid.className='grid'
+  game.append(grid)
+  const icons=['🍎','🚗','🐶','🌸','🍌','🐟']
+  let arr=[...icons.slice(0,4),...icons.slice(0,4)]
+  arr.sort(()=>Math.random()-0.5)
+  let open=[]
+  arr.forEach((e,i)=>{
+    const
