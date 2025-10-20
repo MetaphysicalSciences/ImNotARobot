@@ -2,469 +2,432 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I'm Not a Bot 🤖</title>
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f1f1f1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    touch-action: manipulation;
-  }
-  #container {
-    background: white;
-    border-radius: 10px;
-    padding: 25px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    text-align: center;
-    width: 90%;
-    max-width: 340px;
-  }
-  h1 {
-    margin-top: 0;
-    font-size: 22px;
-  }
-  button {
-    background: #4285f4;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  button:hover, button:active { background: #357ae8; }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    justify-content: center;
-    margin: 15px 0;
-  }
-  .cell {
-    aspect-ratio: 1/1;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    cursor: pointer;
-    background: #fff;
-    user-select: none;
-  }
-  .selected { background: #c8e6c9; border-color: #4caf50; }
-  #message { font-weight: bold; margin-top: 10px; min-height: 20px; }
-  #progress { margin-top: 10px; font-size: 14px; }
-  input[type=text], input[type=number] {
-    width: 80%;
-    padding: 8px;
-    font-size: 16px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    margin: 5px;
-  }
-  #bar { height: 15px; width: 100%; background: #ddd; border-radius: 10px; overflow: hidden; margin-top: 15px; }
-  #bar-inner { height: 100%; width: 0%; background: #4caf50; transition: width 0.2s; }
+body{margin:0;font-family:Arial,sans-serif;background:#f1f1f1;display:flex;justify-content:center;align-items:center;min-height:100vh}
+#container{background:white;border-radius:10px;padding:30px;box-shadow:0 4px 12px rgba(0,0,0,0.2);text-align:center;width:90%;max-width:400px}
+h1{margin-top:0;font-size:22px}
+button{background:#4285f4;color:white;border:none;border-radius:5px;padding:10px 20px;font-size:16px;cursor:pointer}
+button:hover{background:#357ae8}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;justify-items:center;margin:20px 0}
+.cell{width:80px;height:80px;border:2px solid #ccc;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:36px;cursor:pointer;background:#fff;user-select:none}
+.selected{background:#c8e6c9;border-color:#4caf50}
+#message{font-weight:bold;margin-top:10px}
+#progress{margin-top:10px;font-size:14px}
+input[type=text]{width:80%;padding:8px;font-size:16px;border-radius:4px;border:1px solid #ccc}
+#bar{height:15px;width:100%;background:#ddd;border-radius:10px;overflow:hidden;margin-top:15px}
+#bar-inner{height:100%;width:0%;background:#4caf50;transition:width 0.2s}
 </style>
 </head>
 <body>
 <div id="container">
-  <h1>I'm Not a Bot 🤖</h1>
-  <div id="menu"><button id="start">Verify</button></div>
-  <div id="game" style="display:none;"></div>
-  <div id="message"></div>
-  <div id="progress"></div>
+<h1>I'm Not a Bot 🤖</h1>
+<div id="menu">
+<button id="start">Verify</button>
+</div>
+<div id="game" style="display:none"></div>
+<div id="message"></div>
+<div id="progress"></div>
 </div>
 <script>
-let level = 1
-const game = document.getElementById('game')
-const msg = document.getElementById('message')
-const prog = document.getElementById('progress')
-document.getElementById('start').onclick = () => startLevel(1)
+let level=1
+const game=document.getElementById('game')
+const msg=document.getElementById('message')
+const prog=document.getElementById('progress')
+document.getElementById('start').onclick=()=>startLevel(1)
 
-function next() {
-  level++
-  if (level>18) {
-    msg.textContent='✅ You are truly human!'
-    game.innerHTML=''
-    prog.textContent=''
-    return
-  }
-  startLevel(level)
+function next(){
+level++
+if(level>18){msg.textContent='✅ You are truly human!';game.innerHTML='';prog.textContent='';return}
+startLevel(level)
 }
 
-function startLevel(lvl) {
-  document.getElementById('menu').style.display='none'
-  game.style.display='block'
-  msg.textContent=''
-  prog.textContent='Level '+lvl+'/18'
-  game.innerHTML=''
-  if (lvl==1) levelOne()
-  if (lvl==2) levelTwo()
-  if (lvl==3) levelThree()
-  if (lvl==4) levelFour()
-  if (lvl==5) levelFive()
-  if (lvl==6) levelSix()
-  if (lvl==7) levelSeven()
-  if (lvl==8) levelEight()
-  if (lvl==9) levelNine()
-  if (lvl==10) levelTen()
-  if (lvl==11) levelEleven()
-  if (lvl==12) levelTwelve()
-  if (lvl==13) levelThirteen()
-  if (lvl==14) levelFourteen()
-  if (lvl==15) levelFifteen()
-  if (lvl==16) levelSixteen()
-  if (lvl==17) levelSeventeen()
-  if (lvl==18) levelEighteen()
+function startLevel(lvl){
+document.getElementById('menu').style.display='none'
+game.style.display='block'
+msg.textContent=''
+prog.textContent='Level '+lvl+'/18'
+game.innerHTML=''
+if(lvl==1) levelOne()
+if(lvl==2) levelTwo()
+if(lvl==3) levelThree()
+if(lvl==4) levelFour()
+if(lvl==5) levelFive()
+if(lvl==6) levelSix()
+if(lvl==7) levelSeven()
+if(lvl==8) levelEight()
+if(lvl==9) levelNine()
+if(lvl==10) levelTen()
+if(lvl==11) levelEleven()
+if(lvl==12) levelTwelve()
+if(lvl==13) levelThirteen()
+if(lvl==14) levelFourteen()
+if(lvl==15) levelFifteen()
+if(lvl==16) levelSixteen()
+if(lvl==17) levelSeventeen()
+if(lvl==18) levelEighteen()
 }
 
-function pass(){msg.textContent='✅ Passed';setTimeout(next,1000)}
-
-function levelOne() {
-  const emojis=['🐶','🐱','🍎','🚗','🌸','🌲','🍌','🐸','🐟']
-  const target=emojis[Math.floor(Math.random()*emojis.length)]
-  const instruct=document.createElement('div')
-  instruct.textContent='Select all '+target
-  game.appendChild(instruct)
-  const grid=document.createElement('div')
-  grid.className='grid'
-  game.appendChild(grid)
-  const opts=[]
-  const correct=2+Math.floor(Math.random()*2)
-  for(let i=0;i<correct;i++) opts.push(target)
-  while(opts.length<9){
-    let e=emojis[Math.floor(Math.random()*emojis.length)]
-    if(e!=target)opts.push(e)
-  }
-  opts.sort(()=>Math.random()-0.5)
-  opts.forEach(e=>{
-    const c=document.createElement('div')
-    c.className='cell'
-    c.textContent=e
-    c.onclick=()=>c.classList.toggle('selected')
-    grid.appendChild(c)
-  })
-  const btn=document.createElement('button')
-  btn.textContent='Verify'
-  btn.onclick=()=>{
-    let ok=true
-    grid.querySelectorAll('.cell').forEach(c=>{
-      if(c.textContent==target&&!c.classList.contains('selected'))ok=false
-      if(c.textContent!=target&&c.classList.contains('selected'))ok=false
-    })
-    if(ok)pass();else msg.textContent='❌ Try again'
-  }
-  game.appendChild(btn)
+function levelOne(){
+const emojis=['🐶','🐱','🍎','🚗','🌸','🌲','🍌','🐸','🐟']
+const target=emojis[Math.floor(Math.random()*emojis.length)]
+const instruct=document.createElement('div')
+instruct.textContent='Select all '+target
+game.appendChild(instruct)
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+const opts=[]
+const correct=2+Math.floor(Math.random()*2)
+for(let i=0;i<correct;i++) opts.push(target)
+while(opts.length<9){
+let e=emojis[Math.floor(Math.random()*emojis.length)]
+if(e!=target)opts.push(e)
+}
+opts.sort(()=>Math.random()-0.5)
+opts.forEach(e=>{
+const c=document.createElement('div')
+c.className='cell'
+c.textContent=e
+c.onclick=()=>c.classList.toggle('selected')
+grid.appendChild(c)
+})
+const btn=document.createElement('button')
+btn.textContent='Verify'
+btn.onclick=()=>{
+let ok=true
+grid.querySelectorAll('.cell').forEach(c=>{
+if(c.textContent==target&&!c.classList.contains('selected'))ok=false
+if(c.textContent!=target&&c.classList.contains('selected'))ok=false
+})
+if(ok){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Try again'
+}
+game.appendChild(btn)
 }
 
-function levelTwo() {
-  const text=document.createElement('div')
-  text.textContent='Type the characters:'
-  const code=Math.random().toString(36).substring(2,7).toUpperCase()
-  const disp=document.createElement('div')
-  disp.style.letterSpacing='5px'
-  disp.style.fontFamily='monospace'
-  disp.style.fontSize='22px'
-  disp.textContent=code
-  const input=document.createElement('input')
-  input.type='text'
-  const btn=document.createElement('button')
-  btn.textContent='Verify'
-  btn.onclick=()=>{if(input.value.toUpperCase()==code)pass();else msg.textContent='❌ Wrong'}
-  game.append(text,disp,input,btn)
+function levelTwo(){
+const text=document.createElement('div')
+text.textContent='Type the characters:'
+const code=Math.random().toString(36).substring(2,7).toUpperCase()
+const disp=document.createElement('div')
+disp.style.letterSpacing='5px'
+disp.style.fontFamily='monospace'
+disp.style.fontSize='22px'
+disp.textContent=code
+const input=document.createElement('input')
+input.type='text'
+const btn=document.createElement('button')
+btn.textContent='Verify'
+btn.onclick=()=>{
+if(input.value.toUpperCase()==code){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'
+}
+game.append(text,disp,input,btn)
 }
 
-function levelThree() {
-  const text=document.createElement('div')
-  text.textContent='Click 50 times to verify'
-  game.appendChild(text)
-  const bar=document.createElement('div')
-  bar.id='bar'
-  const inner=document.createElement('div')
-  inner.id='bar-inner'
-  bar.appendChild(inner)
-  game.appendChild(bar)
-  let count=0
-  game.onclick=()=>{
-    count++
-    inner.style.width=(count/50*100)+'%'
-    if(count>=50){game.onclick=null;pass()}
-  }
+function levelThree(){
+const text=document.createElement('div')
+text.textContent='Click 50 times to verify'
+game.appendChild(text)
+const bar=document.createElement('div')
+bar.id='bar'
+const inner=document.createElement('div')
+inner.id='bar-inner'
+bar.appendChild(inner)
+game.appendChild(bar)
+let count=0
+function increment(){count++;inner.style.width=(count/50*100)+'%';if(count>=50){msg.textContent='✅ Passed';document.removeEventListener('click',increment);setTimeout(next,1000)}}
+document.addEventListener('click',increment)
 }
 
-function levelFour() {
-  const text=document.createElement('div')
-  text.textContent='Find the odd square'
-  const grid=document.createElement('div')
-  grid.className='grid'
-  game.appendChild(text)
-  game.appendChild(grid)
-  const odd=Math.floor(Math.random()*9)
-  for(let i=0;i<9;i++){
-    const c=document.createElement('div')
-    c.className='cell'
-    c.style.background=i==odd?'#e0e0e0':'#ddd'
-    c.onclick=()=>{if(i==odd)pass();else msg.textContent='❌'}
-    grid.appendChild(c)
-  }
+function levelFour(){
+const text=document.createElement('div')
+text.textContent='Click all squares with a dot'
+game.appendChild(text)
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+const dots=[]
+while(dots.length<3){let d=Math.floor(Math.random()*9);if(!dots.includes(d))dots.push(d)}
+for(let i=0;i<9;i++){
+const c=document.createElement('div')
+c.className='cell'
+c.onclick=()=>{if(dots.includes(i)){c.style.background='#4caf50';dots.splice(dots.indexOf(i),1);if(dots.length==0){msg.textContent='✅ Passed';setTimeout(next,1000)}}else msg.textContent='❌ Wrong'}
+grid.appendChild(c)
+}
 }
 
-function levelFive() {
-  const text=document.createElement('div')
-  text.textContent='Tap the button 3 times in a row quickly'
-  const btn=document.createElement('button')
-  btn.textContent='Tap!'
-  let taps=0
-  let timer
-  btn.onclick=()=>{
-    taps++
-    clearTimeout(timer)
-    if(taps==3){pass()}
-    timer=setTimeout(()=>taps=0,800)
-  }
-  game.append(text,btn)
+function levelFive(){
+const text=document.createElement('div')
+text.textContent='Tap the screen rapidly 20 times'
+game.appendChild(text)
+let taps=0
+function tapHandler(){taps++;msg.textContent=`${taps}/20`;if(taps>=20){msg.textContent='✅ Passed';document.removeEventListener('touchstart',tapHandler);document.removeEventListener('click',tapHandler);setTimeout(next,1000)}}
+document.addEventListener('touchstart',tapHandler)
+document.addEventListener('click',tapHandler)
 }
 
-function levelSix() {
-  const text=document.createElement('div')
-  text.textContent='Drag the slider to 100%'
-  game.appendChild(text)
-  const range=document.createElement('input')
-  range.type='range'
-  range.min=0
-  range.max=100
-  range.value=0
-  game.appendChild(range)
-  const btn=document.createElement('button')
-  btn.textContent='Verify'
-  btn.onclick=()=>{if(range.value==100)pass();else msg.textContent='❌ Not full'}
-  game.appendChild(btn)
+function levelSix(){
+const text=document.createElement('div')
+text.textContent='Drag the slider to 100%'
+game.appendChild(text)
+const range=document.createElement('input')
+range.type='range'
+range.min=0
+range.max=100
+range.value=0
+game.appendChild(range)
+const btn=document.createElement('button')
+btn.textContent='Verify'
+btn.onclick=()=>{if(range.value==100){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Not full'}
+game.appendChild(btn)
 }
 
-function levelSeven() {
-  const text=document.createElement('div')
-  text.textContent='Click the green square (changes each second)'
-  const grid=document.createElement('div')
-  grid.className='grid'
-  game.appendChild(text)
-  game.appendChild(grid)
-  let green=Math.floor(Math.random()*9)
-  for(let i=0;i<9;i++){
-    const c=document.createElement('div')
-    c.className='cell'
-    grid.appendChild(c)
-  }
-  function refresh(){
-    grid.querySelectorAll('.cell').forEach((c,i)=>{
-      c.style.background=i==green?'#4caf50':'#fff'
-      c.onclick=()=>{if(i==green){clearInterval(interval);pass()}else msg.textContent='❌'}
-    })
-    green=Math.floor(Math.random()*9)
-  }
-  const interval=setInterval(refresh,1000)
-  refresh()
+function levelSeven(){
+const text=document.createElement('div')
+text.textContent='Select the green square (changes each second)'
+game.appendChild(text)
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+let green=Math.floor(Math.random()*9)
+for(let i=0;i<9;i++){
+const c=document.createElement('div')
+c.className='cell'
+grid.appendChild(c)
+}
+function refresh(){
+grid.querySelectorAll('.cell').forEach((c,i)=>{
+c.style.background=i==green?'#4caf50':'#fff'
+c.onclick=()=>{if(i==green){msg.textContent='✅ Passed';clearInterval(interval);setTimeout(next,1000)}else msg.textContent='❌ Missed'}
+})
+green=Math.floor(Math.random()*9)
+}
+const interval=setInterval(refresh,1000)
+refresh()
 }
 
-function levelEight() {
-  const text=document.createElement('div')
-  text.textContent='Balance the bar in center (use arrows / swipe)'
-  const bar=document.createElement('div')
-  bar.style.width='200px'
-  bar.style.height='10px'
-  bar.style.background='#ccc'
-  bar.style.margin='20px auto'
-  bar.style.position='relative'
-  const dot=document.createElement('div')
-  dot.style.width='10px'
-  dot.style.height='10px'
-  dot.style.background='#4caf50'
-  dot.style.position='absolute'
-  dot.style.left='95px'
-  bar.appendChild(dot)
-  game.append(text,bar)
-  let pos=95
-  let score=0
-  const interval=setInterval(()=>{
-    if(pos>90&&pos<110){score++}else score=0
-    if(score>=80){clearInterval(interval);document.onkeydown=null;pass()}
-  },50)
-  document.onkeydown=e=>{if(e.key=='ArrowLeft')pos-=3;if(e.key=='ArrowRight')pos+=3;pos=Math.max(0,190);dot.style.left=pos+'px'}
-  let startX=null
-  bar.ontouchstart=e=>startX=e.touches[0].clientX
-  bar.ontouchmove=e=>{
-    if(startX!=null){
-      let dx=e.touches[0].clientX-startX
-      pos+=dx/10
-      pos=Math.max(0,190)
-      dot.style.left=pos+'px'
-      startX=e.touches[0].clientX
-    }
-  }
-  bar.ontouchend=()=>startX=null
+function levelEight(){
+const text=document.createElement('div')
+text.textContent='Balance the bar in center (arrow keys)'
+game.appendChild(text)
+const bar=document.createElement('div')
+bar.style.width='200px'
+bar.style.height='10px'
+bar.style.background='#ccc'
+bar.style.margin='20px auto'
+bar.style.position='relative'
+const dot=document.createElement('div')
+dot.style.width='10px'
+dot.style.height='10px'
+dot.style.background='#4caf50'
+dot.style.position='absolute'
+dot.style.left='95px'
+bar.appendChild(dot)
+game.appendChild(bar)
+let pos=95
+let score=0
+const interval=setInterval(()=>{
+if(pos>90&&pos<110){score++}else score=0
+if(score>=100){msg.textContent='✅ Passed';clearInterval(interval);document.onkeydown=null;setTimeout(next,1000)}
+},50)
+document.onkeydown=e=>{
+if(e.key=='ArrowLeft')pos-=3
+if(e.key=='ArrowRight')pos+=3
+pos=Math.max(0,Math.min(190,pos))
+dot.style.left=pos+'px'
 }
 
-function levelNine() {
-  const text=document.createElement('div')
-  text.textContent='Solve 3 quick math problems'
-  game.appendChild(text)
-  let score=0
-  function ask(){
-    const a=Math.floor(Math.random()*10)
-    const b=Math.floor(Math.random()*10)
-    const ans=a+b
-    const q=document.createElement('div')
-    q.textContent=`${a} + ${b} = ?`
-    const inp=document.createElement('input')
-    inp.type='number'
-    const btn=document.createElement('button')
-    btn.textContent='Submit'
-    btn.onclick=()=>{
-      if(parseInt(inp.value)==ans){score++;q.remove();inp.remove();btn.remove();if(score==3)pass();else ask()}else msg.textContent='❌'}
-    game.append(q,inp,btn)
-  }
-  ask()
+}
+
+function levelNine(){
+const text=document.createElement('div')
+text.textContent='Solve 3 quick math problems'
+game.appendChild(text)
+let score=0
+function ask(){
+const a=Math.floor(Math.random()*10)
+const b=Math.floor(Math.random()*10)
+const ans=a+b
+const q=document.createElement('div')
+q.textContent=`${a} + ${b} = ?`
+const inp=document.createElement('input')
+inp.type='text'
+const btn=document.createElement('button')
+btn.textContent='Submit'
+btn.onclick=()=>{
+if(parseInt(inp.value)==ans){score++;msg.textContent='✅';q.remove();inp.remove();btn.remove();if(score==3){msg.textContent='✅ Passed';setTimeout(next,1000)}else ask()}else msg.textContent='❌'}
+game.append(q,inp,btn)
+}
+ask()
 }
 
 function levelTen(){
-  const text=document.createElement('div')
-  text.textContent='Memorize the sequence'
-  const seq=[]
-  for(let i=0;i<4;i++)seq.push(Math.floor(Math.random()*9))
-  const grid=document.createElement('div')
-  grid.className='grid'
-  for(let i=0;i<9;i++){const c=document.createElement('div');c.className='cell';grid.appendChild(c)}
-  game.append(text,grid)
-  let showing=true
-  let index=0
-  function flash(i){grid.children[i].style.background='#4caf50';setTimeout(()=>grid.children[i].style.background='#fff',500)}
-  let showInt=setInterval(()=>{flash(seq[index]);index++;if(index==seq.length){clearInterval(showInt);showing=false}},800)
-  let input=[]
-  grid.querySelectorAll('.cell').forEach((c,i)=>{
-    c.onclick=()=>{if(showing)return;input.push(i);if(input.length==seq.length){if(JSON.stringify(input)==JSON.stringify(seq))pass();else msg.textContent='❌'}}
-  })
+const text=document.createElement('div')
+text.textContent='Tap the odd emoji out'
+game.appendChild(text)
+const emojis=['🐶','🐶','🐶','🐱']
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+emojis.sort(()=>Math.random()-0.5).forEach((e,i)=>{
+const c=document.createElement('div')
+c.className='cell'
+c.textContent=e
+c.onclick=()=>{if(e=='🐱'){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'}
+grid.appendChild(c)
+})
 }
 
 function levelEleven(){
-  const text=document.createElement('div')
-  text.textContent='Press the button only when it turns green'
-  const btn=document.createElement('button')
-  btn.textContent='Wait...'
-  btn.disabled=true
-  game.append(text,btn)
-  setTimeout(()=>{
-    btn.textContent='Now!'
-    btn.disabled=false
-    btn.style.background='#4caf50'
-    const start=Date.now()
-    btn.onclick=()=>{if(Date.now()-start>200){pass()}else msg.textContent='❌ Too early'}
-  },1500+Math.random()*2000)
+const text=document.createElement('div')
+text.textContent='Click squares in ascending number'
+game.appendChild(text)
+const nums=[]
+while(nums.length<4){let n=Math.floor(Math.random()*9)+1;if(!nums.includes(n))nums.push(n)}
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+let order=0
+nums.forEach(n=>{
+const c=document.createElement('div')
+c.className='cell'
+c.textContent=n
+c.onclick=()=>{if(n==nums[order]){order++;c.style.background='#4caf50';if(order==4){msg.textContent='✅ Passed';setTimeout(next,1000)}}else msg.textContent='❌ Wrong'}
+grid.appendChild(c)
+})
 }
 
 function levelTwelve(){
-  const text=document.createElement('div')
-  text.textContent='Pick all even numbers'
-  const grid=document.createElement('div')
-  grid.className='grid'
-  game.append(text,grid)
-  let nums=[]
-  for(let i=0;i<9;i++){nums.push(Math.floor(Math.random()*20))}
-  nums.forEach(n=>{
-    const c=document.createElement('div')
-    c.className='cell'
-    c.textContent=n
-    c.onclick=()=>c.classList.toggle('selected')
-    grid.appendChild(c)
-  })
-  const btn=document.createElement('button')
-  btn.textContent='Verify'
-  btn.onclick=()=>{
-    let ok=true
-    grid.querySelectorAll('.cell').forEach(c=>{
-      let n=parseInt(c.textContent)
-      if(n%2==0&&!c.classList.contains('selected'))ok=false
-      if(n%2!=0&&c.classList.contains('selected'))ok=false
-    })
-    if(ok)pass();else msg.textContent='❌ Wrong'
-  }
-  game.append(btn)
+const text=document.createElement('div')
+text.textContent='Select all red squares (3 rounds)'
+game.appendChild(text)
+let round=0
+function roundFunc(){
+game.querySelectorAll('.grid,.cell').forEach(e=>e.remove())
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+const reds=[]
+while(reds.length<3){let r=Math.floor(Math.random()*9);if(!reds.includes(r))reds.push(r)}
+for(let i=0;i<9;i++){
+const c=document.createElement('div')
+c.className='cell'
+c.onclick=()=>{if(reds.includes(i)){c.style.background='#f44336';reds.splice(reds.indexOf(i),1);if(reds.length==0){round++;if(round<3){roundFunc()}else{msg.textContent='✅ Passed';setTimeout(next,1000)}}}else msg.textContent='❌ Wrong'}}
+grid.appendChild(c)
+}
+}
+roundFunc()
 }
 
 function levelThirteen(){
-  const text=document.createElement('div')
-  text.textContent='Shake your device / move mouse fast to verify'
-  game.append(text)
-  let moved=0
-  window.ondevicemotion=e=>{if(Math.abs(e.acceleration.x)>10||Math.abs(e.acceleration.y)>10){pass();window.ondevicemotion=null}}
-  window.onmousemove=()=>{moved++;if(moved>100){window.onmousemove=null;pass()}}
+const text=document.createElement('div')
+text.textContent='Shake your device 5 times (or click rapidly)'
+game.appendChild(text)
+let count=0
+function handler(){count++;msg.textContent=`${count}/5`;if(count>=5){msg.textContent='✅ Passed';window.removeEventListener('devicemotion',handler);document.removeEventListener('click',handler);setTimeout(next,1000)}}
+window.addEventListener('devicemotion',handler)
+document.addEventListener('click',handler)
 }
 
 function levelFourteen(){
-  const text=document.createElement('div')
-  text.textContent='Spot the number 5 among letters'
-  const grid=document.createElement('div')
-  grid.className='grid'
-  const chars=[]
-  for(let i=0;i<9;i++)chars.push(i==Math.floor(Math.random()*9)?'5':String.fromCharCode(65+Math.floor(Math.random()*26)))
-  chars.forEach(ch=>{
-    const c=document.createElement('div')
-    c.className='cell'
-    c.textContent=ch
-    c.onclick=()=>{if(ch=='5')pass();else msg.textContent='❌'}
-    grid.appendChild(c)
-  })
-  game.append(text,grid)
+const text=document.createElement('div')
+text.textContent='Click alternating squares 10 times'
+game.appendChild(text)
+let last=null
+let count=0
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+for(let i=0;i<4;i++){
+const c=document.createElement('div')
+c.className='cell'
+c.onclick=()=>{if(i!=last){count++;last=i;c.style.background='#4caf50';if(count>=10){msg.textContent='✅ Passed';setTimeout(next,1000)}}else msg.textContent='❌ Same square'}
+grid.appendChild(c)
+}
 }
 
 function levelFifteen(){
-  const text=document.createElement('div')
-  text.textContent='Slide the tiles to make them all green (3 taps each)'
-  game.append(text)
-  const grid=document.createElement('div')
-  grid.className='grid'
-  game.append(grid)
-  let states=Array(9).fill(0)
-  function update(){
-    grid.innerHTML=''
-    for(let i=0;i<9;i++){
-      const c=document.createElement('div')
-      c.className='cell'
-      c.style.background=states[i]==3?'#4caf50':'#fff'
-      c.onclick=()=>{
-        if(states[i]<3)states[i]++
-        update()
-        if(states.every(v=>v==3))pass()
-      }
-      grid.appendChild(c)
-    }
-  }
-  update()
+const text=document.createElement('div')
+text.textContent='Type the word shown backwards'
+game.appendChild(text)
+const words=['HUMAN','ROBOT','VERIFY','CAPTCHA']
+const word=words[Math.floor(Math.random()*words.length)]
+const disp=document.createElement('div')
+disp.textContent=word.split('').reverse().join('')
+disp.style.letterSpacing='5px'
+game.appendChild(disp)
+const input=document.createElement('input')
+input.type='text'
+const btn=document.createElement('button')
+btn.textContent='Verify'
+btn.onclick=()=>{if(input.value.toUpperCase()==word){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'}
+game.appendChild(input)
+game.appendChild(btn)
 }
 
 function levelSixteen(){
-  const text=document.createElement('div')
-  text.textContent='Don’t click anything for 5 seconds'
-  game.append(text)
-  let fail=false
-  game.onclick=()=>{fail=true;msg.textContent='❌ You clicked!'}
-  setTimeout(()=>{if(!fail){game.onclick=null;pass()}},5000)
+const text=document.createElement('div')
+text.textContent='Slide the blocks in order (2 rounds)'
+game.appendChild(text)
+let round=0
+function roundFunc(){
+game.querySelectorAll('.grid,.cell').forEach(e=>e.remove())
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+let nums=[1,2,3,4]
+nums.sort(()=>Math.random()-0.5)
+let order=0
+nums.forEach(n=>{
+const c=document.createElement('div')
+c.className='cell'
+c.textContent=n
+c.onclick=()=>{if(n==order+1){order++;c.style.background='#4caf50';if(order==4){round++;if(round<2){roundFunc()}else{msg.textContent='✅ Passed';setTimeout(next,1000)}}}else msg.textContent='❌ Wrong'}
+grid.appendChild(c)
+})
+}
+roundFunc()
 }
 
 function levelSeventeen(){
-  const text=document.createElement('div')
-  text.textContent='Match pairs of identical icons'
-  game.append(text)
-  const grid=document.createElement('div')
-  grid.className='grid'
-  game.append(grid)
-  const icons=['🍎','🚗','🐶','🌸','🍌','🐟']
-  let arr=[...icons.slice(0,4),...icons.slice(0,4)]
-  arr.sort(()=>Math.random()-0.5)
-  let open=[]
-  arr.forEach((e,i)=>{
-    const
+const text=document.createElement('div')
+text.textContent='Click on all moving squares (3 rounds)'
+game.appendChild(text)
+let round=0
+function roundFunc(){
+game.querySelectorAll('.grid,.cell').forEach(e=>e.remove())
+const grid=document.createElement('div')
+grid.className='grid'
+game.appendChild(grid)
+const moving=[]
+while(moving.length<2){let r=Math.floor(Math.random()*9);if(!moving.includes(r))moving.push(r)}
+for(let i=0;i<9;i++){
+const c=document.createElement('div')
+c.className='cell'
+grid.appendChild(c)
+if(moving.includes(i)){
+let dir=1
+setInterval(()=>{c.style.transform=`translateX(${(Math.sin(Date.now()/200)*10)}px)`},16)
+c.onclick=()=>{c.style.background='#4caf50';moving.splice(moving.indexOf(i),1);if(moving.length==0){round++;if(round<3){roundFunc()}else{msg.textContent='✅ Passed';setTimeout(next,1000)}}}
+}
+}
+}
+roundFunc()
+}
+
+function levelEighteen(){
+const text=document.createElement('div')
+text.textContent='Final verification: type YES to complete'
+game.appendChild(text)
+const input=document.createElement('input')
+input.type='text'
+const btn=document.createElement('button')
+btn.textContent='Verify'
+btn.onclick=()=>{if(input.value.toUpperCase()=='YES'){msg.textContent='✅ Passed';setTimeout(next,1000)}else msg.textContent='❌ Wrong'}
+game.appendChild(input)
+game.appendChild(btn)
+}
+</script>
+</body>
+</html>
