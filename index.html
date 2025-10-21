@@ -2,491 +2,130 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Im not a bot 🤖</title>
+<title>Extreme CPU & GPU Stress Test</title>
 <style>
-:root{
-  --bg:#f4f6f8;
-  --card:#fff;
-  --accent:#1a73e8;
-  --ok:#16a34a;
-  --danger:#ef4444;
-  --muted:#6b7280;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{
-  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-  background:linear-gradient(180deg,#eef2ff 0%,var(--bg) 60%);
-  display:flex;justify-content:center;align-items:center;padding:20px;
-}
-.app{
-  width:960px;max-width:96%;background:transparent;
-}
-.header{
-  display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;
-}
-.title{
-  display:flex;gap:12px;align-items:center;
-}
-.logo{
-  width:50px;height:50px;background:linear-gradient(135deg,#fff,#eef2ff);
-  border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:26px;
-}
-.h1{font-weight:700;font-size:20px}
-.controls{display:flex;gap:8px;align-items:center}
-.btn{
-  background:var(--accent);color:white;padding:8px 14px;border-radius:8px;border:0;font-weight:600;cursor:pointer
-}
-.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(26,115,232,0.2)}
-.layout{display:grid;grid-template-columns:1fr 280px;gap:12px}
-.card{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 6px 20px rgba(0,0,0,0.04)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.cell{display:flex;align-items:center;justify-content:center;font-size:32px;height:70px;border:2px solid #e6eef9;border-radius:8px;cursor:pointer;user-select:none;transition:0.1s}
-.cell.selected{border-color:var(--ok);background:#f6fffa;box-shadow:0 6px 18px rgba(16,185,129,0.08)}
-.instruction{margin-bottom:6px;font-size:14px;color:#374151}
-.fake-checkbox{width:20px;height:20px;border-radius:4px;border:2px solid #cbd5e1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:white}
-.fake-checkbox.on{background:linear-gradient(90deg,#fff,#eceffb);border-color:#9be7a3}
-.message{font-weight:700;margin-top:6px;font-size:14px}
-.small-muted{font-size:12px;color:var(--muted)}
-.level-badge{background:#eef2ff;color:var(--accent);padding:6px 10px;border-radius:999px;font-weight:700}
-.verify-btn{margin-top:8px;width:100%;padding:10px;border-radius:8px;border:0;font-weight:700;cursor:pointer;background:linear-gradient(90deg,var(--accent),#3b82f6);color:white}
-.tile{background:#fff;border-radius:8px;padding:8px;border:1px solid #eef3ff;display:flex;align-items:center;justify-content:center;height:60px;font-size:28px;cursor:pointer}
-.tile.matched{background:#e6ffef;border-color:#bbf7d0;box-shadow:0 6px 18px rgba(16,185,129,0.06)}
-.center{display:flex;justify-content:center;align-items:center;flex-direction:column}
-.input{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eef9;font-size:14px}
-.progress-bar{height:10px;background:#e6eef9;border-radius:999px;overflow:hidden}
-.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#60a5fa)}
+  body { margin: 0; overflow: hidden; background: black; color: white; font-family: monospace; }
+  #stats { position: absolute; top: 0; left: 0; padding: 10px; background: rgba(0,0,0,0.5); }
+  canvas { display: block; }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="header">
-    <div class="title">
-      <div class="logo">🤖</div>
-      <div>
-        <div class="h1">Im not a bot 🤖</div>
-      </div>
-    </div>
-    <div class="controls">
-      <div class="level-badge" id="levelBadge">Menu</div>
-      <button class="btn" id="startBtn">Verify</button>
-      <button class="btn ghost" id="resetBtn">Reset</button>
-    </div>
-  </div>
-  <div class="layout">
-    <div class="card left" id="mainCard">
-      <div class="center" id="mainArea">
-        <h2>Main Menu</h2>
-        <div class="small-muted">Press Verify to start</div>
-        <div style="height:12px"></div>
-        <button class="verify-btn" id="menuVerify">Verify</button>
-      </div>
-    </div>
-    <div class="card right">
-      <div class="small-muted">Current Level</div>
-      <div id="sideLevel" style="font-weight:800">—</div>
-      <div class="small-muted">Status</div>
-      <div id="sideStatus" style="font-weight:700">Idle</div>
-      <div class="small-muted">Progress</div>
-      <div id="sideProgress">0 / 18</div>
-      <div class="small-muted">Level Progress</div>
-      <div class="progress-bar"><div class="progress-fill" id="levelFill"></div></div>
-    </div>
-  </div>
-</div>
+<div id="stats">Initializing...</div>
+<canvas id="glcanvas"></canvas>
 
 <script>
-const emojis = ['🐶','🐱','🐼','🦊','🐻','🐸','🦁','🐷','🐵','🐔','🦄','🐙','🐢','🦋','🍎','🍌','🍇','🍓','🍍','🍑','🚗','🚲','✈️','🛶','🚌','🚕','🌲','🌸','🌵','🔥','💧'];
-let state = {level:0,unlocked:0,clicks:0,progress:0};
-const totalLevels = 18;
-const mainArea = document.getElementById('mainArea');
-const levelBadge = document.getElementById('levelBadge');
-const sideLevel = document.getElementById('sideLevel');
-const sideStatus = document.getElementById('sideStatus');
-const sideProgress = document.getElementById('sideProgress');
-const levelFill = document.getElementById('levelFill');
-const startBtn = document.getElementById('startBtn');
-const resetBtn = document.getElementById('resetBtn');
-const menuVerify = document.getElementById('menuVerify');
-let currentLevelObj = null;
+const canvas = document.getElementById('glcanvas');
+const gl = canvas.getContext('webgl2');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
-function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const statsEl = document.getElementById('stats');
+let fps = 0, frames = 0, last = performance.now();
+let memory = {usedJSHeapSize: 0, totalJSHeapSize: 0};
 
-function toMenu(){
-  state.level = 0;
-  updateUI();
-  mainArea.innerHTML = `<div class="center"><h2>Main Menu</h2><div class="small-muted">Press Verify to start</div><div style="height:12px"></div><button class="verify-btn" id="menuVerifyBtn">Verify</button></div>`;
-  document.getElementById('menuVerifyBtn').onclick = ()=>startLevel(1);
+function updateStats() {
+    const now = performance.now();
+    frames++;
+    if (now - last >= 1000) {
+        fps = frames;
+        frames = 0;
+        last = now;
+        if (performance.memory) {
+            memory.usedJSHeapSize = performance.memory.usedJSHeapSize;
+            memory.totalJSHeapSize = performance.memory.totalJSHeapSize;
+        }
+        statsEl.textContent = `
+FPS: ${fps}
+JS Heap: ${(memory.usedJSHeapSize/1048576).toFixed(2)}MB / ${(memory.totalJSHeapSize/1048576).toFixed(2)}MB
+Canvas: ${canvas.width}x${canvas.height}
+Particle Count: ${particles.length}
+        `;
+    }
 }
 
-function updateUI(){
-  levelBadge.textContent = state.level===0?'Menu':`Lv ${state.level}`;
-  sideLevel.textContent = state.level===0?'Menu':`Level ${state.level}`;
-  sideStatus.textContent = state.level===0?'Idle':'Playing';
-  sideProgress.textContent = `${state.unlocked} / ${totalLevels}`;
-  levelFill.style.width = Math.round((state.unlocked/totalLevels)*100)+'%';
+// ---- GPU Stress ----
+const particleCount = 50000; // increase for more stress
+const particles = new Float32Array(particleCount * 3);
+for (let i=0;i<particleCount*3;i++) {
+    particles[i] = (Math.random()*2-1) * 1;
 }
 
-function startLevel(n){
-  state.level = n;
-  updateUI();
-  mainArea.innerHTML = '';
-  currentLevelObj = levels[n];
-  if(!currentLevelObj) return;
-  currentLevelObj.render(mainArea,()=>levelSuccess());
+const vertexShaderSource = `
+attribute vec3 position;
+uniform float time;
+void main() {
+    vec3 pos = position;
+    pos.x += sin(time + pos.y*10.0)*0.01;
+    pos.y += cos(time + pos.x*10.0)*0.01;
+    gl_PointSize = 1.5;
+    gl_Position = vec4(pos,1.0);
+}
+`;
+
+const fragmentShaderSource = `
+precision mediump float;
+void main() {
+    gl_FragColor = vec4(1.0,0.2,0.5,1.0);
+}
+`;
+
+function createShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
+        console.error(gl.getShaderInfoLog(shader));
+    }
+    return shader;
 }
 
-function levelSuccess(){
-  state.unlocked = Math.max(state.unlocked,state.level);
-  updateUI();
-  mainArea.innerHTML = `<div class="center"><div style="font-size:36px;color:var(--ok)">✅ Verified!</div><div style="height:12px"></div><div class="small-muted">Level ${state.level} complete</div><div style="height:12px"></div><div style="display:flex;gap:10px"><button class="btn" id="nextBtn">Next</button><button class="btn ghost" id="menuBtn">Menu</button></div></div>`;
-  document.getElementById('nextBtn').onclick = ()=>{
-    const next = Math.min(totalLevels,state.level+1);
-    if(state.level>=totalLevels) toMenu(); else startLevel(next);
-  };
-  document.getElementById('menuBtn').onclick = ()=>toMenu();
+const vs = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+const fs = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+const program = gl.createProgram();
+gl.attachShader(program, vs);
+gl.attachShader(program, fs);
+gl.linkProgram(program);
+gl.useProgram(program);
+
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, particles, gl.DYNAMIC_DRAW);
+
+const positionLoc = gl.getAttribLocation(program, 'position');
+gl.enableVertexAttribArray(positionLoc);
+gl.vertexAttribPointer(positionLoc,3,gl.FLOAT,false,0,0);
+
+const timeLoc = gl.getUniformLocation(program,'time');
+
+// ---- CPU Stress ----
+function heavyCalculation() {
+    const size = 2000; 
+    const matrix = [];
+    for(let i=0;i<size;i++){
+        matrix[i] = [];
+        for(let j=0;j<size;j++){
+            matrix[i][j] = Math.sin(i*j) * Math.cos(i+j);
+        }
+    }
+    return matrix;
 }
 
-resetBtn.onclick = ()=>{
-  state = {level:0,unlocked:0,clicks:0,progress:0};
-  toMenu();
+function animate(time){
+    gl.clearColor(0,0,0,1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    gl.uniform1f(timeLoc, time*0.001);
+    gl.drawArrays(gl.POINTS,0,particleCount);
+
+    heavyCalculation(); // CPU heavy
+    
+    updateStats();
+    requestAnimationFrame(animate);
 }
 
-startBtn.onclick = ()=>{
-  if(state.level===0) startLevel(1);
-  else if(currentLevelObj && currentLevelObj.verify) currentLevelObj.verify();
-}
+animate(0);
 
-menuVerify.onclick = ()=>startLevel(1);
-
-toMenu();
-
-const levels = {};
-
-//=== LEVEL 1
-levels[1]={
-  render(container,done){
-    const target=rand(emojis);
-    const correctCount=2+Math.floor(Math.random()*2);
-    let options=[];
-    for(let i=0;i<correctCount;i++)options.push(target);
-    while(options.length<9)options.push(rand(emojis));
-    options=shuffle(options);
-    const wrapper=document.createElement('div');
-    wrapper.innerHTML=`<div class="instruction">Select all ${target}</div><div class="grid" id="grid"></div><button class="verify-btn" id="verifyBtn">Verify</button>`;
-    container.appendChild(wrapper);
-    const grid=wrapper.querySelector('#grid');
-    options.forEach((e,i)=>{
-      const div=document.createElement('div');div.className='cell';div.textContent=e;grid.appendChild(div);
-      div.onclick=()=>div.classList.toggle('selected');
-    });
-    const verifyBtn=wrapper.querySelector('#verifyBtn');
-    verifyBtn.onclick=()=>{
-      const cells=Array.from(grid.children);
-      let ok=true;
-      cells.forEach(c=>{
-        if(c.textContent===target&&!c.classList.contains('selected'))ok=false;
-        if(c.textContent!==target&&c.classList.contains('selected'))ok=false;
-      });
-      if(ok)done(); else alert('Try again!');
-    }
-  }
-};
-
-//=== LEVEL 2
-levels[2]={
-  render(container,done){
-    let n=6;
-    let memory=[];
-    const wrapper=document.createElement('div');
-    wrapper.innerHTML=`<div class="instruction">Remember the order of these emojis:</div><div class="grid" id="memGrid"></div>`;
-    container.appendChild(wrapper);
-    const grid=wrapper.querySelector('#memGrid');
-    while(memory.length<n) memory.push(rand(emojis));
-    memory.forEach(e=>{
-      const div=document.createElement('div');div.className='cell';div.textContent=e;grid.appendChild(div);
-    });
-    setTimeout(()=>{
-      grid.innerHTML='';
-      const answer=shuffle([...memory]);
-      answer.forEach(e=>{
-        const div=document.createElement('div');div.className='cell';div.textContent=e;grid.appendChild(div);
-        div.onclick=()=>div.classList.toggle('selected');
-      });
-      const btn=document.createElement('button');btn.className='verify-btn';btn.textContent='Verify';
-      wrapper.appendChild(btn);
-      btn.onclick=()=>{
-        const selected=Array.from(grid.children).filter(c=>c.classList.contains('selected')).map(c=>c.textContent);
-        let ok=true;
-        memory.forEach(v=>{if(!selected.includes(v))ok=false});
-        if(ok)done(); else alert('Wrong order! Try again!');
-      }
-    },2500);
-  }
-};
-
-//=== LEVEL 3 Clicker
-levels[3]={
-  render(container,done){
-    state.clicks=0;
-    const wrapper=document.createElement('div');
-    wrapper.innerHTML=`<div class="instruction">Click the button 40 times to verify</div><button class="verify-btn" id="clickerBtn">Click me</button><div class="small-muted" id="clickCount">0 / 40</div>`;
-    container.appendChild(wrapper);
-    const btn=wrapper.querySelector('#clickerBtn');
-    const count=wrapper.querySelector('#clickCount');
-    btn.onclick=()=>{
-      state.clicks++;
-      count.textContent=`${state.clicks} / 40`;
-      if(state.clicks>=40)done();
-    }
-  }
-};
-
-//=== LEVEL 4 Emoji Match
-levels[4]={
-  render(container,done){
-    const target=rand(emojis);
-    const wrapper=document.createElement('div');
-    wrapper.innerHTML=`<div class="instruction">Click the ${target} emoji to continue</div><div class="grid" id="grid4"></div>`;
-    container.appendChild(wrapper);
-    const grid=wrapper.querySelector('#grid4');
-    let opts=[target];
-    while(opts.length<9)opts.push(rand(emojis));
-    shuffle(opts).forEach(e=>{
-      const div=document.createElement('div');div.className='cell';div.textContent=e;grid.appendChild(div);
-      div.onclick=()=>{if(e===target)done(); else alert('Try again!')}
-    });
-  }
-};
-
-//=== LEVEL 5 Fast Clicker (40 clicks)
-levels[5]={
-  render(container,done){
-    state.clicks=0;
-    const wrapper=document.createElement('div');
-    wrapper.innerHTML=`<div class="instruction">Click the button 40 times quickly!</div><button class="verify-btn" id="fastBtn">Click me</button><div class="small-muted" id="fastCount">0 / 40</div>`;
-    container.appendChild(wrapper);
-    const btn=wrapper.querySelector('#fastBtn');
-    const count=wrapper.querySelector('#fastCount');
-    btn.onclick=()=>{
-      state.clicks++;
-      count.textContent=`${state.clicks} / 40`;
-      if(state.clicks>=40)done();
-    }
-  }
-};
-
-//=== LEVEL 6 Drag & Drop
-levels[6]={
-  render(container,done){
-    const wrapper=document.createElement('div');
-    wrapper.innerHTML=`<div class="instruction">Drag the 🟢 into the square</div><div class="grid" style="display:flex;gap:20px;justify-content:center;margin-top:20px"><div class="tile" id="dragTile">🟢</div><div class="tile" id="dropTile"></div></div>`;
-    container.appendChild(wrapper);
-    const drag=document.getElementById('dragTile');
-    const drop=document.getElementById('dropTile');
-    drag.draggable=true;
-    drag.ondragstart=e=>{e.dataTransfer.setData('text','drag')};
-    drop.ondragover=e=>e.preventDefault();
-    drop.ondrop=e=>{
-      drop.textContent='🟢';
-      drag.style.display='none';
-      done();
-    }
-  }
-};
-
-//=== LEVEL 7 Typing
-levels[7]={
-  render(container,done){
-    const word=rand(['robot','verify','captcha','nealfun','secure','human']);
-    const wrapper=document.createElement('div');
-    wrapper.innerHTML=`<div class="instruction">Type the word: ${word}</div><input class="input" id="typeInput"/><button class="verify-btn" id="typeBtn">Verify</button>`;
-    container.appendChild(wrapper);
-    const btn=wrapper.querySelector('#typeBtn');
-    const input=wrapper.querySelector('#typeInput');
-    btn.onclick=()=>{if(input.value.toLowerCase()===word)done(); else alert('Incorrect!')}
-  }
-};
-
-//=== LEVEL 8 Slider
-levels[8]={
-  render(container,done){
-    const target=Math.floor(Math.random()*100);
-    const wrapper=document.createElement('div');
-    wrapper.innerHTML=`<div class="instruction">Move slider to ${target}</div><input type="range" min="0" max="100" value="0" class="input" id="sliderVal"/><div class="small-muted" id="sliderDisplay">0</div><button class="verify-btn" id="sliderBtn">Verify</button>`;
-    container.appendChild(wrapper);
-    const slider=wrapper.querySelector('#sliderVal');
-    const display=wrapper.querySelector('#sliderDisplay');
-    const btn=wrapper.querySelector('#sliderBtn');
-    slider.oninput=e=>display.textContent=slider.value;
-    btn.onclick=()=>{if(Math.abs(slider.value-target)<=2)done(); else alert('Try again!')}
-  }
-};
-
-//=== LEVEL 9 Pattern Click
-levels[9]={
-  render(container,done){
-    const pattern=[rand(emojis),rand(emojis),rand(emojis)];
-    const wrapper=document.createElement('div');
-    wrapper.innerHTML=`<div class="instruction">Click the emojis in order: ${pattern.join(' ')}</div><div class="grid" id="patternGrid"></div>`;
-    container.appendChild(wrapper);
-    const grid=document.getElementById('patternGrid');
-    const options=shuffle([...pattern,rand(emojis),rand(emojis),rand(emojis)]);
-    options.forEach(e=>{
-      const div=document.createElement('div');div.className='cell';div.textContent=e;grid.appendChild(div);
-    });
-    let idx=0;
-    grid.childNodes.forEach(div=>{
-      div.onclick=()=>{
-        if(div.textContent===pattern[idx]){idx++;div.classList.add('matched');if(idx>=pattern.length)done()}
-        else{idx=0;grid.childNodes.forEach(c=>c.classList.remove('matched'));alert('Wrong!')}
-      }
-    });
-  }
-};
-
-//=== LEVEL 10 Flappy Bird
-levels[10]={
-  render(container,done){
-    let canvas=document.createElement('canvas');
-    canvas.width=300; canvas.height=400;
-    container.appendChild(canvas);
-    const ctx=canvas.getContext('2d');
-    let bird={x:50,y:200,vy:0},pipes=[],score=0;
-    let interval=null;
-    function resetGame(){bird={x:50,y:200,vy:0};pipes=[];score=0;}
-    function spawnPipe(){let h=Math.floor(Math.random()*180)+50;pipes.push({x:300,y:0,h:h});}
-    function draw(){
-      ctx.fillStyle='#eef2ff';ctx.fillRect(0,0,300,400);
-      bird.vy+=0.8;bird.y+=bird.vy;
-      ctx.fillStyle='yellow';ctx.beginPath();ctx.arc(bird.x,bird.y,12,0,Math.PI*2);ctx.fill();
-      for(let i=pipes.length-1;i>=0;i--){
-        let p=pipes[i];p.x-=2;
-        ctx.fillStyle='green';ctx.fillRect(p.x,p.y,40,p.h);
-        ctx.fillRect(p.x,p.h+100,40,400-p.h-100);
-        if(p.x+40<0)pipes.splice(i,1);
-        if(bird.x+12>p.x && bird.x-12<p.x+40 && (bird.y-12<p.h || bird.y+12>p.h+100)){clearInterval(interval);alert('Game over!');resetGame();start();}
-        if(p.x+40===bird.x)score++;
-      }
-      ctx.fillStyle='black';ctx.fillText('Score: '+score,10,20);
-      if(score>=11){clearInterval(interval);done();}
-    }
-    function start(){interval=setInterval(draw,16); setInterval(()=>spawnPipe(),2000);}
-    canvas.onclick=()=>{bird.vy=-6;}
-    start();
-    const redoBtn=document.createElement('button');redoBtn.className='btn ghost';redoBtn.textContent='Redo';redoBtn.style.marginTop='12px';container.appendChild(redoBtn);
-    redoBtn.onclick=()=>{
-      clearInterval(interval);resetGame();start();
-    }
-  }
-};
-
-//=== LEVELS 11-18: unique mini-games
-// I’ll design each creatively like Neal.fun style
-
-//=== LEVEL 11: Snake Mini
-levels[11]={
-  render(container,done){
-    const canvas=document.createElement('canvas');canvas.width=300;canvas.height=300;container.appendChild(canvas);
-    const ctx=canvas.getContext('2d');
-    let snake=[{x:10,y:10}],dir={x:0,y:0},food={x:15,y:15},score=0;
-    function draw(){
-      ctx.fillStyle='#eef2ff';ctx.fillRect(0,0,300,300);
-      ctx.fillStyle='green';snake.forEach(s=>ctx.fillRect(s.x*15,s.y*15,14,14));
-      ctx.fillStyle='red';ctx.fillRect(food.x*15,food.y*15,14,14);
-      let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-      if(head.x<0||head.y<0||head.x>=20||head.y>=20 || snake.some(s=>s.x===head.x&&s.y===head.y)){alert('Game over');snake=[{x:10,y:10}];dir={x:0,y:0};score=0;return;}
-      snake.unshift(head);
-      if(head.x===food.x && head.y===food.y){score++;food={x:Math.floor(Math.random()*20),y:Math.floor(Math.random()*20)};}
-      else snake.pop();
-      ctx.fillStyle='black';ctx.fillText('Score:'+score,10,290);
-      if(score>=5)done();
-    }
-    document.onkeydown=e=>{
-      if(e.key==='ArrowUp')dir={x:0,y:-1};
-      if(e.key==='ArrowDown')dir={x:0,y:1};
-      if(e.key==='ArrowLeft')dir={x:-1,y:0};
-      if(e.key==='ArrowRight')dir={x:1,y:0};
-    }
-    setInterval(draw,100);
-  }
-};
-
-//=== LEVEL 12: Maze Click
-levels[12]={
-  render(container,done){
-    const grid=document.createElement('div');grid.className='grid';container.appendChild(grid);
-    const n=5; let path=[];
-    for(let i=0;i<n*n;i++){let cell=document.createElement('div');cell.className='cell';cell.textContent='';grid.appendChild(cell);}
-    const cells=Array.from(grid.children);
-    let target=Math.floor(Math.random()*cells.length);cells[target].textContent='🏁';
-    cells.forEach(c=>c.onclick={()=>{if(c===cells[target])done(); else alert('Wrong!')}})
-  }
-};
-
-//=== LEVEL 13: Tap the moving emoji
-levels[13]={
-  render(container,done){
-    let target=rand(emojis);
-    const wrapper=document.createElement('div');wrapper.className='center';container.appendChild(wrapper);
-    const span=document.createElement('div');span.style.fontSize='40px';span.textContent=target;wrapper.appendChild(span);
-    let clicks=0;
-    let interval=setInterval(()=>{span.style.position='absolute';span.style.top=Math.random()*300+'px';span.style.left=Math.random()*250+'px';},800);
-    span.onclick=()=>{clicks++;if(clicks>=5){clearInterval(interval);done();}}
-  }
-};
-
-//=== LEVEL 14: Quick Math
-levels[14]={
-  render(container,done){
-    const a=Math.floor(Math.random()*20);const b=Math.floor(Math.random()*20);
-    const wrapper=document.createElement('div');wrapper.innerHTML=`<div class="instruction">Compute ${a} + ${b}</div><input class="input" id="mathInput"/><button class="verify-btn" id="mathBtn">Verify</button>`;container.appendChild(wrapper);
-    wrapper.querySelector('#mathBtn').onclick=()=>{if(parseInt(wrapper.querySelector('#mathInput').value)===a+b)done(); else alert('Wrong!')}
-  }
-};
-
-//=== LEVEL 15: Hold Button
-levels[15]={
-  render(container,done){
-    let hold=0;
-    const wrapper=document.createElement('div');wrapper.innerHTML=`<div class="instruction">Hold the button for 3 seconds</div><button class="verify-btn" id="holdBtn">Hold</button>`;container.appendChild(wrapper);
-    const btn=wrapper.querySelector('#holdBtn');
-    let timer=null;
-    btn.onmousedown=()=>{timer=setInterval(()=>{hold+=0.1;if(hold>=3)clearInterval(timer,done())},100);}
-    btn.onmouseup=()=>{hold=0;clearInterval(timer);}
-    btn.onmouseleave=()=>{hold=0;clearInterval(timer);}
-  }
-};
-
-//=== LEVEL 16: Color Match
-levels[16]={
-  render(container,done){
-    const colors=['red','green','blue','orange','purple'];let target=rand(colors);
-    const wrapper=document.createElement('div');wrapper.innerHTML=`<div class="instruction">Click the ${target} square</div><div class="grid" id="colorGrid"></div>`;container.appendChild(wrapper);
-    const grid=document.getElementById('colorGrid');
-    let opts=[target];while(opts.length<9)opts.push(rand(colors));shuffle(opts).forEach(c=>{let div=document.createElement('div');div.className='tile';div.style.background=c;grid.appendChild(div);div.onclick=()=>{if(c===target)done(); else alert('Try again!')}})
-  }
-};
-
-//=== LEVEL 17: Memory Flip
-levels[17]={
-  render(container,done){
-    let arr=[];while(arr.length<6)arr.push(rand(emojis));arr=shuffle([...arr,...arr]);let flipped=[];const wrapper=document.createElement('div');wrapper.innerHTML=`<div class="instruction">Match all pairs</div><div class="grid" id="memFlip"></div>`;container.appendChild(wrapper);
-    const grid=document.getElementById('memFlip');
-    arr.forEach(e=>{let div=document.createElement('div');div.className='tile';div.textContent='❓';grid.appendChild(div);div.onclick=()=>{if(flipped.length<2&&!div.dataset.done){div.textContent=e;flipped.push(div);if(flipped.length===2){if(flipped[0].textContent===flipped[1].textContent){flipped.forEach(f=>f.dataset.done=true);flipped=[]; if(Array.from(grid.children).every(c=>c.dataset.done))done();} else setTimeout(()=>{flipped.forEach(f=>f.textContent='❓');flipped=[]},500)}}}})
-  }
-};
-
-//=== LEVEL 18: Rapid Tap
-levels[18]={
-  render(container,done){
-    let clicks=0;const wrapper=document.createElement('div');wrapper.innerHTML=`<div class="instruction">Tap 10 times as fast as possible</div><button class="verify-btn" id="rapidBtn">Tap!</button><div class="small-muted" id="rapidCount">0/10</div>`;container.appendChild(wrapper);
-    const btn=wrapper.querySelector('#rapidBtn');const display=wrapper.querySelector('#rapidCount');
-    btn.onclick=()=>{clicks++;display.textContent=`${clicks}/10`;if(clicks>=10)done();}
-  }
-};
 </script>
 </body>
 </html>
