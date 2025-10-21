@@ -44,7 +44,7 @@ Particle Count: ${particles.length}
 }
 
 // ---- GPU Stress ----
-const particleCount = 50000000000000; // increase for more stress
+const particleCount = 50000; // increase for more stress
 const particles = new Float32Array(particleCount * 3);
 for (let i=0;i<particleCount*3;i++) {
     particles[i] = (Math.random()*2-1) * 1;
@@ -100,7 +100,7 @@ const timeLoc = gl.getUniformLocation(program,'time');
 
 // ---- CPU Stress ----
 function heavyCalculation() {
-    const size = 2000000000000000; 
+    const size = 2000; 
     const matrix = [];
     for(let i=0;i<size;i++){
         matrix[i] = [];
@@ -129,4 +129,3 @@ animate(0);
 </script>
 </body>
 </html>
-
