@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Surprise Game 2</title>
+<title>Water Simulation</title>
 <style>
-body,html{margin:0;padding:0;overflow:hidden;background:#000}canvas{display:block}
+body,html{margin:0;padding:0;overflow:hidden;background:#111}canvas{display:block}
 </style>
 </head>
 <body>
@@ -13,36 +13,89 @@ body,html{margin:0;padding:0;overflow:hidden;background:#000}canvas{display:bloc
 <script>
 const c=document.querySelector("canvas"),ctx=c.getContext("2d");
 let w=innerWidth,h=innerHeight;c.width=w;c.height=h;
-let particles=[];
-let mouse={x:w/2,y:h/2,down:false};
-document.addEventListener("mousemove",e=>{mouse.x=e.clientX;mouse.y=e.clientY});
-document.addEventListener("mousedown",()=>{mouse.down=true});
+const cols=Math.floor(w/5),rows=Math.floor(h/2);
+let water=[];
+const gravity=0.2,spread=0.25,damping=0.99;
+
+for(let x=0;x<cols;x++){
+  water[x]=[];
+  for(let y=0;y<rows;y++){
+    water[x][y]={height:h/2,velocity:0,target:h/2};
+  }
+}
+
+let tiltX=0;
+if(window.DeviceOrientationEvent){
+  window.addEventListener("deviceorientation",e=>{
+    tiltX=e.gamma/50;
+  });
+}
+
+let mouse={x:0,y:0,down:false};
+document.addEventListener("mousedown",e=>{mouse.down=true;mouse.x=e.clientX;mouse.y=e.clientY});
 document.addEventListener("mouseup",()=>{mouse.down=false});
+document.addEventListener("mousemove",e=>{mouse.x=e.clientX;mouse.y=e.clientY});
 document.addEventListener("touchstart",e=>{mouse.down=true;mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY});
 document.addEventListener("touchmove",e=>{mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY});
 document.addEventListener("touchend",()=>{mouse.down=false});
-function rand(min,max){return Math.random()*(max-min)+min}
-class Particle{
-  constructor(x,y,r,c,dx,dy){this.x=x;this.y=y;this.r=r;this.c=c;this.dx=dx;this.dy=dy;this.life=rand(60,120);}
-  update(){
-    this.x+=this.dx; this.y+=this.dy; this.life--;
-    if(this.life<0)this.reset();
-  }
-  reset(){this.x=w/2;this.y=h/2;this.dx=rand(-4,4);this.dy=rand(-4,4);this.r=rand(2,8);this.life=rand(60,120);}
-  draw(){ctx.fillStyle=this.c;ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,2*Math.PI);ctx.fill();}
-}
-for(let i=0;i<100;i++){particles.push(new Particle(w/2,h/2,rand(2,8),`hsl(${rand(0,360)},80%,60%)`,rand(-4,4),rand(-4,4)))}
-function loop(){
-  requestAnimationFrame(loop);
-  ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(0,0,w,h);
-  if(mouse.down){
-    for(let i=0;i<5;i++){
-      let p=new Particle(mouse.x,mouse.y,rand(2,6),`hsl(${rand(0,360)},100%,50%)`,rand(-6,6),rand(-6,6));
-      particles.push(p);
+
+function updateWater(){
+  for(let x=0;x<cols;x++){
+    for(let y=0;y<rows;y++){
+      let p=water[x][y];
+      p.velocity+=(p.target-p.height)*gravity;
+      p.height+=p.velocity;
+      p.velocity*=damping;
     }
   }
-  particles.forEach(p=>{p.update();p.draw();});
+  let leftDeltas=new Array(cols).fill(0);
+  let rightDeltas=new Array(cols).fill(0);
+  for(let i=0;i<8;i++){
+    for(let x=0;x<cols;x++){
+      for(let y=0;y<rows;y++){
+        if(x>0){
+          leftDeltas[x]=spread*(water[x][y].height-water[x-1][y].height);
+          water[x-1][y].velocity+=leftDeltas[x];
+        }
+        if(x<cols-1){
+          rightDeltas[x]=spread*(water[x][y].height-water[x+1][y].height);
+          water[x+1][y].velocity+=rightDeltas[x];
+        }
+      }
+    }
+  }
+  for(let x=0;x<cols;x++){
+    for(let y=0;y<rows;y++){
+      water[x][y].height+=tiltX;
+    }
+  }
+  if(mouse.down){
+    let mx=Math.floor(mouse.x/5);
+    let my=Math.floor(mouse.y/5);
+    if(mx>=0&&mx<cols&&my>=0&&my<rows){
+      water[mx][my].velocity=-10;
+    }
+  }
 }
+
+function drawWater(){
+  ctx.fillStyle="#111";ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle="#00f";ctx.lineWidth=2;
+  for(let y=0;y<rows-1;y++){
+    ctx.beginPath();
+    for(let x=0;x<cols;x++){
+      ctx.lineTo(x*5,water[x][y].height);
+    }
+    ctx.stroke();
+  }
+}
+
+function loop(){
+  requestAnimationFrame(loop);
+  updateWater();
+  drawWater();
+}
+
 loop();
 window.addEventListener("resize",()=>{w=innerWidth;h=innerHeight;c.width=w;c.height=h;});
 </script>
