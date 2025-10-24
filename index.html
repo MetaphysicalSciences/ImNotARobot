@@ -2,82 +2,49 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Planetary Destruction</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surprise Game 2</title>
 <style>
-body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#111;color:#fff}
-canvas{background:#222}
-button{margin-top:10px;padding:10px 20px;font-size:16px}
+body,html{margin:0;padding:0;overflow:hidden;background:#000}canvas{display:block}
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<button id="launch">Launch Square</button>
+<canvas></canvas>
 <script>
-const canvas=document.getElementById("c");
-const ctx=canvas.getContext("2d");
-canvas.width=400;
-canvas.height=400;
-let circle={x:200,y:200,r:80,img:null,angle:0};
-let squares=[];
-function createCircleImage(){
-    let temp=document.createElement("canvas");
-    temp.width=temp.height=circle.r*2;
-    let tctx=temp.getContext("2d");
-    tctx.fillStyle="orange";
-    tctx.beginPath();
-    tctx.arc(circle.r,circle.r,circle.r,0,Math.PI*2);
-    tctx.fill();
-    return tctx.getImageData(0,0,temp.width,temp.height);
+const c=document.querySelector("canvas"),ctx=c.getContext("2d");
+let w=innerWidth,h=innerHeight;c.width=w;c.height=h;
+let particles=[];
+let mouse={x:w/2,y:h/2,down:false};
+document.addEventListener("mousemove",e=>{mouse.x=e.clientX;mouse.y=e.clientY});
+document.addEventListener("mousedown",()=>{mouse.down=true});
+document.addEventListener("mouseup",()=>{mouse.down=false});
+document.addEventListener("touchstart",e=>{mouse.down=true;mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY});
+document.addEventListener("touchmove",e=>{mouse.x=e.touches[0].clientX;mouse.y=e.touches[0].clientY});
+document.addEventListener("touchend",()=>{mouse.down=false});
+function rand(min,max){return Math.random()*(max-min)+min}
+class Particle{
+  constructor(x,y,r,c,dx,dy){this.x=x;this.y=y;this.r=r;this.c=c;this.dx=dx;this.dy=dy;this.life=rand(60,120);}
+  update(){
+    this.x+=this.dx; this.y+=this.dy; this.life--;
+    if(this.life<0)this.reset();
+  }
+  reset(){this.x=w/2;this.y=h/2;this.dx=rand(-4,4);this.dy=rand(-4,4);this.r=rand(2,8);this.life=rand(60,120);}
+  draw(){ctx.fillStyle=this.c;ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,2*Math.PI);ctx.fill();}
 }
-circle.img=createCircleImage();
-function drawCircle(){
-    let data=circle.img;
-    ctx.save();
-    ctx.translate(circle.x,circle.y);
-    ctx.rotate(circle.angle);
-    ctx.translate(-circle.r,-circle.r);
-    ctx.putImageData(data,0,0);
-    ctx.restore();
-}
-function launchSquare(){
-    squares.push({x:200,y:380,size:20,vx:0,vy:-5});
-}
-document.getElementById("launch").onclick=launchSquare;
-function update(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    circle.angle+=0.02;
-    drawCircle();
-    for(let s of squares){
-        s.x+=s.vx;
-        s.y+=s.vy;
-        ctx.fillStyle="red";
-        ctx.fillRect(s.x-s.size/2,s.y-s.size/2,s.size,s.size);
-        checkCollision(s);
+for(let i=0;i<100;i++){particles.push(new Particle(w/2,h/2,rand(2,8),`hsl(${rand(0,360)},80%,60%)`,rand(-4,4),rand(-4,4)))}
+function loop(){
+  requestAnimationFrame(loop);
+  ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(0,0,w,h);
+  if(mouse.down){
+    for(let i=0;i<5;i++){
+      let p=new Particle(mouse.x,mouse.y,rand(2,6),`hsl(${rand(0,360)},100%,50%)`,rand(-6,6),rand(-6,6));
+      particles.push(p);
     }
-    squares=squares.filter(s=>s.y+s.size>0);
-    requestAnimationFrame(update);
+  }
+  particles.forEach(p=>{p.update();p.draw();});
 }
-function checkCollision(s){
-    let data=circle.img.data;
-    let cx=Math.floor(s.x-circle.x+circle.r);
-    let cy=Math.floor(s.y-circle.y+circle.r);
-    if(cx>=0&&cx<circle.r*2&&cy>=0&&cy<circle.r*2){
-        let idx=(cy*circle.r*2+cx)*4;
-        if(data[idx+3]>0){
-            for(let y=-2;y<=2;y++){
-                for(let x=-2;x<=2;x++){
-                    let nx=cx+x;
-                    let ny=cy+y;
-                    if(nx>=0&&nx<circle.r*2&&ny>=0&&ny<circle.r*2){
-                        data[(ny*circle.r*2+nx)*4+3]=0;
-                    }
-                }
-            }
-            s.vy=0;
-        }
-    }
-}
-update();
+loop();
+window.addEventListener("resize",()=>{w=innerWidth;h=innerHeight;c.width=w;c.height=h;});
 </script>
 </body>
 </html>
