@@ -3,39 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, minimum-scale=1">
-<title>Snake XP Ultimate</title>
+<title>Snake XP Ultimate Recode</title>
 <style>
 html,body{margin:0;padding:0;overflow:hidden;font-family:"Tahoma","Verdana",sans-serif;background:#008080;touch-action:none;-webkit-user-select:none;}
 canvas{display:block;background:#0a0a0a;}
-#joystick{position:absolute;bottom:50px;left:50px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.2);touch-action:none;}
+#joystick{position:absolute;bottom:50px;left:50px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.2);touch-action:none;z-index:20;}
 #stick{position:absolute;top:35px;left:35px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.5);}
-#menu,#lose,#settings{position:absolute;top:0;left:0;width:100%;height:100%;background:#c0c0c0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;}
+#menu,#lose,#settings{position:absolute;top:0;left:0;width:100%;height:100%;background:#c0c0c0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:30;}
 button{margin:5px;padding:10px 20px;background:#e0e0e0;border:2px solid #808080;font-size:16px;cursor:pointer;}
 input[type=range]{width:150px;margin:5px;}
 select{margin:5px;}
 label{margin:2px;}
-#score{position:absolute;top:10px;left:10px;color:#fff;font-size:24px;text-shadow:1px 1px #000;}
+#score{position:absolute;top:10px;left:10px;color:#fff;font-size:24px;text-shadow:1px 1px #000;z-index:25;}
 </style>
 </head>
 <body>
 <canvas id="game"></canvas>
 <div id="joystick"><div id="stick"></div></div>
 <div id="score">Score: 0</div>
+
 <div id="menu">
 <h1>Snake XP Ultimate</h1>
 <button id="startBtn">Start Game</button>
 <button id="settingsBtn">Settings</button>
 </div>
+
 <div id="lose" style="display:none;">
 <h1>You Lost!</h1>
 <p id="finalScore">Score: 0</p>
 <button id="retryBtn">Retry</button>
 <button id="menuBtn">Go to Menu</button>
 </div>
+
 <div id="settings" style="display:none;overflow-y:auto;">
 <h2>Settings</h2>
 <label>Joystick Size <input type="range" id="joySize" min="50" max="200" value="100"></label>
 <label>Snake Color <input type="color" id="snakeColor" value="#0f0"></label>
+<label>Tail Color <input type="color" id="tailColor" value="#0f0"></label>
 <label>Snake Shape
 <select id="snakeShape">
 <option value="rect">Rectangle</option>
@@ -45,22 +49,22 @@ label{margin:2px;}
 </label>
 <label>Snake Speed <input type="range" id="snakeSpeed" min="1" max="15" value="4"></label>
 <label>Tail Growth <input type="range" id="tailGrowth" min="1" max="10" value="2"></label>
-<label>Background Color <input type="color" id="bgColor" value="#0a0a0a"></label>
-<label>Fruit Spawn Rate <input type="range" id="fruitRate" min="1" max="20" value="5"></label>
 <label>Snake Width <input type="range" id="snakeWidth" min="5" max="40" value="20"></label>
+<label>Snake Opacity <input type="range" id="snakeOpacity" min="0.1" max="1" step="0.05" value="1"></label>
 <label>Fruit Size <input type="range" id="fruitSize" min="5" max="30" value="10"></label>
+<label>Fruit Blink <input type="checkbox" id="fruitBlink"></label>
+<label>Fruit Spawn Rate <input type="range" id="fruitRate" min="1" max="20" value="5"></label>
+<label>Score Multiplier <input type="range" id="scoreMultiplier" min="1" max="5" value="1"></label>
+<label>Background Color <input type="color" id="bgColor" value="#0a0a0a"></label>
+<label>Background Pattern <input type="color" id="bgPattern" value="#111"></label>
 <label>Show Grid <input type="checkbox" id="showGrid"></label>
 <label>Speed Boost <input type="checkbox" id="speedBoost"></label>
+<label>Auto Speed <input type="checkbox" id="autoSpeed"></label>
 <label>Sound Effects <input type="checkbox" id="soundToggle"></label>
 <label>Vibration <input type="checkbox" id="vibrationToggle"></label>
-<label>Tail Color <input type="color" id="tailColor" value="#0f0"></label>
-<label>Fruit Blink <input type="checkbox" id="fruitBlink"></label>
-<label>Background Pattern <input type="color" id="bgPattern" value="#111"></label>
-<label>Score Multiplier <input type="range" id="scoreMultiplier" min="1" max="5" value="1"></label>
-<label>Auto Speed Adjust <input type="checkbox" id="autoSpeed"></label>
-<label>Snake Opacity <input type="range" id="snakeOpacity" min="0.1" max="1" step="0.05" value="1"></label>
 <button id="backBtn">Back</button>
 </div>
+
 <script>
 const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
@@ -82,6 +86,7 @@ function resetGame(){
     score=0;
     health=10;
     fruits=[];
+    frame=0;
     spawnFruit();
 }
 
@@ -156,8 +161,9 @@ function gameLoop(){
         for(let i=0;i<w;i+=20){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,h);ctx.stroke();}
         for(let j=0;j<h;j+=20){ctx.beginPath();ctx.moveTo(0,j);ctx.lineTo(w,j);ctx.stroke();}
     }
-    if(speedBoost) speed=speed*1.5;
-    if(autoSpeed) speed=4+snake.length/20;
+    let effectiveSpeed=speed;
+    if(speedBoost) effectiveSpeed*=1.5;
+    if(autoSpeed) effectiveSpeed=4+snake.length/20;
     moveSnake();
     checkCollision();
     drawSnake();
@@ -178,24 +184,24 @@ document.getElementById('settingsBtn').addEventListener('click',()=>{menu.style.
 document.getElementById('backBtn').addEventListener('click',()=>{settingsScreen.style.display="none";menu.style.display="flex";});
 
 document.getElementById('joySize').addEventListener('input',e=>{joystick.style.width=e.target.value+'px';joystick.style.height=e.target.value+'px';});
-document.getElementById('snakeColor').addEventListener('input',e=>{snakeColor=e.target.value;tailColor=e.target.value;});
+document.getElementById('snakeColor').addEventListener('input',e=>{snakeColor=e.target.value;});
+document.getElementById('tailColor').addEventListener('input',e=>{tailColor=e.target.value;});
 document.getElementById('snakeShape').addEventListener('change',e=>{snakeShape=e.target.value;});
 document.getElementById('snakeSpeed').addEventListener('input',e=>{speed=parseInt(e.target.value);});
 document.getElementById('tailGrowth').addEventListener('input',e=>{tailGrowth=parseInt(e.target.value);});
-document.getElementById('bgColor').addEventListener('input',e=>{bgColor=e.target.value;});
-document.getElementById('fruitRate').addEventListener('input',e=>{fruitRate=parseInt(e.target.value);});
 document.getElementById('snakeWidth').addEventListener('input',e=>{snakeWidth=parseInt(e.target.value);});
+document.getElementById('snakeOpacity').addEventListener('input',e=>{snakeOpacity=parseFloat(e.target.value);});
 document.getElementById('fruitSize').addEventListener('input',e=>{fruitSize=parseInt(e.target.value);});
+document.getElementById('fruitBlink').addEventListener('change',e=>{fruitBlink=e.target.checked;});
+document.getElementById('fruitRate').addEventListener('input',e=>{fruitRate=parseInt(e.target.value);});
+document.getElementById('scoreMultiplier').addEventListener('input',e=>{scoreMultiplier=parseInt(e.target.value);});
+document.getElementById('bgColor').addEventListener('input',e=>{bgColor=e.target.value;});
+document.getElementById('bgPattern').addEventListener('input',e=>{bgPattern=e.target.value;});
 document.getElementById('showGrid').addEventListener('change',e=>{showGrid=e.target.checked;});
 document.getElementById('speedBoost').addEventListener('change',e=>{speedBoost=e.target.checked;});
+document.getElementById('autoSpeed').addEventListener('change',e=>{autoSpeed=e.target.checked;});
 document.getElementById('soundToggle').addEventListener('change',e=>{soundToggle=e.target.checked;});
 document.getElementById('vibrationToggle').addEventListener('change',e=>{vibrationToggle=e.target.checked;});
-document.getElementById('tailColor').addEventListener('input',e=>{tailColor=e.target.value;});
-document.getElementById('fruitBlink').addEventListener('change',e=>{fruitBlink=e.target.checked;});
-document.getElementById('bgPattern').addEventListener('input',e=>{bgPattern=e.target.value;});
-document.getElementById('scoreMultiplier').addEventListener('input',e=>{scoreMultiplier=parseInt(e.target.value);});
-document.getElementById('autoSpeed').addEventListener('change',e=>{autoSpeed=e.target.checked;});
-document.getElementById('snakeOpacity').addEventListener('input',e=>{snakeOpacity=parseFloat(e.target.value);});
 
 function limitDir(x,y){if(Math.abs(x)>Math.abs(y)){dir={x:x>0?1:-1,y:0};}else{dir={x:0,y:y>0?1:-1};}}
 
