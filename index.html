@@ -1,373 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Snake 2025</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <style>
-html,body{height:100%;margin:0;background:#050507;touch-action:none;-webkit-user-select:none;overflow:hidden}
-canvas{display:block;width:100%;height:100%}
-#uiTop{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
-#score{pointer-events:auto;margin:auto 0;padding:6px 10px;background:rgba(0,0,0,0.35);border-radius:8px;color:#c8ffc8;font-family:system-ui,Helvetica,Arial;font-weight:600;letter-spacing:0.6px}
-#menu,#settings,#lose{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:system-ui,Helvetica,Arial}
-.panel{background:linear-gradient(180deg,#070707,#0b0b10);padding:22px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.8);min-width:260px;max-width:92%;color:#dfe;}
-.title{font-size:36px;text-align:center;margin-bottom:14px;color:#8fff9b}
-.controls{display:flex;flex-direction:column;gap:12px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.row label{flex:1;color:#bfe;font-size:15px}
-.row input[type="range"]{flex:1}
-.select,button{background:#08110a;border:1px solid rgba(143,255,155,0.08);color:#cfe;padding:10px;border-radius:8px;font-size:16px}
-.small{font-size:13px;padding:8px}
-#joystick{position:absolute;bottom:40px;left:40px;width:110px;height:110px;border-radius:999px;background:rgba(255,255,255,0.04);pointer-events:auto;touch-action:none}
-#stick{position:absolute;top:40px;left:40px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.18)}
-#lose{display:none;background:rgba(0,0,0,0.65)}
-#lose .panel{display:flex;flex-direction:column;align-items:center;gap:12px}
-.hide{display:none}
-.badge{font-size:12px;padding:6px 8px;border-radius:8px;background:rgba(0,0,0,0.25);color:#bff}
+html,body{margin:0;padding:0;overflow:hidden;background:#c0c0c0;font-family:Arial;}
+canvas{display:block;background:#fff;border:2px solid #000;}
+#joystick{position:absolute;bottom:50px;left:50px;width:100px;height:100px;border-radius:50%;background:#999;}
+#stick{position:absolute;top:35px;left:35px;width:30px;height:30px;border-radius:50%;background:#666;}
+#score{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:24px;color:#000;}
+#menu{position:absolute;top:0;left:0;width:100%;height:100%;background:#008080;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;}
+#menu h1{font-size:50px;margin-bottom:30px;}
+#menu button{margin:10px;padding:10px 25px;font-size:20px;background:#fff;color:#000;border:none;cursor:pointer;}
+#settings{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:#004040;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#settings label{margin:5px;font-size:18px;}
+#settings select, #settings input{margin:5px;padding:5px;font-size:16px;}
+#settings button{margin-top:20px;padding:10px 20px;font-size:18px;background:#fff;color:#000;border:none;cursor:pointer;}
+#lose{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:#808080;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#000;}
+#lose button{margin-top:20px;padding:10px 20px;font-size:20px;background:#fff;color:#000;border:none;cursor:pointer;}
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<div id="uiTop">
-<div id="leftBadge" class="badge">Snake 2025</div>
+<canvas id="game"></canvas>
+<div id="joystick"><div id="stick"></div></div>
 <div id="score">0</div>
-<div id="rightBadge" class="badge">v1</div>
-</div>
 
 <div id="menu">
-<div class="panel">
-<div class="title">Snake 2025</div>
-<div class="controls">
-<button id="start" class="select">Start Game</button>
-<button id="openSettings" class="select">Settings</button>
-<button id="how" class="select small">How to play (tap & drag joystick or swipe)</button>
-</div>
-</div>
+<h1>Snake 2025</h1>
+<button id="startBtn">Start</button>
+<button id="settingsBtn">Settings</button>
 </div>
 
-<div id="settings" class="hide">
-<div class="panel">
-<div class="title">Settings</div>
-<div class="controls">
-<div class="row"><label>Shape</label>
-<select id="shape" class="select">
+<div id="settings">
+<label>Snake Shape:</label>
+<select id="snakeShape">
+<option value="block">Block</option>
 <option value="round">Round</option>
 <option value="diamond">Diamond</option>
-<option value="blocky">Blocky</option>
-</select></div>
+</select>
 
-<div class="row"><label>Color</label>
-<select id="color" class="select">
-<option value="#5ff27a">Green</option>
-<option value="#4fe8ff">Cyan</option>
-<option value="#ffd84f">Yellow</option>
-<option value="#ff79e6">Magenta</option>
-<option value="#ff6b6b">Red</option>
-</select></div>
+<label>Snake Color:</label>
+<select id="snakeColor">
+<option value="#000">Black</option>
+<option value="#008000">Green</option>
+<option value="#0000ff">Blue</option>
+<option value="#ff0000">Red</option>
+<option value="#800080">Purple</option>
+</select>
 
-<div class="row"><label>Speed</label>
-<input id="speed" type="range" min="80" max="260" value="140"></div>
+<label>Speed:</label>
+<select id="speedSel">
+<option value="5">Slow</option>
+<option value="10" selected>Normal</option>
+<option value="15">Fast</option>
+<option value="20">Very Fast</option>
+</select>
 
-<div class="row"><label>Segment Spacing</label>
-<input id="spacing" type="range" min="12" max="36" value="20"></div>
+<label>Grid Size:</label>
+<select id="gridSel">
+<option value="15">Small</option>
+<option value="20" selected>Medium</option>
+<option value="25">Large</option>
+<option value="30">Extra Large</option>
+</select>
 
-<div class="row"><label>Control</label>
-<select id="controlType" class="select">
-<option value="joystick">Joystick</option>
-<option value="swipe">Swipe</option>
-</select></div>
+<label>Fruit Type:</label>
+<select id="fruitType">
+<option value="simple">Simple</option>
+<option value="star">Star</option>
+<option value="block">Block</option>
+<option value="random">Random</option>
+</select>
 
-<div class="row"><label>Joystick Size</label>
-<input id="joystickSize" type="range" min="70" max="160" value="110"></div>
+<label>Score Multiplier:</label>
+<select id="scoreMult">
+<option value="1">1x</option>
+<option value="2">2x</option>
+<option value="3" selected>3x</option>
+<option value="5">5x</option>
+</select>
 
-<div style="display:flex;gap:8px;justify-content:center;margin-top:6px">
-<button id="back" class="select">Back</button>
-<button id="resetSettings" class="select small">Defaults</button>
+<label>Joystick Size:</label>
+<select id="joySize">
+<option value="80">Small</option>
+<option value="100" selected>Medium</option>
+<option value="120">Large</option>
+<option value="150">Huge</option>
+</select>
+
+<button id="backBtn">Back</button>
 </div>
-</div>
-</div>
-</div>
 
-<div id="lose" class="hide">
-<div class="panel">
-<div style="font-size:28px;color:#ffc8c8">You Lost</div>
-<div id="loseScore" style="font-size:18px;color:#ffd">Score: 0</div>
-<div style="display:flex;gap:10px">
-<button id="retry" class="select">Retry</button>
-<button id="toMenu" class="select">Main Menu</button>
-</div>
-</div>
-</div>
-
-<div id="joystick">
-<div id="stick"></div>
+<div id="lose">
+<h2>You Lost!</h2>
+<button id="retry">Retry</button>
 </div>
 
 <script>
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d', { alpha: false });
-let W = canvas.width = innerWidth, H = canvas.height = innerHeight;
-addEventListener('resize', ()=>{W = canvas.width = innerWidth; H = canvas.height = innerHeight;});
-const scoreEl = document.getElementById('score');
-const menu = document.getElementById('menu');
-const settingsEl = document.getElementById('settings');
-const loseEl = document.getElementById('lose');
-const loseScore = document.getElementById('loseScore');
-const joystickEl = document.getElementById('joystick');
-const stickEl = document.getElementById('stick');
-let controlType = 'joystick';
-let joystickSize = 110;
-let shape = 'round';
-let snakeColor = '#5ff27a';
-let speed = 140;
-let spacing = 20;
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+let w = canvas.width = window.innerWidth;
+let h = canvas.height = window.innerHeight;
+window.addEventListener('resize',()=>{w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;});
 
-document.getElementById('openSettings').onclick = ()=>{menu.classList.add('hide');settingsEl.classList.remove('hide');}
-document.getElementById('back').onclick = ()=>{applySettings();settingsEl.classList.add('hide');menu.classList.remove('hide');}
-document.getElementById('resetSettings').onclick = ()=>{document.getElementById('shape').value='round';document.getElementById('color').value='#5ff27a';document.getElementById('speed').value=140;document.getElementById('spacing').value=20;document.getElementById('controlType').value='joystick';document.getElementById('joystickSize').value=110;applySettings();}
-document.getElementById('start').onclick = ()=>{menu.classList.add('hide');startGame();}
-document.getElementById('retry').onclick = ()=>{loseEl.classList.add('hide');startGame();}
-document.getElementById('toMenu').onclick = ()=>{loseEl.classList.add('hide');menu.classList.remove('hide');}
+let snake=[],snakeLength=5,dir={x:1,y:0},nextDir={x:1,y:0},grid=20,speed=10,moveTimer=0,score=0,playing=false,over=false;
+let fruit={x:10,y:10,type:"simple"};
+let snakeShape="block",snakeColor="#000",fruitType="simple",scoreMultiplier=3;
 
-function applySettings(){
-shape = document.getElementById('shape').value;
-snakeColor = document.getElementById('color').value;
-speed = Number(document.getElementById('speed').value);
-spacing = Number(document.getElementById('spacing').value);
-controlType = document.getElementById('controlType').value;
-joystickSize = Number(document.getElementById('joystickSize').value);
-joystickEl.style.width = joystickSize+'px';
-joystickEl.style.height = joystickSize+'px';
-stickEl.style.left = Math.max(6, joystickSize/2-15)+'px';
-stickEl.style.top = Math.max(6, joystickSize/2-15)+'px';
+function resetSnake(){
+    snake=[];
+    for(let i=0;i<snakeLength;i++){snake.push({x:Math.floor(w/2/grid)-i,y:Math.floor(h/2/grid)});}
 }
-
-applySettings();
-
-let running = false;
-let path = [];
-let segments = [];
-let segCount = 12;
-let dirAngle = 0;
-let lastTime = 0;
-let fruits = [];
-let pointsSpacing = spacing;
-let currentScore = 0;
-
-function rand(min,max){return Math.random()*(max-min)+min}
-function placeFruits(){
-fruits.length = 0;
-for(let i=0;i<3;i++){
-let t = i===0?0:i===1?1:2;
-fruits.push({x:rand(30,W-30),y:rand(60,H-60),t});
+function spawnFruit(){
+    fruit.x = Math.floor(Math.random() * Math.floor(w/grid));
+    fruit.y = Math.floor(Math.random() * Math.floor(h/grid));
+    const types=["simple","star","block","random"];
+    fruit.type = types[Math.floor(Math.random()*types.length)];
 }
-}
-
-function init(){
-path = [];
-segments = [];
-segCount = 12;
-for(let i=0;i<segCount;i++) segments.push({x:W/2 - i*pointsSpacing, y: H/2});
-for(let i=0;i<200;i++) path.push({x:W/2 - i*1, y:H/2});
-dirAngle = 0;
-currentScore = 0;
-pointsSpacing = spacing;
-placeFruits();
-scoreEl.textContent = currentScore;
-}
-
-function startGame(){
-init();running = true;lastTime = performance.now();requestAnimationFrame(loop);
-}
-
-function lose(){
-running = false;
-loseScore.textContent = 'Score: '+currentScore;
-loseEl.classList.remove('hide');
-}
-
-function update(dt){
-let move = (speed/100)*dt*100;
-let head = {x: path[0].x + Math.cos(dirAngle)*move, y: path[0].y + Math.sin(dirAngle)*move};
-path.unshift(head);
-let needed = Math.ceil((segCount*pointsSpacing + 200)/1);
-while(path.length < needed) path.push({...path[path.length-1]});
-while(path.length > 2000) path.pop();
-for(let i=0;i<segments.length;i++){
-let index = Math.floor(i*pointsSpacing);
-if(index < path.length) { segments[i].x = path[Math.min(path.length-1, index)].x; segments[i].y = path[Math.min(path.length-1, index)].y; }
-}
-let headPos = segments[0];
-for(let i=6;i<segments.length;i++){
-let s = segments[i];
-let d = Math.hypot(headPos.x - s.x, headPos.y - s.y);
-if(d < Math.max(8, pointsSpacing*0.65)){ lose(); return; }
-}
-for(let i=fruits.length-1;i>=0;i--){
-let f = fruits[i];
-let d = Math.hypot(headPos.x - f.x, headPos.y - f.y);
-if(d < 26){
-let add = f.t===0?2:f.t===1?4:6;
-currentScore += add*10;
-for(let k=0;k<add;k++) segments.push({x:segments[segments.length-1].x, y:segments[segments.length-1].y});
-fruits.splice(i,1);
-fruits.push({x:rand(30,W-30),y:rand(60,H-60),t:Math.random()<0.85?0:Math.random()<0.94?1:2});
-scoreEl.textContent = currentScore;
-}
-}
-}
-
-function drawBackground(){
-ctx.fillStyle = '#050507';
-ctx.fillRect(0,0,W,H);
-let g = ctx.createLinearGradient(0,0,0,H);
-g.addColorStop(0,'rgba(12,14,16,0.06)');
-g.addColorStop(1,'rgba(0,0,0,0.06)');
-ctx.fillStyle = g;
-ctx.fillRect(0,0,W,H);
-}
-
+function resetGame(){snakeLength=5;score=0;over=false;resetSnake();spawnFruit();moveTimer=0;}
 function drawSnake(){
-for(let i=segments.length-1;i>=0;i--){
-let s = segments[i];
-let t = i/segments.length;
-let size = Math.max(6, 18 - t*12);
-ctx.save();
-ctx.translate(s.x, s.y);
-ctx.globalAlpha = 0.9 - t*0.5;
-if(shape === 'round'){
-ctx.beginPath();
-ctx.fillStyle = snakeColor;
-ctx.shadowBlur = 12 - t*8;
-ctx.shadowColor = snakeColor;
-ctx.arc(0,0,size/1.2,0,Math.PI*2);
-ctx.fill();
+    ctx.fillStyle=snakeColor;
+    for(let s of snake){
+        if(snakeShape=="block"){ctx.fillRect(s.x*grid,s.y*grid,grid,grid);}
+        else if(snakeShape=="round"){ctx.beginPath();ctx.arc(s.x*grid+grid/2,s.y*grid+grid/2,grid/2,0,Math.PI*2);ctx.fill();}
+        else if(snakeShape=="diamond"){ctx.save();ctx.translate(s.x*grid+grid/2,s.y*grid+grid/2);ctx.rotate(Math.PI/4);ctx.fillRect(-grid/2,-grid/2,grid,grid);ctx.restore();}
+    }
 }
-else if(shape === 'blocky'){
-ctx.fillStyle = snakeColor;
-ctx.shadowBlur = 4;
-ctx.shadowColor = 'rgba(0,0,0,0.6)';
-ctx.fillRect(-size/1.1,-size/1.1,size*1.9,size*1.9);
+function drawFruit(){
+    ctx.fillStyle="#f00";
+    if(fruit.type=="simple"){ctx.fillRect(fruit.x*grid,fruit.y*grid,grid,grid);}
+    else if(fruit.type=="star"){ctx.beginPath();ctx.moveTo(fruit.x*grid+grid/2,fruit.y*grid);for(let i=0;i<5;i++){ctx.lineTo(fruit.x*grid+grid/2+grid/2*Math.cos(i*2*Math.PI/5-1.57),fruit.y*grid+grid/2+grid/2*Math.sin(i*2*Math.PI/5-1.57));}ctx.closePath();ctx.fill();}
+    else if(fruit.type=="block"){ctx.fillRect(fruit.x*grid,fruit.y*grid,grid,grid);}
+    else{ctx.beginPath();ctx.arc(fruit.x*grid+grid/2,fruit.y*grid+grid/2,grid/2,0,Math.PI*2);ctx.fill();}
 }
-else {
-ctx.fillStyle = snakeColor;
-ctx.rotate(Math.PI/4);
-ctx.fillRect(-size/1.2,-size/1.2,size*1.8,size*1.8);
+function moveSnake(dt){
+    moveTimer+=dt*speed;
+    if(moveTimer>=1){
+        moveTimer=0;
+        dir = nextDir;
+        let head = {x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+        if(head.x<0)head.x=Math.floor(w/grid)-1;
+        if(head.y<0)head.y=Math.floor(h/grid)-1;
+        if(head.x>=Math.floor(w/grid))head.x=0;
+        if(head.y>=Math.floor(h/grid))head.y=0;
+        for(let s of snake){if(s.x==head.x && s.y==head.y){over=true;playing=false;document.getElementById("lose").style.display="flex";return;}}
+        snake.unshift(head);
+        if(head.x==fruit.x && head.y==fruit.y){score+=1*scoreMultiplier;snakeLength++;spawnFruit();}
+        else{snake.pop();}
+    }
 }
-ctx.restore();
-}
-}
-
-function drawFruit(f){
-ctx.save();
-ctx.translate(f.x,f.y);
-if(f.t===0){
-ctx.beginPath();
-for(let i=0;i<5;i++){ let a = i*(Math.PI*2)/5 - Math.PI/2; let r = i%2?8:18; ctx.lineTo(Math.cos(a)*r, Math.sin(a)*r); }
-ctx.closePath();
-ctx.fillStyle = '#ff6b6b';
-ctx.shadowBlur = 20; ctx.shadowColor = '#ff6b6b';
-ctx.fill();
-}
-else if(f.t===1){
-let r = 10 + Math.sin(performance.now()/180 + f.x)*3;
-ctx.beginPath(); ctx.ellipse(0,0,r,r*0.65,0,0,Math.PI*2);
-ctx.fillStyle = '#4fe8ff'; ctx.shadowBlur = 18; ctx.shadowColor = '#4fe8ff'; ctx.fill();
-ctx.beginPath(); ctx.moveTo(-r*0.25,-r*0.25); ctx.lineTo(r*0.6,0); ctx.lineTo(-r*0.25,r*0.25); ctx.closePath();
-ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fill();
-}
-else {
-ctx.rotate(performance.now()/700 + f.x*0.001);
-ctx.fillStyle = '#ffd84f'; ctx.shadowBlur = 14; ctx.shadowColor = '#ffd84f';
-ctx.fillRect(-10,-10,20,20);
-ctx.clearRect(-4,-4,8,8);
-}
-ctx.restore();
+let lastTime=0;
+function gameLoop(time){
+    let dt=(time-lastTime)/1000;
+    lastTime=time;
+    if(playing && !over){
+        moveSnake(dt);
+        ctx.clearRect(0,0,w,h);
+        drawFruit();
+        drawSnake();
+        document.getElementById("score").textContent=score;
+        requestAnimationFrame(gameLoop);
+    }
 }
 
-function render(){
-drawBackground();
-for(let i=0;i<fruits.length;i++) drawFruit(fruits[i]);
-drawSnake();
-}
+const joystick=document.getElementById("joystick");
+const stick=document.getElementById("stick");
+let active=false,sx=0,sy=0;
+joystick.addEventListener("touchstart",e=>{active=true;sx=e.touches[0].clientX;sy=e.touches[0].clientY;});
+joystick.addEventListener("touchmove",e=>{if(!active)return;let tx=e.touches[0].clientX-sx,ty=e.touches[0].clientY-sy;let angle=Math.atan2(ty,tx);stick.style.transform=`translate(${Math.min(40,Math.hypot(tx,ty))*Math.cos(angle)}px,${Math.min(40,Math.hypot(tx,ty))*Math.sin(angle)}px)`;if(Math.abs(tx)>Math.abs(ty)){nextDir={x:tx>0?1:-1,y:0};}else{nextDir={x:0,y:ty>0?1:-1};}});
+joystick.addEventListener("touchend",()=>{active=false;stick.style.transform="translate(0,0)";});
 
-function loop(t){
-if(!running) return;
-let dt = Math.min(0.032, (t - lastTime)/1000);
-lastTime = t;
-update(dt);
-render();
-requestAnimationFrame(loop);
-}
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('dblclick',e=>e.preventDefault());
+document.addEventListener('touchmove',e=>{if(e.scale!==1)e.preventDefault();},{passive:false});
 
-let joystickActive = false;
-let stickStartX = 0;
-let stickStartY = 0;
-let swipeStartX = 0;
-let swipeStartY = 0;
-let lastSwipeDirTime = 0;
-
-joystickEl.addEventListener('touchstart', e=>{
-e.preventDefault();
-if(controlType !== 'joystick') return;
-joystickActive = true;
-let touch = e.touches[0];
-stickStartX = touch.clientX;
-stickStartY = touch.clientY;
-});
-joystickEl.addEventListener('touchmove', e=>{
-e.preventDefault();
-if(controlType !== 'joystick' || !joystickActive) return;
-let t = e.touches[0];
-let dx = t.clientX - stickStartX;
-let dy = t.clientY - stickStartY;
-let dist = Math.hypot(dx,dy);
-let max = Math.max(12, joystickSize/2 - 10);
-let clamped = Math.min(dist, max);
-let ang = Math.atan2(dy,dx);
-stickEl.style.transform = `translate(${Math.cos(ang)*clamped}px,${Math.sin(ang)*clamped}px)`;
-dirAngle = ang;
-});
-joystickEl.addEventListener('touchend', e=>{
-e.preventDefault();
-if(controlType !== 'joystick') return;
-joystickActive = false;
-stickEl.style.transform = 'translate(0px,0px)';
-});
-
-let lastTouch = {x:0,y:0,time:0};
-window.addEventListener('touchstart', e=>{
-if(controlType !== 'swipe') return;
-let t = e.touches[0];
-swipeStartX = t.clientX; swipeStartY = t.clientY;
-lastTouch.x = swipeStartX; lastTouch.y = swipeStartY; lastTouch.time = performance.now();
-});
-window.addEventListener('touchmove', e=>{
-if(controlType !== 'swipe') return;
-let t = e.touches[0];
-let dx = t.clientX - swipeStartX;
-let dy = t.clientY - swipeStartY;
-if(Math.hypot(dx,dy) > 20 && performance.now() - lastSwipeDirTime > 80){
-dirAngle = Math.atan2(dy,dx);
-lastSwipeDirTime = performance.now();
-}
-});
-
-document.addEventListener('gesturestart', e=>e.preventDefault());
-document.addEventListener('dblclick', e=>e.preventDefault());
-document.addEventListener('touchmove', e=>{ if(e.scale !== undefined && e.scale !== 1) e.preventDefault(); }, {passive:false});
-
-canvas.addEventListener('mousedown', e=>{ let rx = e.clientX - W/2; let ry = e.clientY - H/2; dirAngle = Math.atan2(e.clientY - segments[0].y, e.clientX - segments[0].x); });
-window.addEventListener('mousemove', e=>{ if(!running) return; });
-
-function boot(){
-init();
-render();
-}
-
-boot();
-document.addEventListener('visibilitychange', ()=>{ if(document.hidden) running = false; else if(menu.classList.contains('hide') && loseEl.classList.contains('hide')){ running = true; lastTime = performance.now(); requestAnimationFrame(loop); }});
-
+document.getElementById("startBtn").onclick=()=>{document.getElementById("menu").style.display="none";playing=true;resetGame();requestAnimationFrame(gameLoop);}
+document.getElementById("settingsBtn").onclick=()=>{document.getElementById("menu").style.display="none";document.getElementById("settings").style.display="flex";}
+document.getElementById("backBtn").onclick=()=>{
+    snakeShape=document.getElementById("snakeShape").value;
+    snakeColor=document.getElementById("snakeColor").value;
+    speed=parseInt(document.getElementById("speedSel").value);
+    grid=parseInt(document.getElementById("gridSel").value);
+    fruitType=document.getElementById("fruitType").value;
+    scoreMultiplier=parseInt(document.getElementById("scoreMult").value);
+    document.getElementById("settings").style.display="none";
+    document.getElementById("menu").style.display="flex";
+};
+document.getElementById("retry").onclick=()=>{resetGame();document.getElementById("lose").style.display="none";playing=true;requestAnimationFrame(gameLoop);}
 </script>
 </body>
 </html>
