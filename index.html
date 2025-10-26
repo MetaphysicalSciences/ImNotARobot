@@ -1,618 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">
-<title>Snake XP Ultra - Tesseract Edition</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Windows XP Menu</title>
 <style>
-html,body{height:100%;margin:0;padding:0;background:#0a5b5b;font-family:Tahoma,Arial,Helvetica,sans-serif;overflow:hidden;-webkit-user-select:none;touch-action:none;}
-#gameCanvas{display:block;background:#000;height:100vh;width:100vw;}
-#joystick{position:absolute;bottom:48px;left:48px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.18);z-index:60;touch-action:none;display:flex;align-items:center;justify-content:center;}
-#stick{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.6);transform:translate(0,0);}
-.window{position:absolute;z-index:70;border:6px solid #e6e6e6;background:linear-gradient(#cbd8de,#a9c0d6);box-shadow:6px 6px 0 rgba(0,0,0,0.4);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
-.titlebar{width:100%;height:34px;background:linear-gradient(#0a64ad,#083b7a);color:#fff;display:flex;align-items:center;padding:0 8px;border-top-left-radius:2px;border-top-right-radius:2px;box-shadow:inset 0 -2px 0 rgba(0,0,0,0.2);}
-.title{flex:1;font-weight:bold;font-size:14px;text-shadow:0 1px 0 rgba(0,0,0,0.5);}
-.buttons{display:flex;gap:6px;}
-.btn{width:18px;height:16px;border-radius:2px;background:#e0e0e0;display:inline-flex;align-items:center;justify-content:center;color:#333;font-weight:bold;cursor:pointer;box-shadow:inset 0 -2px 0 rgba(0,0,0,0.1);}
-.body{padding:12px;width:92%;display:flex;flex-direction:column;gap:8px;align-items:stretch;}
-.bigButton{padding:10px 12px;background:#0078d7;color:#fff;border:none;border-radius:3px;font-weight:bold;cursor:pointer;box-shadow:inset 0 -2px 0 rgba(0,0,0,0.2);}
-.bigButton:hover{background:#006bb3;}
-.labelRow{display:flex;justify-content:space-between;align-items:center;width:100%;}
-.range{width:55%;}
-.color{height:30px;width:60px;border:none;padding:0;margin-left:8px;}
-.select{padding:6px;border-radius:4px;border:1px solid #777;}
-.scrollArea{overflow-y:auto;max-height:48vh;width:100%;padding-right:6px;}
-#scoreDisplay{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:65;background:rgba(0,0,0,0.6);padding:6px 12px;border-radius:6px;color:#fff;font-weight:bold;box-shadow:2px 2px 0 rgba(0,0,0,0.3);}
-#gameOverWindow{display:none;}
-#settingsWindow{display:none;}
-#mainWindow{display:flex;position:absolute;left:calc(50% - 220px);top:calc(50% - 120px);width:440px;height:240px;}
-#settingsWindow{position:absolute;left:8px;top:8px;right:8px;bottom:8px;border-radius:8px;}
-#gameOverWindow{position:absolute;left:calc(50% - 200px);top:calc(50% - 120px);width:400px;height:220px;border-radius:8px;}
-.settingItem{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:4px;background:linear-gradient(#f6f6f6,#e9eef5);margin:4px 0;border:1px solid rgba(0,0,0,0.08);}
-.small{font-size:12px;color:#222;}
-.check{transform:scale(1.1);margin-left:8px;}
-.minimap{position:absolute;right:12px;bottom:12px;width:120px;height:80px;border:2px solid rgba(255,255,255,0.18);z-index:62;background:rgba(0,0,0,0.3);border-radius:4px;}
-.footer{margin-top:8px;display:flex;gap:8px;}
-.hint{font-size:12px;color:#123;}
+html,body{margin:0;padding:0;height:100%;background:#008080;font-family:'Tahoma',sans-serif;overflow:hidden}
+.window{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;background:#ece9d8;border:3px solid #003399;box-shadow:0 0 0 3px #99ccff inset}
+.titlebar{background:linear-gradient(#0055e7,#003399);color:#fff;padding:6px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;font-size:15px}
+.titlebar span{flex:1;text-align:center}
+.close{background:#ff0000;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer}
+.menu-body{padding:20px;display:flex;flex-direction:column;align-items:center;gap:10px;background:linear-gradient(to bottom,#f7f7f7,#d8d8d8)}
+.btn{width:90%;padding:10px;border:2px outset #fff;background:linear-gradient(to bottom,#e6e6e6,#c0c0c0);color:#000;font-weight:bold;text-align:center;cursor:pointer}
+.btn:active{border:2px inset #fff;background:linear-gradient(to bottom,#c0c0c0,#a0a0a0)}
+.footer{background:#ece9d8;padding:8px;text-align:center;font-size:12px;border-top:1px solid #999}
+.taskbar{position:absolute;bottom:0;left:0;width:100%;height:40px;background:linear-gradient(to bottom,#245edb,#003399);display:flex;align-items:center;box-shadow:inset 0 1px #66a3ff}
+.start{margin-left:10px;background:linear-gradient(to bottom,#29a329,#006600);border:2px outset #fff;color:#fff;padding:6px 14px;font-weight:bold;font-size:14px;cursor:pointer;border-radius:3px}
+.start:active{border:2px inset #fff}
+.desktop-icon{position:absolute;width:70px;text-align:center;color:#fff;font-size:13px;cursor:pointer}
+.desktop-icon img{width:48px;height:48px}
+#icon-game{top:80px;left:60px}
+#icon-settings{top:180px;left:60px}
+#icon-exit{top:280px;left:60px}
+.particles{position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:-1}
+.particle{position:absolute;width:6px;height:6px;background:#fff;border-radius:50%;opacity:0.6;animation:float 10s infinite ease-in-out}
+@keyframes float{0%{transform:translateY(100vh) scale(0.5);opacity:0.5}100%{transform:translateY(-10vh) scale(1.5);opacity:0}}
+.scrollmenu{height:200px;width:100%;overflow-y:auto;border:2px inset #999;background:#f3f3f3;padding:5px;box-sizing:border-box}
+.setting{background:#dcdcdc;margin:5px;padding:6px;border:1px solid #aaa;cursor:pointer}
+.setting:hover{background:#c0c0c0}
 </style>
 </head>
 <body>
-<canvas id="gameCanvas"></canvas>
-<div id="joystick"><div id="stick"></div></div>
-
-<div class="window" id="mainWindow">
-<div class="titlebar">
-<div class="title">Snake XP Ultra - Tesseract Edition</div>
-<div class="buttons"><div class="btn" id="btnClose">X</div></div>
+<div class="particles"></div>
+<div class="desktop-icon" id="icon-game"><img src="https://upload.wikimedia.org/wikipedia/en/5/5f/Windows_XP_Logo.png"><div>Play Game</div></div>
+<div class="desktop-icon" id="icon-settings"><img src="https://upload.wikimedia.org/wikipedia/en/2/23/Windows_Settings_icon.png"><div>Settings</div></div>
+<div class="desktop-icon" id="icon-exit"><img src="https://upload.wikimedia.org/wikipedia/en/d/d6/Windows_XP_Shutdown.png"><div>Exit</div></div>
+<div class="window" id="mainWin">
+<div class="titlebar"><div class="close" onclick="hideWin()">X</div><span>Windows XP Game Menu</span></div>
+<div class="menu-body">
+<div class="btn" onclick="alert('Starting game...')">Start Game</div>
+<div class="btn" onclick="openSettings()">Settings</div>
+<div class="btn" onclick="alert('Goodbye!')">Exit</div>
 </div>
-<div class="body">
-<div style="display:flex;gap:8px;width:100%;align-items:center;justify-content:space-between;">
-<button class="bigButton" id="startBtn">Start Game</button>
-<button class="bigButton" id="settingsBtn">Settings</button>
-<button class="bigButton" id="helpBtn">Help</button>
+<div class="footer">© 2001 Microsoft Corporation</div>
 </div>
-<div style="display:flex;gap:8px;align-items:center;justify-content:space-between;">
-<div class="hint">Retro Windows XP styling. Tesseract snake shape available in settings.</div>
-<div style="display:flex;gap:8px;">
-<button class="bigButton" id="skipBtn">Skip Intro</button>
+<div class="window" id="settingsWin" style="display:none;width:460px">
+<div class="titlebar"><div class="close" onclick="hideSettings()">X</div><span>Settings</span></div>
+<div class="menu-body">
+<div class="scrollmenu" id="scroll">
+<div class="setting">Joystick Size</div>
+<div class="setting">Snake Shape</div>
+<div class="setting">Snake Colour</div>
+<div class="setting">Fruit Variety</div>
+<div class="setting">Music Volume</div>
+<div class="setting">SFX Volume</div>
+<div class="setting">Background Theme</div>
+<div class="setting">Particle Density</div>
+<div class="setting">Window Transparency</div>
+<div class="setting">4D Mode</div>
+<div class="setting">Snake Glow</div>
+<div class="setting">Retro Filter</div>
+<div class="setting">XP Start Sound</div>
+<div class="setting">Snake Shadow</div>
+<div class="setting">Fruit Shine</div>
+<div class="setting">CRT Flicker</div>
+<div class="setting">Cursor Style</div>
+<div class="setting">Snake Thickness</div>
+<div class="setting">UI Scaling</div>
+<div class="setting">Button Tone</div>
+<div class="setting">XP Clouds</div>
+<div class="setting">Window Blur</div>
+<div class="setting">Fullscreen</div>
+<div class="setting">Grid Overlay</div>
+<div class="setting">Debug Stats</div>
+<div class="setting">4D Rotation Speed</div>
+<div class="setting">Fruit Glow Intensity</div>
+<div class="setting">VHS Distortion</div>
+<div class="setting">Auto Save</div>
+<div class="setting">Snake Trail Effect</div>
+<div class="setting">UI Click Sound</div>
 </div>
+<div class="btn" onclick="hideSettings()">Back to Menu</div>
 </div>
+<div class="footer">Windows XP Settings</div>
 </div>
-</div>
-
-<div class="window" id="settingsWindow" style="display:none;">
-<div class="titlebar">
-<div class="title">Settings</div>
-<div class="buttons"><div class="btn" id="closeSettings">X</div></div>
-</div>
-<div class="body">
-<div style="display:flex;gap:8px;width:100%;align-items:center;justify-content:space-between;">
-<div style="font-weight:bold">Customize controls, visuals, and gameplay</div>
-<div style="display:flex;gap:8px;"><button class="bigButton" id="resetSettings">Reset</button></div>
-</div>
-<div class="scrollArea" id="settingsScroll">
-<div class="settingItem"><div class="small">Joystick Size</div><input id="s_joystickSize" class="range" type="range" min="50" max="180" value="100"></div>
-<div class="settingItem"><div class="small">Joystick Opacity</div><input id="s_joystickOpacity" class="range" type="range" min="0" max="1" step="0.05" value="0.18"></div>
-<div class="settingItem"><div class="small">Stick Opacity</div><input id="s_stickOpacity" class="range" type="range" min="0" max="1" step="0.05" value="0.6"></div>
-<div class="settingItem"><div class="small">Snake Color</div><input id="s_snakeColor" class="color" type="color" value="#00ff00"></div>
-<div class="settingItem"><div class="small">Snake Shape</div>
-<select id="s_snakeShape" class="select">
-<option value="square">Square</option>
-<option value="circle">Circle</option>
-<option value="rounded">Rounded</option>
-<option value="4d">4D Tesseract</option>
-</select>
-</div>
-<div class="settingItem"><div class="small">Grid Size</div><input id="s_grid" class="range" type="range" min="12" max="36" value="20"></div>
-<div class="settingItem"><div class="small">Animate Speed</div><input id="s_animSpeed" class="range" type="range" min="4" max="30" value="12"></div>
-<div class="settingItem"><div class="small">Trail Opacity</div><input id="s_trail" class="range" type="range" min="0" max="1" step="0.02" value="0.88"></div>
-<div class="settingItem"><div class="small">Background Color</div><input id="s_bgColor" class="color" type="color" value="#000000"></div>
-<div class="settingItem"><div class="small">Particle Count</div><input id="s_particles" class="range" type="range" min="0" max="800" value="120"></div>
-<div class="settingItem"><div class="small">Particle Speed</div><input id="s_particleSpeed" class="range" type="range" min="0" max="20" value="5"></div>
-<div class="settingItem"><div class="small">Particle Color Shift</div><input id="s_particleShift" class="range" type="range" min="0" max="360" value="220"></div>
-<div class="settingItem"><div class="small">Rare Fruit Chance (%)</div><input id="s_rareChance" class="range" type="range" min="0" max="50" value="10"></div>
-<div class="settingItem"><div class="small">Max Fruits</div><input id="s_maxFruits" class="range" type="range" min="1" max="20" value="6"></div>
-<div class="settingItem"><div class="small">Tail Multiplier</div><input id="s_tailMult" class="range" type="range" min="1" max="6" value="1"></div>
-<div class="settingItem"><div class="small">Perfect Collision</div><input id="s_perfectCollision" class="check" type="checkbox" checked></div>
-<div class="settingItem"><div class="small">On-Self Hit: Remove Segments</div><input id="s_removeOnHit" class="check" type="checkbox" checked></div>
-<div class="settingItem"><div class="small">Segments Removed On Hit</div><input id="s_removeCount" class="range" type="range" min="1" max="6" value="2"></div>
-<div class="settingItem"><div class="small">Enable Wrap (edges)</div><input id="s_wrap" class="check" type="checkbox" checked></div>
-<div class="settingItem"><div class="small">Snake Glow</div><input id="s_glow" class="range" type="range" min="0" max="30" value="6"></div>
-<div class="settingItem"><div class="small">Fruit Glow</div><input id="s_fruitGlow" class="range" type="range" min="0" max="30" value="6"></div>
-<div class="settingItem"><div class="small">Show Mini-Map</div><input id="s_minimap" class="check" type="checkbox" checked></div>
-<div class="settingItem"><div class="small">Mini-Map Scale</div><input id="s_minimapScale" class="range" type="range" min="0.05" max="0.3" step="0.01" value="0.12"></div>
-<div class="settingItem"><div class="small">Max Tail Length</div><input id="s_maxTail" class="range" type="range" min="10" max="500" value="300"></div>
-<div class="settingItem"><div class="small">Fruit Spawn Interval (frames)</div><input id="s_spawnInterval" class="range" type="range" min="10" max="400" value="120"></div>
-<div class="settingItem"><div class="small">Enable Sound Effects</div><input id="s_sound" class="check" type="checkbox"></div>
-<div class="settingItem"><div class="small">Control Sensitivity</div><input id="s_sensitivity" class="range" type="range" min="0.2" max="2" step="0.05" value="1"></div>
-<div class="settingItem"><div class="small">Fruit Variety (Add 8 More)</div><input id="s_variety" class="check" type="checkbox" checked></div>
-<div class="settingItem"><div class="small">XP Theme Intensity</div><input id="s_xpIntensity" class="range" type="range" min="0" max="1" step="0.05" value="0.9"></div>
-<div class="footer"><div class="hint">Scroll to see all settings</div></div>
-</div>
-</div>
-
-<div class="window" id="gameOverWindow" style="display:none;">
-<div class="titlebar"><div class="title">Game Over</div><div class="buttons"><div class="btn" id="closeOver">X</div></div></div>
-<div class="body">
-<div style="font-weight:bold;font-size:18px;text-align:center;" id="overText">You hit yourself</div>
-<div style="text-align:center;margin-top:6px;">Final Score: <span id="overScore">0</span></div>
-<div style="display:flex;gap:8px;margin-top:12px;">
-<button class="bigButton" id="retryBtn">Retry</button>
-<button class="bigButton" id="menuBtn">Main Menu</button>
-</div>
-</div>
-</div>
-
-<div id="scoreDisplay">Score: 0</div>
-<canvas id="miniMap" class="minimap"></canvas>
-
+<div class="taskbar"><div class="start" onclick="showWin()">Start</div></div>
 <script>
-const canvas=document.getElementById('gameCanvas');
-const ctx=canvas.getContext('2d');
-const mini=document.getElementById('miniMap');
-const mctx=mini.getContext('2d');
-let W=canvas.width=window.innerWidth;
-let H=canvas.height=window.innerHeight;
-mini.width=120;mini.height=80;
-window.addEventListener('resize',()=>{W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;});
-
-let grid=20;
-let snake=[];
-let dir={x:1,y:0};
-let nextDir={x:1,y:0};
-let animSpeed=12;
-let frame=0;
-let fruits=[];
-let score=0;
-let gameRunning=false;
-let snakeColor="#00ff00";
-let snakeShape="square";
-let joystickSize=100;
-let joystickOpacity=0.18;
-let stickOpacity=0.6;
-let bgColor="#000000";
-let particleCount=120;
-let particles=[];
-let particleSpeed=5;
-let particleShift=220;
-let rareChance=10;
-let maxFruits=6;
-let tailMult=1;
-let removeOnHit=true;
-let removeCount=2;
-let wrapEnabled=true;
-let snakeGlow=6;
-let fruitGlow=6;
-let showMinimap=true;
-let minimapScale=0.12;
-let maxTail=300;
-let spawnInterval=120;
-let spawnCounter=0;
-let enableSound=false;
-let sensitivity=1;
-let varietyEnabled=true;
-let xpIntensity=0.9;
-let trailOpacity=0.88;
-
-const startBtn=document.getElementById('startBtn');
-const settingsBtn=document.getElementById('settingsBtn');
-const settingsWindow=document.getElementById('settingsWindow');
-const closeSettings=document.getElementById('closeSettings');
-const mainWindow=document.getElementById('mainWindow');
-const settingsScroll=document.getElementById('settingsScroll');
-const gameOverWindow=document.getElementById('gameOverWindow');
-const overText=document.getElementById('overText');
-const overScore=document.getElementById('overScore');
-const scoreDisplay=document.getElementById('scoreDisplay');
-const joystick=document.getElementById('joystick');
-const stick=document.getElementById('stick');
-
-function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-
-function resetAll(){
-snakeColor=document.getElementById('s_snakeColor').value;
-snakeShape=document.getElementById('s_snakeShape').value;
-grid=parseInt(document.getElementById('s_grid').value);
-animSpeed=parseInt(document.getElementById('s_animSpeed').value);
-trailOpacity=parseFloat(document.getElementById('s_trail').value);
-bgColor=document.getElementById('s_bgColor').value;
-particleCount=parseInt(document.getElementById('s_particles').value);
-particleSpeed=parseInt(document.getElementById('s_particleSpeed').value);
-particleShift=parseInt(document.getElementById('s_particleShift').value);
-rareChance=parseInt(document.getElementById('s_rareChance').value);
-maxFruits=parseInt(document.getElementById('s_maxFruits').value);
-tailMult=parseInt(document.getElementById('s_tailMult').value);
-removeOnHit=document.getElementById('s_removeOnHit').checked;
-removeCount=parseInt(document.getElementById('s_removeCount').value);
-wrapEnabled=document.getElementById('s_wrap').checked;
-snakeGlow=parseInt(document.getElementById('s_glow').value);
-fruitGlow=parseInt(document.getElementById('s_fruitGlow').value);
-showMinimap=document.getElementById('s_minimap').checked;
-minimapScale=parseFloat(document.getElementById('s_minimapScale').value);
-maxTail=parseInt(document.getElementById('s_maxTail').value);
-spawnInterval=parseInt(document.getElementById('s_spawnInterval').value);
-enableSound=document.getElementById('s_sound').checked;
-sensitivity=parseFloat(document.getElementById('s_sensitivity').value);
-varietyEnabled=document.getElementById('s_variety').checked;
-xpIntensity=parseFloat(document.getElementById('s_xpIntensity').value);
-joystickSize=parseInt(document.getElementById('s_joystickSize').value);
-joystickOpacity=parseFloat(document.getElementById('s_joystickOpacity').value);
-stickOpacity=parseFloat(document.getElementById('s_stickOpacity').value);
-document.getElementById('s_joystickSize').dispatchEvent(new Event('input'));
-joystick.style.width=joystick.style.height=joystickSize+'px';
-joystick.style.background='rgba(255,255,255,'+joystickOpacity+')';
-stick.style.background='rgba(255,255,255,'+stickOpacity+')';
-document.body.style.background='#0a5b5b';
-scoreDisplay.style.fontSize='18px';
-mini.width=Math.max(80,Math.floor(W*minimapScale));
-mini.height=Math.max(60,Math.floor(H*minimapScale));
-}
-
-function initParticles(){
-particles=[];
-for(let i=0;i<particleCount;i++){
-particles.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*particleSpeed,vy:(Math.random()-0.5)*particleSpeed,size:Math.random()*3+1,h:(particleShift+Math.random()*60)%360,a:0.5+Math.random()*0.5});
-}
-}
-
-function spawnFruit(){
-if(fruits.length>=maxFruits) return;
-let types=[];
-if(varietyEnabled){
-for(let i=0;i<11;i++) types.push(i);
-}else{
-types=[0,1,2];
-}
-let type=types[randInt(0,types.length-1)];
-let x=randInt(0,Math.max(1,Math.floor(W/grid)-1));
-let y=randInt(0,Math.max(1,Math.floor(H/grid)-1));
-let overlapping=false;
-for(let s of snake) if(s.x===x && s.y===y) overlapping=true;
-for(let f of fruits) if(f.x===x && f.y===y) overlapping=true;
-if(overlapping) return;
-fruits.push({x,y,type});
-}
-
-function spawnInitialFruits(n){
-for(let i=0;i<n;i++) spawnFruit();
-}
-
-function startGame(){
-mainWindow.style.display='none';
-settingsWindow.style.display='none';
-gameOverWindow.style.display='none';
-resetAll();
-snake=[{x:Math.floor(Math.max(10,W/grid)/2),y:Math.floor(Math.max(10,H/grid)/2)}];
-dir={x:1,y:0};
-nextDir={x:1,y:0};
-score=0;
-fruits=[];
-spawnInitialFruits(maxFruits);
-initParticles();
-frame=0;
-spawnCounter=0;
-gameRunning=true;
-scoreDisplay.style.display='block';
-requestAnimationFrame(loop);
-}
-
-function endGame(reason){
-gameRunning=false;
-overText.textContent=reason;
-overScore.textContent=score;
-gameOverWindow.style.display='block';
-}
-
-function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
-
-function perfectCollisionCheck(head){
-for(let i=0;i<snake.length;i++){
-let s=snake[i];
-if(head.x===s.x && head.y===s.y) return i;
-}
-return -1;
-}
-
-function handleSelfCollision(indexHit){
-if(!removeOnHit){
-endGame('You collided with yourself');
-return;
-}
-let rem=parseInt(removeCount);
-let len=snake.length;
-if(len<=rem+2){endGame('You collided with yourself');return;}
-let removeFrom=indexHit;
-snake.splice(removeFrom,rem);
-score=Math.max(0,score-Math.floor(rem*2));
-}
-
-function update(){
-if(!gameRunning) return;
-frame++;
-if(frame<60/animSpeed) return;
-frame=0;
-spawnCounter++;
-if(spawnCounter>=spawnInterval){spawnCounter=0;spawnFruit();}
-dir=nextDir;
-let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-if(wrapEnabled){
-if(head.x<0) head.x=Math.floor(W/grid)-1;
-if(head.x>=Math.floor(W/grid)) head.x=0;
-if(head.y<0) head.y=Math.floor(H/grid)-1;
-if(head.y>=Math.floor(H/grid)) head.y=0;
-}else{
-if(head.x<0||head.x>=Math.floor(W/grid)||head.y<0||head.y>=Math.floor(H/grid)){endGame('You hit the wall');return;}
-}
-let hitIndex=perfectCollisionCheck(head);
-if(hitIndex>=0){
-handleSelfCollision(hitIndex);
-return;
-}
-snake.unshift(head);
-let ate=false;
-for(let i=0;i<fruits.length;i++){
-let f=fruits[i];
-if(f.x===head.x && f.y===head.y){
-ate=true;
-let type=f.type;
-if(type===0){score+=1;}
-else if(type===1){score+=3;for(let z=0;z<1*tailMult;z++) snake.push({...snake[snake.length-1]});}
-else if(type===2){score+=5;for(let z=0;z<2*tailMult;z++) snake.push({...snake[snake.length-1]});}
-else if(type===3){score+=8;for(let z=0;z<3*tailMult;z++) snake.push({...snake[snake.length-1]});}
-else if(type===4){score+=2;animSpeed=Math.max(5,animSpeed-2);}
-else if(type===5){score+=0;animSpeed+=2;}
-else if(type===6){score+=10;for(let z=0;z<4*tailMult;z++) snake.push({...snake[snake.length-1]});}
-else if(type===7){score+=7;let sx=randInt(0,Math.max(1,Math.floor(W/grid)-1));let sy=randInt(0,Math.max(1,Math.floor(H/grid)-1));snake[0].x=sx;snake[0].y=sy;}
-else if(type===8){score+=12;snake.unshift({...snake[0]});snake.unshift({...snake[0]});}
-else if(type===9){score+=4;snake.splice(Math.max(1,Math.floor(snake.length/2)),0,{...snake[Math.floor(snake.length/2)]});}
-else if(type===10){score+=20;for(let z=0;z<6*tailMult;z++) snake.push({...snake[snake.length-1]});}
-fruits.splice(i,1);
-spawnFruit();
-break;
-}
-}
-if(!ate) snake.pop();
-if(snake.length>maxTail){snake=snake.slice(0,maxTail);}
-scoreDisplay.textContent='Score: '+score;
-}
-
-function drawTesseract(x,y,size,phase,age){
-let cx=x+size/2;
-let cy=y+size/2;
-let t=Date.now()/1000;
-let r=0.8*Math.sin(t*1.6+phase)+0.8*Math.cos(t*0.7+phase*0.5);
-let s=size/2;
-let points=[];
-for(let i=0;i<8;i++){
-let a=(i/8)*Math.PI*2;
-let px=cx+Math.cos(a+phase)*s*0.7;
-let py=cy+Math.sin(a+phase)*s*0.7;
-let pz=Math.sin(a*3+phase+age*0.1)*s*0.5;
-let w4=Math.cos(a*2+phase*0.5+age*0.2)*s*0.4;
-let projX=px + w4*0.6;
-let projY=py + pz*0.6;
-points.push({x:projX,y:projY});
-}
-ctx.beginPath();
-ctx.moveTo(points[0].x,points[0].y);
-for(let i=1;i<points.length;i++) ctx.lineTo(points[i].x,points[i].y);
-ctx.closePath();
-ctx.fillStyle=snakeColor;
-ctx.globalAlpha=0.95;
-ctx.fill();
-ctx.globalAlpha=1;
-ctx.strokeStyle='rgba(255,255,255,0.12)';
-ctx.stroke();
-}
-
-function draw(){
-ctx.clearRect(0,0,W,H);
-ctx.fillStyle=bgColor;
-ctx.globalAlpha=trailOpacity;
-ctx.fillRect(0,0,W,H);
-ctx.globalAlpha=1;
-for(let p of particles){
-p.x+=p.vx;
-p.y+=p.vy;
-if(p.x<0||p.x>W)p.vx*=-1;
-if(p.y<0||p.y>H)p.vy*=-1;
-ctx.fillStyle='hsla('+Math.floor(p.h)+',70%,'+ (40+Math.floor(p.a*20)) + '%, '+(0.4+Math.random()*0.3)+')';
-ctx.fillRect(p.x,p.y,p.size,p.size);
-}
-ctx.save();
-ctx.shadowColor=snakeColor;
-ctx.shadowBlur=snakeGlow;
-for(let i=0;i<snake.length;i++){
-let s=snake[i];
-let px=s.x*grid;
-let py=s.y*grid;
-if(snakeShape==='square'){
-ctx.fillStyle=snakeColor;
-ctx.fillRect(px,py,grid-1,grid-1);
-}else if(snakeShape==='circle'){
-ctx.beginPath();
-ctx.fillStyle=snakeColor;
-ctx.arc(px+grid/2,py+grid/2,grid/2-1,0,Math.PI*2);
-ctx.fill();
-}else if(snakeShape==='rounded'){
-ctx.fillStyle=snakeColor;
-ctx.fillRect(px+2,py+2,grid-4,grid-4);
-ctx.beginPath();
-ctx.arc(px+grid/2,py+grid/2,grid/2-4,0,Math.PI*2);
-ctx.fill();
-}else if(snakeShape==='4d'){
-drawTesseract(px,py,grid-1,(i%7)*0.6,i);
-}
-}
-ctx.restore();
-for(let f of fruits){
-ctx.save();
-ctx.shadowColor='#fff';
-ctx.shadowBlur=fruitGlow;
-let fx=f.x*grid;
-let fy=f.y*grid;
-switch(f.type){
-case 0:
-ctx.fillStyle='#ff3b3b';
-ctx.fillRect(fx,fy,grid-2,grid-2);
-break;
-case 1:
-ctx.fillStyle='#ffd23b';
-ctx.beginPath();
-ctx.arc(fx+grid/2,fy+grid/2,grid/2-1,0,Math.PI*2);
-ctx.fill();
-break;
-case 2:
-ctx.fillStyle='#3bfffa';
-ctx.fillRect(fx,fy,grid-2,grid-2);
-ctx.strokeStyle='#fff';
-ctx.strokeRect(fx,fy,grid-2,grid-2);
-break;
-case 3:
-ctx.fillStyle='#ff7bff';
-ctx.beginPath();
-ctx.moveTo(fx+grid/2,fy+3);
-ctx.lineTo(fx+grid-3,fy+grid-3);
-ctx.lineTo(fx+3,fy+grid-3);
-ctx.closePath();
-ctx.fill();
-break;
-case 4:
-ctx.fillStyle='#9dff7b';
-ctx.fillRect(fx+2,fy+2,grid-4,grid-4);
-ctx.beginPath();
-ctx.arc(fx+grid/2,fy+grid/2,grid/3,0,Math.PI*2);
-ctx.fill();
-break;
-case 5:
-ctx.fillStyle='#7bd3ff';
-ctx.beginPath();
-ctx.ellipse(fx+grid/2,fy+grid/2,grid/2-2,grid/4,0,0,Math.PI*2);
-ctx.fill();
-break;
-case 6:
-ctx.fillStyle='#ffd67b';
-ctx.beginPath();
-ctx.arc(fx+grid/2,fy+grid/2,grid/2-1,0,Math.PI*2);
-ctx.fill();
-ctx.strokeStyle='#fff';
-ctx.stroke();
-break;
-case 7:
-ctx.fillStyle='#d77bff';
-ctx.fillRect(fx,fy,grid-1,grid-1);
-ctx.strokeStyle='#fff';
-ctx.beginPath();
-ctx.moveTo(fx,fy);
-ctx.lineTo(fx+grid-1,fy+grid-1);
-ctx.moveTo(fx+grid-1,fy);
-ctx.lineTo(fx,fy+grid-1);
-ctx.stroke();
-break;
-case 8:
-ctx.fillStyle='#7bffdd';
-ctx.beginPath();
-ctx.rect(fx+1,fy+1,grid-3,grid-3);
-ctx.fill();
-ctx.fillStyle='#fff';
-ctx.fillRect(fx+grid/4,fy+grid/4,grid/2,grid/2);
-break;
-case 9:
-ctx.fillStyle='#ffd6d6';
-ctx.beginPath();
-ctx.moveTo(fx+grid/2,fy);
-ctx.lineTo(fx+grid,fy+grid/2);
-ctx.lineTo(fx+grid/2,fy+grid);
-ctx.lineTo(fx,fy+grid/2);
-ctx.closePath();
-ctx.fill();
-break;
-case 10:
-ctx.fillStyle='#fff17b';
-ctx.beginPath();
-for(let i=0;i<5;i++){
-ctx.lineTo(fx+grid/2+Math.cos(i*2*Math.PI/5)*grid/3,fy+grid/2+Math.sin(i*2*Math.PI/5)*grid/3);
-}
-ctx.closePath();
-ctx.fill();
-break;
-default:
-ctx.fillStyle='#fff';
-ctx.fillRect(fx,fy,grid-2,grid-2);
-break;
-}
-ctx.restore();
-}
-if(showMinimap){
-mctx.clearRect(0,0,mini.width,mini.height);
-mctx.fillStyle='rgba(0,0,0,0.35)';
-mctx.fillRect(0,0,mini.width,mini.height);
-let scaleX=mini.width/(Math.max(1,Math.floor(W/grid)));
-let scaleY=mini.height/(Math.max(1,Math.floor(H/grid)));
-mctx.fillStyle='#66ff66';
-for(let s of snake){
-mctx.fillRect(s.x*scaleX,s.y*scaleY,Math.max(1,scaleX-1),Math.max(1,scaleY-1));
-}
-mctx.fillStyle='#ff6666';
-for(let f of fruits){
-mctx.fillRect(f.x*scaleX,f.y*scaleY,Math.max(1,scaleX-1),Math.max(1,scaleY-1));
-}
-}
-}
-
-function gameLoop(){
-update();
-draw();
-if(gameRunning) requestAnimationFrame(gameLoop);
-}
-
-let active=false,startX=0,startY=0;
-joystick.addEventListener('touchstart',e=>{e.preventDefault();active=true;startX=e.touches[0].clientX;startY=e.touches[0].clientY;});
-joystick.addEventListener('touchmove',e=>{if(!active) return;let tx=(e.touches[0].clientX-startX)*sensitivity;let ty=(e.touches[0].clientY-startY)*sensitivity;let dist=Math.min(joystickSize/2,Math.hypot(tx,ty));let angle=Math.atan2(ty,tx);stick.style.transform='translate('+ (dist*Math.cos(angle)) +'px,'+ (dist*Math.sin(angle)) +'px)';if(Math.abs(tx)>Math.abs(ty)){if(tx>0 && dir.x!==-1) nextDir={x:1,y:0};else if(tx<0 && dir.x!==1) nextDir={x:-1,y:0};}else{if(ty>0 && dir.y!==-1) nextDir={x:0,y:1};else if(ty<0 && dir.y!==1) nextDir={x:0,y:-1};}});
-joystick.addEventListener('touchend',e=>{active=false;stick.style.transform='translate(0,0)';});
-
-document.addEventListener('gesturestart',e=>e.preventDefault());
-document.addEventListener('dblclick',e=>e.preventDefault());
-document.addEventListener('touchmove',e=>{if(e.scale!==1) e.preventDefault();},{passive:false});
-document.addEventListener('keydown',e=>{if(e.key==='ArrowUp'&&dir.y!==1) nextDir={x:0,y:-1};if(e.key==='ArrowDown'&&dir.y!==-1) nextDir={x:0,y:1};if(e.key==='ArrowLeft'&&dir.x!==1) nextDir={x:-1,y:0};if(e.key==='ArrowRight'&&dir.x!==-1) nextDir={x:1,y:0};});
-
-startBtn.addEventListener('click',()=>startGame());
-settingsBtn.addEventListener('click',()=>{settingsWindow.style.display='block';});
-closeSettings.addEventListener('click',()=>{settingsWindow.style.display='none';});
-document.getElementById('resetSettings').addEventListener('click',()=>{
-document.getElementById('s_joystickSize').value=100;
-document.getElementById('s_joystickOpacity').value=0.18;
-document.getElementById('s_stickOpacity').value=0.6;
-document.getElementById('s_snakeColor').value='#00ff00';
-document.getElementById('s_snakeShape').value='4d';
-document.getElementById('s_grid').value=20;
-document.getElementById('s_animSpeed').value=12;
-document.getElementById('s_trail').value=0.88;
-document.getElementById('s_bgColor').value='#000000';
-document.getElementById('s_particles').value=120;
-document.getElementById('s_particleSpeed').value=5;
-document.getElementById('s_particleShift').value=220;
-document.getElementById('s_rareChance').value=10;
-document.getElementById('s_maxFruits').value=6;
-document.getElementById('s_tailMult').value=1;
-document.getElementById('s_removeOnHit').checked=true;
-document.getElementById('s_removeCount').value=2;
-document.getElementById('s_wrap').checked=true;
-document.getElementById('s_glow').value=6;
-document.getElementById('s_fruitGlow').value=6;
-document.getElementById('s_minimap').checked=true;
-document.getElementById('s_minimapScale').value=0.12;
-document.getElementById('s_maxTail').value=300;
-document.getElementById('s_spawnInterval').value=120;
-document.getElementById('s_sound').checked=false;
-document.getElementById('s_sensitivity').value=1;
-document.getElementById('s_variety').checked=true;
-document.getElementById('s_xpIntensity').value=0.9;
-resetAll();
-initParticles();
-});
-
-document.getElementById('retryBtn').addEventListener('click',()=>{gameOverWindow.style.display='none';startGame();});
-document.getElementById('menuBtn').addEventListener('click',()=>{gameOverWindow.style.display='none';mainWindow.style.display='flex';});
-
-document.getElementById('btnClose').addEventListener('click',()=>{mainWindow.style.display='none';});
-document.getElementById('closeOver').addEventListener('click',()=>{gameOverWindow.style.display='none';});
-
-document.getElementById('helpBtn').addEventListener('click',()=>{
-alert('Controls: use joystick or arrow keys. Settings available for many visuals and gameplay options.');
-});
-
-document.getElementById('skipBtn').addEventListener('click',()=>{
-startGame();
-});
-
-document.addEventListener('visibilitychange',()=>{if(document.hidden) gameRunning=false;});
-
-resetAll();
-initParticles();
-spawnInitialFruits(maxFruits);
-draw();
+function random(min,max){return Math.random()*(max-min)+min}
+function createParticles(n){const c=document.querySelector('.particles');for(let i=0;i<n;i++){let p=document.createElement('div');p.className='particle';p.style.left=random(0,100)+'%';p.style.animationDelay=random(0,10)+'s';p.style.animationDuration=random(5,15)+'s';c.appendChild(p);}}
+createParticles(60)
+function showWin(){document.getElementById('mainWin').style.display='block';}
+function hideWin(){document.getElementById('mainWin').style.display='none';}
+function openSettings(){document.getElementById('mainWin').style.display='none';document.getElementById('settingsWin').style.display='block';}
+function hideSettings(){document.getElementById('settingsWin').style.display='none';document.getElementById('mainWin').style.display='block';}
+document.getElementById('icon-game').onclick=showWin
+document.getElementById('icon-settings').onclick=openSettings
+document.getElementById('icon-exit').onclick=()=>alert('Goodbye!')
 </script>
 </body>
 </html>
