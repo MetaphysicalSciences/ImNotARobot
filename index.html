@@ -2,91 +2,258 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Windows XP Clicker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XP Shooter</title>
 <style>
-html,body{margin:0;padding:0;height:100%;background:#008080;font-family:'Tahoma',sans-serif;overflow:hidden}
-.window{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;background:#ece9d8;border:3px solid #003399;box-shadow:0 0 0 3px #99ccff inset}
-.titlebar{background:linear-gradient(#0055e7,#003399);color:#fff;padding:6px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;font-size:15px}
-.titlebar span{flex:1;text-align:center}
-.close{background:#ff0000;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer}
-.menu-body{padding:20px;display:flex;flex-direction:column;align-items:center;gap:10px;background:linear-gradient(to bottom,#f7f7f7,#d8d8d8)}
-.btn{width:90%;padding:10px;border:2px outset #fff;background:linear-gradient(to bottom,#e6e6e6,#c0c0c0);color:#000;font-weight:bold;text-align:center;cursor:pointer}
-.btn:active{border:2px inset #fff;background:linear-gradient(to bottom,#c0c0c0,#a0a0a0)}
-.footer{background:#ece9d8;padding:8px;text-align:center;font-size:12px;border-top:1px solid #999}
-.taskbar{position:absolute;bottom:0;left:0;width:100%;height:40px;background:linear-gradient(to bottom,#245edb,#003399);display:flex;align-items:center;box-shadow:inset 0 1px #66a3ff}
-.start{margin-left:10px;background:linear-gradient(to bottom,#29a329,#006600);border:2px outset #fff;color:#fff;padding:6px 14px;font-weight:bold;font-size:14px;cursor:pointer;border-radius:3px}
-.start:active{border:2px inset #fff}
-.desktop-icon{position:absolute;width:70px;text-align:center;color:#fff;font-size:13px;cursor:pointer}
-.desktop-icon img{width:48px;height:48px}
-#icon-game{top:80px;left:60px}
-#icon-settings{top:180px;left:60px}
-#icon-exit{top:280px;left:60px}
-.particles{position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:-1}
-.particle{position:absolute;width:6px;height:6px;background:#fff;border-radius:50%;opacity:0.6;animation:float 10s infinite ease-in-out}
-@keyframes float{0%{transform:translateY(100vh) scale(0.5);opacity:0.5}100%{transform:translateY(-10vh) scale(1.5);opacity:0}}
-.scrollmenu{height:200px;width:100%;overflow-y:auto;border:2px inset #999;background:#f3f3f3;padding:5px;box-sizing:border-box}
-.setting{background:#dcdcdc;margin:5px;padding:6px;border:1px solid #aaa;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-.setting:hover{background:#c0c0c0}
-.upgrade-cost{font-weight:bold;margin-left:5px}
+body {
+  margin: 0;
+  font-family: 'Tahoma','Verdana','Segoe UI',sans-serif;
+  background: #008080;
+  user-select: none;
+  overflow: hidden;
+}
+.window {
+  background: #C0C0C0;
+  border: 2px solid #000080;
+  width: 400px;
+  padding: 10px;
+  margin: 20px auto;
+  box-shadow: 4px 4px 8px #00000088;
+}
+.window-header {
+  background: #000080;
+  color: white;
+  padding: 5px;
+  font-weight: bold;
+  cursor: default;
+}
+.button {
+  background: #C0C0C0;
+  border: 2px solid #fff;
+  padding: 5px 10px;
+  margin: 5px;
+  cursor: pointer;
+  display: inline-block;
+}
+.button:hover {
+  background: #A0A0A0;
+}
+.setting-label {
+  display: block;
+  margin: 5px 0 0 0;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  background: #004040;
+}
 </style>
 </head>
 <body>
-<div class="particles"></div>
-<div class="desktop-icon" id="icon-game"><img src="https://upload.wikimedia.org/wikipedia/en/5/5f/Windows_XP_Logo.png"><div>Play Game</div></div>
-<div class="desktop-icon" id="icon-settings"><img src="https://upload.wikimedia.org/wikipedia/en/2/23/Windows_Settings_icon.png"><div>Upgrades</div></div>
-<div class="desktop-icon" id="icon-exit"><img src="https://upload.wikimedia.org/wikipedia/en/d/d6/Windows_XP_Shutdown.png"><div>Exit</div></div>
-<div class="window" id="mainWin">
-<div class="titlebar"><div class="close" onclick="hideWin()">X</div><span>Microsoft 2001 Clicker</span></div>
-<div class="menu-body">
-<div style="font-size:18px;font-weight:bold;margin-bottom:10px">XP Points: <span id="points">0</span></div>
-<div class="btn" id="clickerBtn">Click Me!</div>
-<div class="btn" onclick="openSettings()">Upgrades</div>
-<div class="btn" onclick="alert('Goodbye!')">Exit</div>
+
+<div id="mainMenu" class="window">
+  <div class="window-header">XP Shooter - Main Menu</div>
+  <div style="padding:10px;">
+    <div class="button" onclick="startGame()">Start Game</div>
+    <div class="button" onclick="showSettings()">Settings</div>
+    <div class="button" onclick="exitGame()">Exit</div>
+  </div>
 </div>
-<div class="footer">© 2001 Microsoft Corporation</div>
+
+<div id="settingsMenu" class="window" style="display:none;">
+  <div class="window-header">Settings</div>
+  <div style="padding:10px;">
+    <label class="setting-label"><input type="checkbox" id="mobileMode"> Mobile Mode</label>
+    <label class="setting-label"><input type="checkbox" id="particles"> Enable Particles</label>
+    <label class="setting-label"><input type="checkbox" id="enemyShapes"> Enemy Shapes</label>
+    <label class="setting-label"><input type="checkbox" id="playerShape"> Player Shape</label>
+    <label class="setting-label"><input type="checkbox" id="fullscreen"> Fullscreen</label>
+    <label class="setting-label"><input type="checkbox" id="sounds"> Sounds</label>
+    <label class="setting-label"><input type="checkbox" id="difficulty"> Hard Mode</label>
+    <label class="setting-label"><input type="checkbox" id="trail"> Bullet Trails</label>
+    <label class="setting-label"><input type="checkbox" id="shake"> Screen Shake</label>
+    <label class="setting-label"><input type="checkbox" id="colorful"> Colorful Particles</label>
+    <label class="setting-label"><input type="checkbox" id="speed"> Increase Speed</label>
+    <label class="setting-label"><input type="checkbox" id="gravity"> Gravity</label>
+    <div class="button" onclick="backToMenu()">Back</div>
+  </div>
 </div>
-<div class="window" id="settingsWin" style="display:none;width:460px">
-<div class="titlebar"><div class="close" onclick="hideSettings()">X</div><span>Upgrades</span></div>
-<div class="menu-body">
-<div class="scrollmenu" id="scroll"></div>
-<div class="btn" onclick="hideSettings()">Back to Menu</div>
-</div>
-<div class="footer">Microsoft 2001 Upgrades</div>
-</div>
-<div class="taskbar"><div class="start" onclick="showWin()">Start</div></div>
+
+<canvas id="gameCanvas" width="800" height="600" style="display:none;"></canvas>
+
 <script>
-function random(min,max){return Math.random()*(max-min)+min}
-function createParticles(n){const c=document.querySelector('.particles');for(let i=0;i<n;i++){let p=document.createElement('div');p.className='particle';p.style.left=random(0,100)+'%';p.style.animationDelay=random(0,10)+'s';p.style.animationDuration=random(5,15)+'s';c.appendChild(p);}}
-createParticles(60)
-let points=0,perClick=1,autoClickers=0,clickInterval
-const upgrades=[
-{name:"Faster CPU",cost:10,effect:()=>{perClick+=1}},
-{name:"Auto Clicker",cost:50,effect:()=>{autoClickers+=1}},
-{name:"More RAM",cost:100,effect:()=>{perClick+=5}},
-{name:"XP Boost",cost:200,effect:()=>{perClick+=10}},
-{name:"Retro Theme",cost:500,effect:()=>{document.body.style.background="#004c4c"}},
-{name:"Particle Density",cost:300,effect:()=>{createParticles(20)}},
-{name:"Windows Update",cost:400,effect:()=>{perClick+=20}},
-{name:"Turbo Mode",cost:800,effect:()=>{perClick+=50}},
-{name:"Virtual Machine",cost:1200,effect:()=>{autoClickers+=2}},
-{name:"Disk Defragmenter",cost:1500,effect:()=>{perClick+=100}},
-{name:"XP Sound Pack",cost:2000,effect:()=>{let audio=new Audio('https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3');audio.play()}},
-{name:"4D Graphics",cost:3000,effect:()=>{perClick+=200}},
-{name:"Ultimate Clicker",cost:5000,effect:()=>{perClick+=500}}
-]
-function renderUpgrades(){const scroll=document.getElementById('scroll');scroll.innerHTML="";upgrades.forEach((u,i)=>{let div=document.createElement('div');div.className='setting';div.innerHTML=`<span>${u.name}</span><span class="upgrade-cost">${u.cost} XP</span>`;div.onclick=()=>{if(points>=u.cost){points-=u.cost;u.effect();u.cost=Math.floor(u.cost*1.5);renderUpgrades();updatePoints()}};scroll.appendChild(div)})}
-function updatePoints(){document.getElementById('points').textContent=Math.floor(points)}
-document.getElementById('clickerBtn').onclick=()=>{points+=perClick;updatePoints()}
-function autoClick(){points+=autoClickers;updatePoints()}
-clickInterval=setInterval(autoClick,1000)
-function showWin(){document.getElementById('mainWin').style.display='block'}
-function hideWin(){document.getElementById('mainWin').style.display='none'}
-function openSettings(){document.getElementById('mainWin').style.display='none';document.getElementById('settingsWin').style.display='block';renderUpgrades()}
-function hideSettings(){document.getElementById('settingsWin').style.display='none';document.getElementById('mainWin').style.display='block'}
-document.getElementById('icon-game').onclick=showWin
-document.getElementById('icon-settings').onclick=openSettings
-document.getElementById('icon-exit').onclick=()=>alert('Goodbye!')
+let canvas = document.getElementById('gameCanvas');
+let ctx = canvas.getContext('2d');
+let gameRunning = false;
+let player = {x:400, y:500, size:20, color:'#00FF00', bullets:[]};
+let enemies = [];
+let particles = [];
+let keys = {};
+let mobileMode = false;
+
+function startGame() {
+  document.getElementById('mainMenu').style.display='none';
+  document.getElementById('settingsMenu').style.display='none';
+  canvas.style.display='block';
+  mobileMode = document.getElementById('mobileMode').checked;
+  initGame();
+  gameRunning = true;
+  requestAnimationFrame(gameLoop);
+}
+
+function showSettings() {
+  document.getElementById('mainMenu').style.display='none';
+  document.getElementById('settingsMenu').style.display='block';
+}
+
+function backToMenu() {
+  document.getElementById('settingsMenu').style.display='none';
+  document.getElementById('mainMenu').style.display='block';
+}
+
+function exitGame() {
+  alert('Thank you for playing!');
+}
+
+document.addEventListener('keydown', e => keys[e.key.toLowerCase()]=true);
+document.addEventListener('keyup', e => keys[e.key.toLowerCase()]=false);
+canvas.addEventListener('touchstart', e => keys[' '] = true);
+canvas.addEventListener('touchend', e => keys[' '] = false);
+
+function initGame() {
+  player.x = canvas.width/2;
+  player.y = canvas.height-50;
+  player.bullets = [];
+  enemies = [];
+  particles = [];
+  for(let i=0;i<10;i++){
+    enemies.push({x:Math.random()*canvas.width, y:Math.random()*200, size:20, color:'#FF0000', dir:1});
+  }
+}
+
+function spawnParticles(x,y,color){
+  for(let i=0;i<10;i++){
+    particles.push({x:x, y:y, vx:(Math.random()-0.5)*4, vy:(Math.random()-0.5)*4, life:50, color:color});
+  }
+}
+
+function drawPlayer(){
+  ctx.fillStyle = player.color;
+  if(document.getElementById('playerShape').checked){
+    ctx.beginPath();
+    ctx.moveTo(player.x,player.y-player.size);
+    ctx.lineTo(player.x-player.size,player.y+player.size);
+    ctx.lineTo(player.x+player.size,player.y+player.size);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.arc(player.x,player.y,player.size,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawEnemies(){
+  enemies.forEach(e=>{
+    ctx.fillStyle = e.color;
+    if(document.getElementById('enemyShapes').checked){
+      ctx.fillRect(e.x-e.size/2, e.y-e.size/2, e.size, e.size);
+    } else {
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.size,0,Math.PI*2);
+      ctx.fill();
+    }
+  });
+}
+
+function drawBullets(){
+  ctx.fillStyle='#FFFF00';
+  player.bullets.forEach(b=>{
+    ctx.beginPath();
+    ctx.arc(b.x,b.y,5,0,Math.PI*2);
+    ctx.fill();
+  });
+}
+
+function updateGame(){
+  if(keys['arrowleft'] || keys['a']) player.x -= mobileMode?6:4;
+  if(keys['arrowright'] || keys['d']) player.x += mobileMode?6:4;
+  if(keys[' '] && player.bullets.length<5){
+    player.bullets.push({x:player.x, y:player.y-20});
+  }
+  player.bullets.forEach((b,i)=>{
+    b.y-=8;
+    enemies.forEach((e,j)=>{
+      let dx=b.x-e.x;
+      let dy=b.y-e.y;
+      if(Math.sqrt(dx*dx+dy*dy)<e.size+5){
+        if(document.getElementById('particles').checked) spawnParticles(e.x,e.y,e.color);
+        enemies.splice(j,1);
+        player.bullets.splice(i,1);
+      }
+    });
+    if(b.y<0) player.bullets.splice(i,1);
+  });
+
+  enemies.forEach(e=>{
+    e.y += 1;
+    if(e.y>canvas.height) e.y=0;
+  });
+
+  particles.forEach((p,i)=>{
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life--;
+    if(p.life<=0) particles.splice(i,1);
+  });
+
+  if(enemies.some(e=>Math.abs(e.x-player.x)<player.size+e.size && Math.abs(e.y-player.y)<player.size+e.size)){
+    gameOver();
+  }
+}
+
+function drawParticles(){
+  particles.forEach(p=>{
+    ctx.fillStyle = document.getElementById('colorful').checked?`hsl(${Math.random()*360},100%,50%)`:p.color;
+    ctx.fillRect(p.x,p.y,2,2);
+  });
+}
+
+function gameLoop(){
+  if(!gameRunning) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawPlayer();
+  drawEnemies();
+  drawBullets();
+  drawParticles();
+  updateGame();
+  requestAnimationFrame(gameLoop);
+}
+
+function gameOver(){
+  gameRunning=false;
+  canvas.style.display='none';
+  let overDiv = document.createElement('div');
+  overDiv.className='window';
+  overDiv.innerHTML=`<div class="window-header">Game Over</div>
+  <div style="padding:10px;">
+  <div class="button" onclick="retryGame(this)">Retry</div>
+  <div class="button" onclick="endGame(this)">Main Menu</div>
+  </div>`;
+  document.body.appendChild(overDiv);
+}
+
+function retryGame(el){
+  el.closest('.window').remove();
+  startGame();
+}
+
+function endGame(el){
+  el.closest('.window').remove();
+  document.getElementById('mainMenu').style.display='block';
+}
+
 </script>
+
 </body>
 </html>
