@@ -5,86 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>XP Ultra</title>
 <style>
-body,html {
-  margin:0;
-  padding:0;
-  overflow:hidden;
-  background:#008080;
-  font-family:'Tahoma','Verdana','Segoe UI',sans-serif;
-  touch-action:none;
-}
-.window {
-  background:#C0C0C0;
-  border:2px solid #000080;
-  box-shadow:4px 4px 8px #00000088;
-  padding:10px;
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  min-width:300px;
-}
-.window-header {
-  background:#000080;
-  color:#fff;
-  font-weight:bold;
-  padding:5px;
-  cursor:default;
-}
-.button {
-  background:#C0C0C0;
-  border:2px solid #fff;
-  padding:5px 10px;
-  margin:5px;
-  display:inline-block;
-  cursor:pointer;
-}
-.button:hover {
-  background:#A0A0A0;
-}
-.setting-label {
-  display:block;
-  margin:5px 0 0 0;
-}
-canvas {
-  display:block;
-  margin:0 auto;
-  background:#004040;
-}
-#joystick, #shootBtn {
-  position:absolute;
-  z-index:1000;
-  touch-action:none;
-}
-#joystick {
-  left:20px;
-  bottom:20px;
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  background:rgba(200,200,200,0.4);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-#stick {
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  background:rgba(100,100,100,0.6);
-}
-#shootBtn {
-  right:20px;
-  bottom:20px;
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  background:rgba(255,255,0,0.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-}
+body,html{margin:0;padding:0;overflow:hidden;background:#008080;font-family:'Tahoma','Verdana','Segoe UI',sans-serif;touch-action:none;}
+.window{background:#C0C0C0;border:2px solid #000080;box-shadow:4px 4px 8px #00000088;padding:10px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);min-width:300px;}
+.window-header{background:#000080;color:#fff;font-weight:bold;padding:5px;cursor:default;}
+.button{background:#C0C0C0;border:2px solid #fff;padding:5px 10px;margin:5px;display:inline-block;cursor:pointer;}
+.button:hover{background:#A0A0A0;}
+.setting-label{display:block;margin:5px 0 0 0;}
+canvas{display:block;margin:0 auto;background:#004040;}
+#joystick,#shootBtn{position:absolute;z-index:1000;touch-action:none;display:none;}
+#joystick{left:20px;bottom:20px;width:120px;height:120px;border-radius:50%;background:rgba(200,200,200,0.4);display:flex;align-items:center;justify-content:center;}
+#stick{width:50px;height:50px;border-radius:50%;background:rgba(100,100,100,0.6);}
+#shootBtn{right:20px;bottom:20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,0,0.6);display:flex;align-items:center;justify-content:center;font-weight:bold;}
 </style>
 </head>
 <body>
@@ -101,6 +32,7 @@ canvas {
 <div id="settingsMenu" class="window" style="display:none;">
   <div class="window-header">Settings</div>
   <div style="padding:10px;">
+    <label class="setting-label"><input type="checkbox" id="mobileMode"> Mobile Mode</label>
     <label class="setting-label"><input type="checkbox" id="enemyShapes" checked> Enemy Shapes</label>
     <label class="setting-label"><input type="checkbox" id="playerShape" checked> Player Shape</label>
     <label class="setting-label"><input type="checkbox" id="fullscreen" checked> Fullscreen</label>
@@ -115,7 +47,6 @@ canvas {
 </div>
 
 <canvas id="gameCanvas"></canvas>
-
 <div id="joystick"><div id="stick"></div></div>
 <div id="shootBtn">FIRE</div>
 
@@ -125,8 +56,10 @@ let ctx=canvas.getContext('2d');
 let w=canvas.width=window.innerWidth;
 let h=canvas.height=window.innerHeight;
 let gameRunning=false;
-let player={x:w/2,y:h-100,size:25,color:'#00FF00',bullets:[]};
+let player={x:w/2,y:h-100,size:25,color:'#00FF00',bullets:[],speed:5};
 let enemies=[],particles=[],keys={},touchDir={x:0,y:0},shootPressed=false;
+let wave=1,spawnInterval=2000,lastSpawn=0;
+let mobileModeEnabled=false;
 
 function resizeCanvas(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;}
 window.addEventListener('resize',resizeCanvas);
@@ -135,8 +68,9 @@ function startGame(){
   document.getElementById('mainMenu').style.display='none';
   document.getElementById('settingsMenu').style.display='none';
   canvas.style.display='block';
-  document.getElementById('joystick').style.display='flex';
-  document.getElementById('shootBtn').style.display='flex';
+  mobileModeEnabled=document.getElementById('mobileMode').checked;
+  document.getElementById('joystick').style.display=mobileModeEnabled?'flex':'none';
+  document.getElementById('shootBtn').style.display=mobileModeEnabled?'flex':'none';
   initGame();
   gameRunning=true;
   requestAnimationFrame(gameLoop);
@@ -147,13 +81,17 @@ function backToMenu(){document.getElementById('settingsMenu').style.display='non
 function exitGame(){alert('Thanks for playing XP Ultra!');}
 
 function initGame(){
-  player.x=w/2;player.y=h-100;player.bullets=[];
-  enemies=[];particles=[];
-  for(let i=0;i<12;i++){enemies.push({x:Math.random()*w,y:Math.random()*200,size:20,dir:1,color:'#FF0000'});}
+  player.x=w/2;player.y=h-100;player.bullets=[];player.speed=5;
+  enemies=[];particles=[];wave=1;spawnInterval=2000;lastSpawn=0;
+}
+
+function spawnEnemy(){
+  let size=Math.random()*15+15;
+  enemies.push({x:Math.random()*w,y:-size,size:size,dir:1+wave*0.1,color:'#FF0000'});
 }
 
 function spawnParticles(x,y,color){
-  for(let i=0;i<15;i++){
+  for(let i=0;i<20;i++){
     particles.push({x:x,y:y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:50,color:color});
   }
 }
@@ -205,10 +143,19 @@ function drawParticles(){
   });
 }
 
-function updateGame(){
-  player.x+=touchDir.x*5;
-  player.y+=touchDir.y*5;
-  if(shootPressed&&player.bullets.length<5) player.bullets.push({x:player.x,y:player.y-20});
+function updateGame(delta){
+  // PC movement
+  if(!mobileModeEnabled){
+    if(keys['w']) player.y-=player.speed;
+    if(keys['s']) player.y+=player.speed;
+    if(keys['a']) player.x-=player.speed;
+    if(keys['d']) player.x+=player.speed;
+    if(keys['f'] && player.bullets.length<5) player.bullets.push({x:player.x,y:player.y-20});
+  } else {
+    player.x+=touchDir.x*player.speed;
+    player.y+=touchDir.y*player.speed;
+    if(shootPressed && player.bullets.length<5) player.bullets.push({x:player.x,y:player.y-20});
+  }
 
   player.bullets.forEach((b,i)=>{
     b.y-=8;
@@ -223,15 +170,28 @@ function updateGame(){
     if(b.y<0) player.bullets.splice(i,1);
   });
 
-  enemies.forEach(e=>{e.y+=1;if(e.y>h)e.y=0;});
+  enemies.forEach(e=>{e.y+=1+wave*0.2;if(e.y>h)e.y=-e.size;e.size<0.5?e.size=0.5:null;});
   if(enemies.some(e=>Math.abs(e.x-player.x)<player.size+e.size && Math.abs(e.y-player.y)<player.size+e.size)) gameOver();
+
+  // Spawn enemies based on wave
+  if(Date.now()-lastSpawn>spawnInterval){
+    spawnEnemy();
+    lastSpawn=Date.now();
+    if(spawnInterval>500) spawnInterval-=20; // speed up spawns over time
+  }
+
+  // Increase wave based on number of enemies killed
+  if(enemies.length<5) wave++;
 }
 
-function gameLoop(){
+let lastTime=0;
+function gameLoop(timestamp){
   if(!gameRunning) return;
+  let delta=timestamp-lastTime;
+  lastTime=timestamp;
   ctx.clearRect(0,0,w,h);
   drawPlayer();drawEnemies();drawBullets();drawParticles();
-  updateGame();
+  updateGame(delta);
   requestAnimationFrame(gameLoop);
 }
 
