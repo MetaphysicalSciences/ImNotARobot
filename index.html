@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Windows XP Menu</title>
+<title>Windows XP Clicker</title>
 <style>
 html,body{margin:0;padding:0;height:100%;background:#008080;font-family:'Tahoma',sans-serif;overflow:hidden}
 .window{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;background:#ece9d8;border:3px solid #003399;box-shadow:0 0 0 3px #99ccff inset}
@@ -26,73 +26,64 @@ html,body{margin:0;padding:0;height:100%;background:#008080;font-family:'Tahoma'
 .particle{position:absolute;width:6px;height:6px;background:#fff;border-radius:50%;opacity:0.6;animation:float 10s infinite ease-in-out}
 @keyframes float{0%{transform:translateY(100vh) scale(0.5);opacity:0.5}100%{transform:translateY(-10vh) scale(1.5);opacity:0}}
 .scrollmenu{height:200px;width:100%;overflow-y:auto;border:2px inset #999;background:#f3f3f3;padding:5px;box-sizing:border-box}
-.setting{background:#dcdcdc;margin:5px;padding:6px;border:1px solid #aaa;cursor:pointer}
+.setting{background:#dcdcdc;margin:5px;padding:6px;border:1px solid #aaa;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
 .setting:hover{background:#c0c0c0}
+.upgrade-cost{font-weight:bold;margin-left:5px}
 </style>
 </head>
 <body>
 <div class="particles"></div>
 <div class="desktop-icon" id="icon-game"><img src="https://upload.wikimedia.org/wikipedia/en/5/5f/Windows_XP_Logo.png"><div>Play Game</div></div>
-<div class="desktop-icon" id="icon-settings"><img src="https://upload.wikimedia.org/wikipedia/en/2/23/Windows_Settings_icon.png"><div>Settings</div></div>
+<div class="desktop-icon" id="icon-settings"><img src="https://upload.wikimedia.org/wikipedia/en/2/23/Windows_Settings_icon.png"><div>Upgrades</div></div>
 <div class="desktop-icon" id="icon-exit"><img src="https://upload.wikimedia.org/wikipedia/en/d/d6/Windows_XP_Shutdown.png"><div>Exit</div></div>
 <div class="window" id="mainWin">
-<div class="titlebar"><div class="close" onclick="hideWin()">X</div><span>Windows XP Game Menu</span></div>
+<div class="titlebar"><div class="close" onclick="hideWin()">X</div><span>Microsoft 2001 Clicker</span></div>
 <div class="menu-body">
-<div class="btn" onclick="alert('Starting game...')">Start Game</div>
-<div class="btn" onclick="openSettings()">Settings</div>
+<div style="font-size:18px;font-weight:bold;margin-bottom:10px">XP Points: <span id="points">0</span></div>
+<div class="btn" id="clickerBtn">Click Me!</div>
+<div class="btn" onclick="openSettings()">Upgrades</div>
 <div class="btn" onclick="alert('Goodbye!')">Exit</div>
 </div>
 <div class="footer">© 2001 Microsoft Corporation</div>
 </div>
 <div class="window" id="settingsWin" style="display:none;width:460px">
-<div class="titlebar"><div class="close" onclick="hideSettings()">X</div><span>Settings</span></div>
+<div class="titlebar"><div class="close" onclick="hideSettings()">X</div><span>Upgrades</span></div>
 <div class="menu-body">
-<div class="scrollmenu" id="scroll">
-<div class="setting">Joystick Size</div>
-<div class="setting">Snake Shape</div>
-<div class="setting">Snake Colour</div>
-<div class="setting">Fruit Variety</div>
-<div class="setting">Music Volume</div>
-<div class="setting">SFX Volume</div>
-<div class="setting">Background Theme</div>
-<div class="setting">Particle Density</div>
-<div class="setting">Window Transparency</div>
-<div class="setting">4D Mode</div>
-<div class="setting">Snake Glow</div>
-<div class="setting">Retro Filter</div>
-<div class="setting">XP Start Sound</div>
-<div class="setting">Snake Shadow</div>
-<div class="setting">Fruit Shine</div>
-<div class="setting">CRT Flicker</div>
-<div class="setting">Cursor Style</div>
-<div class="setting">Snake Thickness</div>
-<div class="setting">UI Scaling</div>
-<div class="setting">Button Tone</div>
-<div class="setting">XP Clouds</div>
-<div class="setting">Window Blur</div>
-<div class="setting">Fullscreen</div>
-<div class="setting">Grid Overlay</div>
-<div class="setting">Debug Stats</div>
-<div class="setting">4D Rotation Speed</div>
-<div class="setting">Fruit Glow Intensity</div>
-<div class="setting">VHS Distortion</div>
-<div class="setting">Auto Save</div>
-<div class="setting">Snake Trail Effect</div>
-<div class="setting">UI Click Sound</div>
-</div>
+<div class="scrollmenu" id="scroll"></div>
 <div class="btn" onclick="hideSettings()">Back to Menu</div>
 </div>
-<div class="footer">Windows XP Settings</div>
+<div class="footer">Microsoft 2001 Upgrades</div>
 </div>
 <div class="taskbar"><div class="start" onclick="showWin()">Start</div></div>
 <script>
 function random(min,max){return Math.random()*(max-min)+min}
 function createParticles(n){const c=document.querySelector('.particles');for(let i=0;i<n;i++){let p=document.createElement('div');p.className='particle';p.style.left=random(0,100)+'%';p.style.animationDelay=random(0,10)+'s';p.style.animationDuration=random(5,15)+'s';c.appendChild(p);}}
 createParticles(60)
-function showWin(){document.getElementById('mainWin').style.display='block';}
-function hideWin(){document.getElementById('mainWin').style.display='none';}
-function openSettings(){document.getElementById('mainWin').style.display='none';document.getElementById('settingsWin').style.display='block';}
-function hideSettings(){document.getElementById('settingsWin').style.display='none';document.getElementById('mainWin').style.display='block';}
+let points=0,perClick=1,autoClickers=0,clickInterval
+const upgrades=[
+{name:"Faster CPU",cost:10,effect:()=>{perClick+=1}},
+{name:"Auto Clicker",cost:50,effect:()=>{autoClickers+=1}},
+{name:"More RAM",cost:100,effect:()=>{perClick+=5}},
+{name:"XP Boost",cost:200,effect:()=>{perClick+=10}},
+{name:"Retro Theme",cost:500,effect:()=>{document.body.style.background="#004c4c"}},
+{name:"Particle Density",cost:300,effect:()=>{createParticles(20)}},
+{name:"Windows Update",cost:400,effect:()=>{perClick+=20}},
+{name:"Turbo Mode",cost:800,effect:()=>{perClick+=50}},
+{name:"Virtual Machine",cost:1200,effect:()=>{autoClickers+=2}},
+{name:"Disk Defragmenter",cost:1500,effect:()=>{perClick+=100}},
+{name:"XP Sound Pack",cost:2000,effect:()=>{let audio=new Audio('https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3');audio.play()}},
+{name:"4D Graphics",cost:3000,effect:()=>{perClick+=200}},
+{name:"Ultimate Clicker",cost:5000,effect:()=>{perClick+=500}}
+]
+function renderUpgrades(){const scroll=document.getElementById('scroll');scroll.innerHTML="";upgrades.forEach((u,i)=>{let div=document.createElement('div');div.className='setting';div.innerHTML=`<span>${u.name}</span><span class="upgrade-cost">${u.cost} XP</span>`;div.onclick=()=>{if(points>=u.cost){points-=u.cost;u.effect();u.cost=Math.floor(u.cost*1.5);renderUpgrades();updatePoints()}};scroll.appendChild(div)})}
+function updatePoints(){document.getElementById('points').textContent=Math.floor(points)}
+document.getElementById('clickerBtn').onclick=()=>{points+=perClick;updatePoints()}
+function autoClick(){points+=autoClickers;updatePoints()}
+clickInterval=setInterval(autoClick,1000)
+function showWin(){document.getElementById('mainWin').style.display='block'}
+function hideWin(){document.getElementById('mainWin').style.display='none'}
+function openSettings(){document.getElementById('mainWin').style.display='none';document.getElementById('settingsWin').style.display='block';renderUpgrades()}
+function hideSettings(){document.getElementById('settingsWin').style.display='none';document.getElementById('mainWin').style.display='block'}
 document.getElementById('icon-game').onclick=showWin
 document.getElementById('icon-settings').onclick=openSettings
 document.getElementById('icon-exit').onclick=()=>alert('Goodbye!')
