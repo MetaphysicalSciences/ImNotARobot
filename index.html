@@ -2,57 +2,95 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XP Shooter</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>XP Ultra</title>
 <style>
-body {
-  margin: 0;
-  font-family: 'Tahoma','Verdana','Segoe UI',sans-serif;
-  background: #008080;
-  user-select: none;
-  overflow: hidden;
+body,html {
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  background:#008080;
+  font-family:'Tahoma','Verdana','Segoe UI',sans-serif;
+  touch-action:none;
 }
 .window {
-  background: #C0C0C0;
-  border: 2px solid #000080;
-  width: 400px;
-  padding: 10px;
-  margin: 20px auto;
-  box-shadow: 4px 4px 8px #00000088;
+  background:#C0C0C0;
+  border:2px solid #000080;
+  box-shadow:4px 4px 8px #00000088;
+  padding:10px;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  min-width:300px;
 }
 .window-header {
-  background: #000080;
-  color: white;
-  padding: 5px;
-  font-weight: bold;
-  cursor: default;
+  background:#000080;
+  color:#fff;
+  font-weight:bold;
+  padding:5px;
+  cursor:default;
 }
 .button {
-  background: #C0C0C0;
-  border: 2px solid #fff;
-  padding: 5px 10px;
-  margin: 5px;
-  cursor: pointer;
-  display: inline-block;
+  background:#C0C0C0;
+  border:2px solid #fff;
+  padding:5px 10px;
+  margin:5px;
+  display:inline-block;
+  cursor:pointer;
 }
 .button:hover {
-  background: #A0A0A0;
+  background:#A0A0A0;
 }
 .setting-label {
-  display: block;
-  margin: 5px 0 0 0;
+  display:block;
+  margin:5px 0 0 0;
 }
 canvas {
-  display: block;
-  margin: 0 auto;
-  background: #004040;
+  display:block;
+  margin:0 auto;
+  background:#004040;
+}
+#joystick, #shootBtn {
+  position:absolute;
+  z-index:1000;
+  touch-action:none;
+}
+#joystick {
+  left:20px;
+  bottom:20px;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  background:rgba(200,200,200,0.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+#stick {
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  background:rgba(100,100,100,0.6);
+}
+#shootBtn {
+  right:20px;
+  bottom:20px;
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:rgba(255,255,0,0.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
 }
 </style>
 </head>
 <body>
 
 <div id="mainMenu" class="window">
-  <div class="window-header">XP Shooter - Main Menu</div>
+  <div class="window-header">XP Ultra - Main Menu</div>
   <div style="padding:10px;">
     <div class="button" onclick="startGame()">Start Game</div>
     <div class="button" onclick="showSettings()">Settings</div>
@@ -63,82 +101,65 @@ canvas {
 <div id="settingsMenu" class="window" style="display:none;">
   <div class="window-header">Settings</div>
   <div style="padding:10px;">
-    <label class="setting-label"><input type="checkbox" id="mobileMode"> Mobile Mode</label>
-    <label class="setting-label"><input type="checkbox" id="particles"> Enable Particles</label>
-    <label class="setting-label"><input type="checkbox" id="enemyShapes"> Enemy Shapes</label>
-    <label class="setting-label"><input type="checkbox" id="playerShape"> Player Shape</label>
-    <label class="setting-label"><input type="checkbox" id="fullscreen"> Fullscreen</label>
-    <label class="setting-label"><input type="checkbox" id="sounds"> Sounds</label>
+    <label class="setting-label"><input type="checkbox" id="enemyShapes" checked> Enemy Shapes</label>
+    <label class="setting-label"><input type="checkbox" id="playerShape" checked> Player Shape</label>
+    <label class="setting-label"><input type="checkbox" id="fullscreen" checked> Fullscreen</label>
     <label class="setting-label"><input type="checkbox" id="difficulty"> Hard Mode</label>
-    <label class="setting-label"><input type="checkbox" id="trail"> Bullet Trails</label>
+    <label class="setting-label"><input type="checkbox" id="trail" checked> Bullet Trails</label>
     <label class="setting-label"><input type="checkbox" id="shake"> Screen Shake</label>
-    <label class="setting-label"><input type="checkbox" id="colorful"> Colorful Particles</label>
+    <label class="setting-label"><input type="checkbox" id="colorful" checked> Colorful Particles</label>
     <label class="setting-label"><input type="checkbox" id="speed"> Increase Speed</label>
     <label class="setting-label"><input type="checkbox" id="gravity"> Gravity</label>
     <div class="button" onclick="backToMenu()">Back</div>
   </div>
 </div>
 
-<canvas id="gameCanvas" width="800" height="600" style="display:none;"></canvas>
+<canvas id="gameCanvas"></canvas>
+
+<div id="joystick"><div id="stick"></div></div>
+<div id="shootBtn">FIRE</div>
 
 <script>
-let canvas = document.getElementById('gameCanvas');
-let ctx = canvas.getContext('2d');
-let gameRunning = false;
-let player = {x:400, y:500, size:20, color:'#00FF00', bullets:[]};
-let enemies = [];
-let particles = [];
-let keys = {};
-let mobileMode = false;
+let canvas=document.getElementById('gameCanvas');
+let ctx=canvas.getContext('2d');
+let w=canvas.width=window.innerWidth;
+let h=canvas.height=window.innerHeight;
+let gameRunning=false;
+let player={x:w/2,y:h-100,size:25,color:'#00FF00',bullets:[]};
+let enemies=[],particles=[],keys={},touchDir={x:0,y:0},shootPressed=false;
 
-function startGame() {
+function resizeCanvas(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight;}
+window.addEventListener('resize',resizeCanvas);
+
+function startGame(){
   document.getElementById('mainMenu').style.display='none';
   document.getElementById('settingsMenu').style.display='none';
   canvas.style.display='block';
-  mobileMode = document.getElementById('mobileMode').checked;
+  document.getElementById('joystick').style.display='flex';
+  document.getElementById('shootBtn').style.display='flex';
   initGame();
-  gameRunning = true;
+  gameRunning=true;
   requestAnimationFrame(gameLoop);
 }
 
-function showSettings() {
-  document.getElementById('mainMenu').style.display='none';
-  document.getElementById('settingsMenu').style.display='block';
-}
+function showSettings(){document.getElementById('mainMenu').style.display='none';document.getElementById('settingsMenu').style.display='block';}
+function backToMenu(){document.getElementById('settingsMenu').style.display='none';document.getElementById('mainMenu').style.display='block';}
+function exitGame(){alert('Thanks for playing XP Ultra!');}
 
-function backToMenu() {
-  document.getElementById('settingsMenu').style.display='none';
-  document.getElementById('mainMenu').style.display='block';
-}
-
-function exitGame() {
-  alert('Thank you for playing!');
-}
-
-document.addEventListener('keydown', e => keys[e.key.toLowerCase()]=true);
-document.addEventListener('keyup', e => keys[e.key.toLowerCase()]=false);
-canvas.addEventListener('touchstart', e => keys[' '] = true);
-canvas.addEventListener('touchend', e => keys[' '] = false);
-
-function initGame() {
-  player.x = canvas.width/2;
-  player.y = canvas.height-50;
-  player.bullets = [];
-  enemies = [];
-  particles = [];
-  for(let i=0;i<10;i++){
-    enemies.push({x:Math.random()*canvas.width, y:Math.random()*200, size:20, color:'#FF0000', dir:1});
-  }
+function initGame(){
+  player.x=w/2;player.y=h-100;player.bullets=[];
+  enemies=[];particles=[];
+  for(let i=0;i<12;i++){enemies.push({x:Math.random()*w,y:Math.random()*200,size:20,dir:1,color:'#FF0000'});}
 }
 
 function spawnParticles(x,y,color){
-  for(let i=0;i<10;i++){
-    particles.push({x:x, y:y, vx:(Math.random()-0.5)*4, vy:(Math.random()-0.5)*4, life:50, color:color});
+  for(let i=0;i<15;i++){
+    particles.push({x:x,y:y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:50,color:color});
   }
 }
 
 function drawPlayer(){
-  ctx.fillStyle = player.color;
+  ctx.fillStyle=player.color;
   if(document.getElementById('playerShape').checked){
     ctx.beginPath();
     ctx.moveTo(player.x,player.y-player.size);
@@ -146,7 +167,7 @@ function drawPlayer(){
     ctx.lineTo(player.x+player.size,player.y+player.size);
     ctx.closePath();
     ctx.fill();
-  } else {
+  }else{
     ctx.beginPath();
     ctx.arc(player.x,player.y,player.size,0,Math.PI*2);
     ctx.fill();
@@ -155,12 +176,12 @@ function drawPlayer(){
 
 function drawEnemies(){
   enemies.forEach(e=>{
-    ctx.fillStyle = e.color;
+    ctx.fillStyle=e.color;
     if(document.getElementById('enemyShapes').checked){
-      ctx.fillRect(e.x-e.size/2, e.y-e.size/2, e.size, e.size);
-    } else {
+      ctx.fillRect(e.x-e.size/2,e.y-e.size/2,e.size,e.size);
+    }else{
       ctx.beginPath();
-      ctx.arc(e.x, e.y, e.size,0,Math.PI*2);
+      ctx.arc(e.x,e.y,e.size,0,Math.PI*2);
       ctx.fill();
     }
   });
@@ -175,19 +196,26 @@ function drawBullets(){
   });
 }
 
+function drawParticles(){
+  particles.forEach((p,i)=>{
+    ctx.fillStyle=document.getElementById('colorful').checked?`hsl(${Math.random()*360},100%,50%)`:p.color;
+    ctx.fillRect(p.x,p.y,2,2);
+    p.x+=p.vx;p.y+=p.vy;p.life--;
+    if(p.life<=0) particles.splice(i,1);
+  });
+}
+
 function updateGame(){
-  if(keys['arrowleft'] || keys['a']) player.x -= mobileMode?6:4;
-  if(keys['arrowright'] || keys['d']) player.x += mobileMode?6:4;
-  if(keys[' '] && player.bullets.length<5){
-    player.bullets.push({x:player.x, y:player.y-20});
-  }
+  player.x+=touchDir.x*5;
+  player.y+=touchDir.y*5;
+  if(shootPressed&&player.bullets.length<5) player.bullets.push({x:player.x,y:player.y-20});
+
   player.bullets.forEach((b,i)=>{
     b.y-=8;
     enemies.forEach((e,j)=>{
-      let dx=b.x-e.x;
-      let dy=b.y-e.y;
+      let dx=b.x-e.x,dy=b.y-e.y;
       if(Math.sqrt(dx*dx+dy*dy)<e.size+5){
-        if(document.getElementById('particles').checked) spawnParticles(e.x,e.y,e.color);
+        spawnParticles(e.x,e.y,e.color);
         enemies.splice(j,1);
         player.bullets.splice(i,1);
       }
@@ -195,37 +223,14 @@ function updateGame(){
     if(b.y<0) player.bullets.splice(i,1);
   });
 
-  enemies.forEach(e=>{
-    e.y += 1;
-    if(e.y>canvas.height) e.y=0;
-  });
-
-  particles.forEach((p,i)=>{
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life--;
-    if(p.life<=0) particles.splice(i,1);
-  });
-
-  if(enemies.some(e=>Math.abs(e.x-player.x)<player.size+e.size && Math.abs(e.y-player.y)<player.size+e.size)){
-    gameOver();
-  }
-}
-
-function drawParticles(){
-  particles.forEach(p=>{
-    ctx.fillStyle = document.getElementById('colorful').checked?`hsl(${Math.random()*360},100%,50%)`:p.color;
-    ctx.fillRect(p.x,p.y,2,2);
-  });
+  enemies.forEach(e=>{e.y+=1;if(e.y>h)e.y=0;});
+  if(enemies.some(e=>Math.abs(e.x-player.x)<player.size+e.size && Math.abs(e.y-player.y)<player.size+e.size)) gameOver();
 }
 
 function gameLoop(){
   if(!gameRunning) return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawPlayer();
-  drawEnemies();
-  drawBullets();
-  drawParticles();
+  ctx.clearRect(0,0,w,h);
+  drawPlayer();drawEnemies();drawBullets();drawParticles();
   updateGame();
   requestAnimationFrame(gameLoop);
 }
@@ -233,7 +238,9 @@ function gameLoop(){
 function gameOver(){
   gameRunning=false;
   canvas.style.display='none';
-  let overDiv = document.createElement('div');
+  document.getElementById('joystick').style.display='none';
+  document.getElementById('shootBtn').style.display='none';
+  let overDiv=document.createElement('div');
   overDiv.className='window';
   overDiv.innerHTML=`<div class="window-header">Game Over</div>
   <div style="padding:10px;">
@@ -243,17 +250,39 @@ function gameOver(){
   document.body.appendChild(overDiv);
 }
 
-function retryGame(el){
-  el.closest('.window').remove();
-  startGame();
-}
+function retryGame(el){el.closest('.window').remove();startGame();}
+function endGame(el){el.closest('.window').remove();document.getElementById('mainMenu').style.display='block';}
 
-function endGame(el){
-  el.closest('.window').remove();
-  document.getElementById('mainMenu').style.display='block';
-}
+document.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+canvas.addEventListener('touchstart',e=>{e.preventDefault();});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();});
+canvas.addEventListener('touchend',e=>{e.preventDefault();});
 
+let stick=document.getElementById('stick');
+let joystick=document.getElementById('joystick');
+let rect=joystick.getBoundingClientRect();
+let dragging=false;
+
+stick.addEventListener('touchstart',e=>{dragging=true;});
+stick.addEventListener('touchend',e=>{dragging=false;touchDir={x:0,y:0};stick.style.transform='translate(0,0)';});
+stick.addEventListener('touchmove',e=>{
+  if(!dragging)return;
+  let touch=e.touches[0];
+  let dx=touch.clientX-rect.left-joystick.offsetWidth/2;
+  let dy=touch.clientY-rect.top-joystick.offsetHeight/2;
+  let dist=Math.sqrt(dx*dx+dy*dy);
+  let max=joystick.offsetWidth/2-25;
+  if(dist>max){dx*=max/dist;dy*=max/dist;}
+  stick.style.transform=`translate(${dx}px,${dy}px)`;
+  touchDir={x:dx/max,y:dy/max};
+});
+
+document.getElementById('shootBtn').addEventListener('touchstart',()=>{shootPressed=true;});
+document.getElementById('shootBtn').addEventListener('touchend',()=>{shootPressed=false;});
+
+document.addEventListener('wheel',e=>e.preventDefault());
+window.addEventListener('keydown',e=>{if(e.key=='F5'||(e.ctrlKey&&e.key=='r'))e.preventDefault();},true);
 </script>
-
 </body>
 </html>
